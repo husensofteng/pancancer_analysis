@@ -1,0 +1,13 @@
+cd /home/huum/projs/regMotifs/datafiles/CellInfo
+ls */*/*| awk '$0!~".bed4" && $0!~".gz"' | awk '{gsub("/","\t"); gsub("\\.","\t"); print}' | awk 'BEGIN{FS=OFS="\t"}{split($3,s,"_"); name=""; acc=""; if($3~"isoform"){name=s[1]"_"s[2]; acc=s[3];} else if($3~"ChromHMM"){name=s[1]; acc=s[2]"_"s[3]"_"s[4]"_"s[5]; } else if($3~"DNase-seq_E" && $3!~"ENC"){name=s[1]; acc=s[2]"."$4} else {name=s[1]; acc=s[2]}; if($2=="ChIP-seq") $2="ENCODE-ChIP-seq"; else if($2=="ChromHMM") $2="RoadMap Epigenomics(ChromHMM)";  print $1,name,acc} ' > ../../analysis/STable1.tsv
+
+cd /home/huum/projs/regMotifs/datafiles/ReplicationTiming
+ls *.bed | cut -f1 -d '.' | awk 'BEGIN{FS=OFS="\t"}{split($0,s,"_"); print s[3],s[4]"_"s[5],s[1]"_"s[2];}' >> /home/huum/projs/regMotifs/analysis/STable1.tsv 
+
+awk 'NR>7' /home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv | awk 'BEGIN{FS=OFS="\t"}{if($10>1 && $8<0.05) print $4,$7,$8,$9,$10,$13,$14,$5,$15,$26}' > STable4_SFRMEs.tsv
+
+awk 'NR>7' /home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv | awk 'BEGIN{FS=OFS="\t"}{if($10>1 && $8<0.05) print $19}' | awk '{gsub(",","\n"); print}' | awk '{gsub("#","\t"); print}' | awk 'BEGIN{FS=OFS="\t"}{print $1":"$2"-"$3,$10,$4">"$5,$7,$6,$9}' | sort -k1 | groupBy -g 1 -c 6,2,3,4,5,6 -o count_distinct,sum,distinct,distinct,distinct,distinct | sort -k2nr > STable5_CFRMs.tsv
+
+awk 'BEGIN{FS=OFS="\t"}{if($1!="None"){r=""; split($8,s,","); for(i=1;i<=length(s);i++){split(s[i],ss,"::"); if(r=="") r=ss[1]; else r=r","ss[1]} print $1,$2,$3,$4,$5,$6,r}}' /home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv_GenesInclCDS.tsv > STable6_Genes.tsv
+
+awk 'BEGIN{FS=OFS="\t"}{if($11<0.01) print $1,$2,$10,$11,$3,$4,$5,$6,$9}' /home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv_GenesInclCDS.tsv_pathways_calculated_pval_sig.tsv > STable7_sigPathways.tsv

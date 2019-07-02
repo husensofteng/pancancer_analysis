@@ -1,0 +1,26 @@
+Tue Nov  6 13:42:02 CET 2018
+perl: warning: Setting locale failed.
+perl: warning: Please check that your locale settings:
+	LANGUAGE = (unset),
+	LC_ALL = (unset),
+	LC_CTYPE = "UTF-8",
+	LANG = "en_US.iso885915"
+    are supported and installed on your system.
+perl: warning: Falling back to a fallback locale ("en_US.iso885915").
+Possible precedence issue with control flow operator at /home/huum/tools/anaconda2/lib/site_perl/5.26.2/Bio/DB/IndexedBase.pm line 845.
+
+-------------------- EXCEPTION --------------------
+MSG: ERROR: File "/home/huum/projs/regMotifs/mutations_VEP_output/observed_agreement_22May2017.bed9.out2" does not exist
+
+STACK Bio::EnsEMBL::VEP::Parser::file /home/huum/tools/anaconda2/share/ensembl-vep-94.0-0/modules/Bio/EnsEMBL/VEP/Parser.pm:230
+STACK Bio::EnsEMBL::VEP::Parser::new /home/huum/tools/anaconda2/share/ensembl-vep-94.0-0/modules/Bio/EnsEMBL/VEP/Parser.pm:123
+STACK Bio::EnsEMBL::VEP::Runner::get_Parser /home/huum/tools/anaconda2/share/ensembl-vep-94.0-0/modules/Bio/EnsEMBL/VEP/Runner.pm:789
+STACK Bio::EnsEMBL::VEP::Runner::get_InputBuffer /home/huum/tools/anaconda2/share/ensembl-vep-94.0-0/modules/Bio/EnsEMBL/VEP/Runner.pm:816
+STACK Bio::EnsEMBL::VEP::Runner::init /home/huum/tools/anaconda2/share/ensembl-vep-94.0-0/modules/Bio/EnsEMBL/VEP/Runner.pm:131
+STACK Bio::EnsEMBL::VEP::Runner::run /home/huum/tools/anaconda2/share/ensembl-vep-94.0-0/modules/Bio/EnsEMBL/VEP/Runner.pm:194
+STACK toplevel /home/huum/tools/anaconda2/bin/vep:224
+Date (localtime)    = Tue Nov  6 13:42:13 2018
+Ensembl API version = 94
+---------------------------------------------------
+The process is done
+Tue Nov  6 13:42:13 CET 2018

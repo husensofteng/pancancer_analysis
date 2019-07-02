@@ -1,0 +1,9 @@
+Mon Oct 15 12:19:53 CEST 2018
+Traceback (most recent call last):
+  File "/home/huum/projs/regMotifs/ProcessCohorts_15.py", line 331, in <module>
+    generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(cohort_names_input)
+  File "/home/huum/projs/regMotifs/ProcessCohorts_15.py", line 257, in process_cohorts
+    simulated_input_files = [simulated_input_dir+'/'+x for x in os.listdir(simulated_input_dir) if '_annotated.bed9' in x]
+OSError: [Errno 2] No such file or directory: 'mutations_simulations_files_103sets_exclVEP'
+The process is done
+Mon Oct 15 12:19:55 CEST 2018

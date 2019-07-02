@@ -1,0 +1,12 @@
+CNS-Oligo
+Cervix-SCC
+Digestive-tract-tumors=meta_tumor_cohorts_v2_22May2017/Digestive_tract_tumors.whitelist.txt
+Female-reproductive-system-tumors=meta_tumor_cohorts_v2_22May2017/Female_reproductive_system_tumors.whitelist.txt
+CNS-tumors=meta_tumor_cohorts_v2_22May2017/CNS_tumors.whitelist.txt
+Breast-tumors=meta_tumor_cohorts_v2_22May2017/Breast_tumors.whitelist.txt
+Kidney-tumors=meta_tumor_cohorts_v2_22May2017/Kidney_tumors.whitelist.txt
+Glioma-tumors=meta_tumor_cohorts_v2_22May2017/Glioma_tumors.whitelist.txt
+Squamous-tumors=meta_tumor_cohorts_v2_22May2017/Squamous_tumors.whitelist.txt
+Sarcoma-tumors=meta_tumor_cohorts_v2_22May2017/Sarcoma_tumors.whitelist.v2.txt
+Lung-tumors=meta_tumor_cohorts_v2_22May2017/Lung_tumors.whitelist.txt
+Myeloid-tumors=meta_tumor_cohorts_v2_22May2017/Myeloid_tumors.whitelist.txt

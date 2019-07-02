@@ -1,0 +1,5 @@
+slurmstepd: error: Unable to create TMPDIR [/home/huum/regMotifsGit/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+Mon Oct 15 10:04:14 CEST 2018
+The process is done
+Mon Oct 15 10:04:48 CEST 2018

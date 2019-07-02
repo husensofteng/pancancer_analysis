@@ -1,0 +1,25 @@
+###ENCODE TF ChIP-seq datasets
+https://www.encodeproject.org/search/?searchTerm=chip-seq&status=released&assembly=hg19&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&target.investigated_as=transcription+factor&files.file_type=bed+narrowPeak&limit=all&frame=object&type=Experiment
+
+From the results downloaded 
+https://www.encodeproject.org/metadata/searchTerm=chip-seq&status=released&assembly=hg19&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&target.investigated_as=transcription+factor&files.file_type=bed+narrowPeak&limit=all&frame=object&type=Experiment/metadata.tsv
+
+mv metadata.tsv metadataENCODETFChIPSeq29Nov2016.tsv
+#Note '/' character should be replaced with '_' in the cell name column (#col 7); e.g :%s/NT2\/D1/NT2_D1/gc
+
+Parse the metadata.tsv to get a proper File Accession and download it through:
+https://www.encodeproject.org/files/FileAccession/@@download/FileAccession
+
+#ENCODE DNase1 datasets
+https://www.encodeproject.org/batch_download/type%3DExperiment%26assay_slims%3DDNA%2Baccessibility%26assay_title%3DDNase-seq%26status%3Dreleased%26replicates.library.biosample.donor.organism.scientific_name%3DHomo%2Bsapiens%26assembly%3Dhg19%26files.file_type%3Dbed%2BnarrowPeak%26limit%3Dall
+
+https://www.encodeproject.org/metadata/type=Experiment&assay_slims=DNA+accessibility&assay_title=DNase-seq&status=released&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&assembly=hg19&files.file_type=bed+narrowPeak&limit=all/metadata.tsv
+
+mv metadata.tsv metadataENCODEDNaseSeq29Nov2016.tsv
+
+#Note '/' character should be replaced with '_' in the cell name column (#col 7); e.g :%s/NT2\/D1/NT2_D1/gc
+
+#ENCODE Replication Timing datasets
+https://www.encodeproject.org/batch_download/type%3DExperiment%26assay_slims%3DReplication%2Btiming%26assembly%3Dhg19%26status%3Dreleased%26replicates.library.biosample.donor.organism.scientific_name%3DHomo%2Bsapiens%26files.file_type%3DbigWig%26assay_title%3DRepli-Seq%26limit%3Dall
+
+https://www.encodeproject.org/metadata/type=Experiment&assay_slims=Replication+timing&assembly=hg19&status=released&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&files.file_type=bigWig&assay_title=Repli-Seq&limit=all/metadata.tsv

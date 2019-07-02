@@ -1,0 +1,6 @@
+slurmstepd: error: Unable to create TMPDIR [/home/huum/regMotifsGit/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+Mon Oct 15 10:01:13 CEST 2018
+/var/spool/slurmd/job1307074/slurm_script: line 30: wk: command not found
+The process is done
+Mon Oct 15 10:01:13 CEST 2018
