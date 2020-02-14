@@ -53,7 +53,7 @@ def get_max_motif_in_grouped_muts(annotated_mutations_grouped_file, annotated_mu
     ref_alt_index_in_motif_info = 4
     mutpos_index_in_motif_info = 5
     motifname_index_in_motif_info = 9
-    with open(annotated_mutations_grouped_file) as grouped_file, open(annotated_mutations_grouped_output_file, 'w') as annotated_mutations_grouped_outfile_bed12:
+    with open(annotated_mutations_grouped_file, 'r') as grouped_file, open(annotated_mutations_grouped_output_file, 'w') as annotated_mutations_grouped_outfile_bed12:
         l = grouped_file.readline()
         while l:
             sl = l.strip().split(fsep)

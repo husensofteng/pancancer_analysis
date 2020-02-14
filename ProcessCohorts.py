@@ -155,7 +155,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, 
     cohort_full_name = created_cohorts[cohort][0].split('_')[0]
     
     if '/' in created_cohorts[cohort][0]:
-        cohort_full_name = '/'.join(created_cohorts[cohort][0].split('/')[0:-1]) + "/" + created_cohorts[cohort][0].split('/')[1].split('_')[0]
+        cohort_full_name = '/'.join(created_cohorts[cohort][0].split('/')[0:-1]) + "/" + created_cohorts[cohort][0].split('/')[-1].split('_')[0]
     print 'Processing: ', cohort_full_name
     
     dict_simulated_mean_sd_per_TF_motif_output_file = cohort_full_name + "_meansdrand{}sets.dict".format(len(mutation_input_files)-1)
@@ -216,7 +216,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir, observed_input_fi
     merged_mut_sig_threshold = 0.05
     
     local_domain_window = 25000#50000
-    chr_lengths_file = 'datafiles/chr_lengths_hg19.txt'
+    chr_lengths_file = '/home/huum/projs/pancan12Feb2020/cancer_datafiles//chr_lengths_hg19.txt'
     
     output_extension = "_{operation_on_unify}TFExprMotifBreaking03Filters".format(operation_on_unify=operation_on_unify)
     filter_cond = 'if(($32>0 || $32~"nan") && $11>=0.3)'# && ($31>0 || $31~"nan")
@@ -290,8 +290,8 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir, observed_input_fi
 if __name__ == '__main__':
 
     cohort_names_input = sys.argv[1]#'meta_tumor_cohorts_v2_22May2017/cohorts_to_run_definedPCAWG_4'
-    mutations_cohorts_dir = '/home/huum/projs/pancancer_analysis/pancan12Feb2020/pancan_output_12Feb'
-    observed_input_file = '/home/huum/projs/pancancer_analysis/pancan12Feb2020/mutations_files/observed_annotated_agreement_22May2017.bed9'
-    simulated_input_dir = '/home/huum/projs/pancancer_analysis/pancan12Feb2020/mutations_simulations_files_103sets'
+    mutations_cohorts_dir = '/home/huum/projs/pancan12Feb2020/pancan_output_12Feb'
+    observed_input_file = '/home/huum/projs/pancan12Feb2020/mutations_files/observed_annotated_agreement_22May2017.bed9'
+    simulated_input_dir = '/home/huum/projs/pancan12Feb2020/mutations_files/mutations_simulations_files_103sets'
     generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(cohort_names_input, mutations_cohorts_dir, observed_input_file, simulated_input_dir)
     #print "Generated Sig. Element Sets: \n", '\n'.join(generated_sig_merged_element_files)
