@@ -232,6 +232,8 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir, observed_input_fi
     
     stats_ext = "_rand{}setsTF".format(len(mutation_input_files)-1)
 
+    '''
+    # to make it possible re-run later steps without requiring earlier ones when premilinary files are removed to save space.
     cohorts_initial = get_cohorts(cohort_names_input)
     cohorts_initial = [x.split("=")[0] for x in cohorts_initial]
     cohorts = cohorts_initial[0::]
@@ -247,6 +249,10 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir, observed_input_fi
             sig_tfpos_files.append(sig_tfpos_file)
             print("Exists: ", sig_elements_output_file)
             del cohorts[cohorts.index(cohort)]
+    '''
+    cohorts = get_cohorts(cohort_names_input)
+    print("Cohorts:", cohorts)
+
     created_cohorts = generate_cohorts(mutation_input_files, cohorts, mutations_cohorts_dir, stats_ext=stats_ext)
     
     for cohort in created_cohorts.keys():
