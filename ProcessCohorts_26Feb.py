@@ -147,7 +147,7 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name, outp
 
 
 def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, f_score_index, motif_breaking_score_index,
-               sig_level_per_TF_thresh, sim_output_extension, sim_sig_level_per_TF_thresh,
+               sig_thresh_fdr, sig_level_per_TF_thresh, sim_output_extension, sim_sig_level_per_TF_thresh,
                filter_cond, operation_on_unify, output_extension, distance_to_merge, merged_mut_sig_threshold,
                local_domain_window, chr_lengths_file,
                sig_elements_output_file, sig_tfs_file, sig_tfpos_file):    
@@ -164,9 +164,9 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, 
                                                                              motif_name_index = motif_name_index, f_score_index = f_score_index, motif_breaking_score_index = motif_breaking_score_index)
     #get sig muts with fdr<0.2
     muts_sig_per_TF_file = get_muts_sig_per_TF(annoted_input_file=created_cohorts[cohort][0], dict_simulated_mean_sd_per_TF_motif=dict_simulated_mean_sd_per_TF_motif, 
-                                               annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), annoted_output_file_extension_onlysig="_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_level_per_TF_thresh),
+                                               annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), annoted_output_file_extension_onlysig="_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh_fdr),
                                                motif_name_index = motif_name_index, f_score_index = f_score_index, motif_breaking_score_index = motif_breaking_score_index,
-                                               filter_on_qval=True, sig_thresh_fdr = 0.2, sig_thresh=sig_level_per_TF_thresh, 
+                                               filter_on_qval=True, sig_thresh_fdr = sig_thresh_fdr, sig_thresh=sig_level_per_TF_thresh, 
                                                filter_on_signal = True, dnase_index = 24, fantom_index = 25, num_other_tfs = 27)
     sig_muts_per_tf_mutation_input_files = [muts_sig_per_TF_file]
     #get sig muts from the simulated with pval<0.5
@@ -175,7 +175,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, 
         muts_sig_per_TF_file = get_muts_sig_per_TF(annoted_input_file=mutations_input_file, dict_simulated_mean_sd_per_TF_motif=dict_simulated_mean_sd_per_TF_motif,
                                                    annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), annoted_output_file_extension_onlysig=sim_output_extension,
                                                    motif_name_index = motif_name_index, f_score_index = f_score_index, motif_breaking_score_index = motif_breaking_score_index,
-                                                   filter_on_qval=True, sig_thresh_fdr = 0.2, sig_thresh=sim_sig_level_per_TF_thresh)
+                                                   filter_on_qval=True, sig_thresh_fdr = sig_thresh_fdr, sig_thresh=sim_sig_level_per_TF_thresh)
         sig_muts_per_tf_mutation_input_files.append(muts_sig_per_TF_file)
      
     #mutation_input_files[0]
@@ -204,6 +204,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir, observed_input_fi
     mutation_input_files = [observed_input_file]
     mutation_input_files.extend(simulated_input_files)
     
+    sig_thresh_fdr = 0.2
     sig_level_per_TF_thresh = 0.05
     sim_sig_level_per_TF_thresh = 1.0#0.05
     motif_name_index = 17
@@ -256,9 +257,9 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir, observed_input_fi
     created_cohorts = generate_cohorts(mutation_input_files, cohorts, mutations_cohorts_dir, stats_ext=stats_ext)
     
     for cohort in created_cohorts.keys():
-        sig_elements_output_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_level_per_TF_thresh) + output_extension + "_groupedbymut"+"withmotifinfo"+"_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+"_statspvaluesSimSig"+str(sim_sig_level_per_TF_thresh)+"_statspvalueslocalw{local_domain_window}onlysig{merged_mut_sig_threshold}".format(local_domain_window=local_domain_window, merged_mut_sig_threshold=merged_mut_sig_threshold)
-        sig_tfs_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_level_per_TF_thresh) + '_sigTFs_{}'.format(sig_level_per_TF_thresh) 
-        sig_tfpos_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_level_per_TF_thresh) + '_sigTFpos_{}'.format(sig_level_per_TF_thresh)
+        sig_elements_output_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh_fdr) + output_extension + "_groupedbymut"+"withmotifinfo"+"_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+"_statspvaluesSimSig"+str(sim_sig_level_per_TF_thresh)+"_statspvalueslocalw{local_domain_window}onlysig{merged_mut_sig_threshold}".format(local_domain_window=local_domain_window, merged_mut_sig_threshold=merged_mut_sig_threshold)
+        sig_tfs_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh_fdr) + '_sigTFs_{}'.format(sig_level_per_TF_thresh) 
+        sig_tfpos_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh_fdr) + '_sigTFpos_{}'.format(sig_level_per_TF_thresh)
         if os.path.exists(sig_elements_output_file) and os.path.exists(sig_tfs_file) and os.path.exists(sig_tfpos_file):
             generated_sig_merged_element_files.append(sig_elements_output_file)
             sig_tfs_files.append(sig_tfs_file)
@@ -269,12 +270,12 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir, observed_input_fi
             continue
         
         if run_parallel:
-            p.apply_async(run_cohort, args=(cohort, created_cohorts, mutation_input_files, motif_name_index, f_score_index, motif_breaking_score_index,
+            p.apply_async(run_cohort, args=(cohort, created_cohorts, mutation_input_files, motif_name_index, f_score_index, motif_breaking_score_index, sig_thresh_fdr,
                sig_level_per_TF_thresh, sim_output_extension, sim_sig_level_per_TF_thresh,
                filter_cond, operation_on_unify, output_extension, distance_to_merge, merged_mut_sig_threshold,
                local_domain_window, chr_lengths_file, sig_elements_output_file, sig_tfs_file, sig_tfpos_file))#, callback=generated_sig_merged_element_files.append)
         else:
-            run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, f_score_index, motif_breaking_score_index,
+            run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, f_score_index, motif_breaking_score_index, sig_thresh_fdr,
                sig_level_per_TF_thresh, sim_output_extension, sim_sig_level_per_TF_thresh,
                filter_cond, operation_on_unify, output_extension, distance_to_merge, merged_mut_sig_threshold,
                local_domain_window, chr_lengths_file, sig_elements_output_file, sig_tfs_file, sig_tfpos_file)
