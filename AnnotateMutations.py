@@ -184,8 +184,8 @@ def get_tissue_cell_mappings(tissue_cell_mappings_file, matching_cell_name_repre
 
 
 def get_annotated_muts(muts_input_file, tracks_dir, muts_out, filter_on_dnase1_or_tf_peak=False):
-    cell_names_to_use = 'CellNamesDict'
-    tissue_cell_mappings_file='TissueCellMatches'
+    cell_names_to_use = 'datafiles/CellNamesDict'
+    tissue_cell_mappings_file='datatfiles/TissueCellMatches'
     representative_cell_name_matchings_dict, matching_cell_name_representative_dict = retreive_key_values_from_dict_file(cell_names_to_use)
     tissue_cell_assays = get_tissue_cell_mappings(tissue_cell_mappings_file=tissue_cell_mappings_file,
                                                   matching_cell_name_representative_dict=matching_cell_name_representative_dict, 
