@@ -624,7 +624,7 @@ def get_simulated_mean_sd_per_TF_motif(simulated_annotated_input_files, cohort_m
 
 def get_muts_sig_per_TF(annoted_input_file, dict_simulated_mean_sd_per_TF_motif, annoted_output_file_extension, annoted_output_file_extension_onlysig, 
                         motif_name_index = 17, f_score_index = 9, motif_breaking_score_index = 10,
-                        filter_on_qval=True, sig_thresh=0.2,
+                        filter_on_qval=True, sig_thresh_fdr=0.2, sig_thresh=0.2,
                         filter_on_signal = True, dnase_index = 24, fantom_index = 25, num_other_tfs = 27, tf_binding_index=30):
     
     if sig_thresh>=1.0:
@@ -654,10 +654,10 @@ def get_muts_sig_per_TF(annoted_input_file, dict_simulated_mean_sd_per_TF_motif,
                     p_values = sl[motif_breaking_score_index+1].split(';')
                     if filter_on_qval:
                         if filter_on_signal:
-                            if float(p_values[3]) < sig_thresh and (float(sl[dnase_index])>0.0):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs])>0.0
+                            if float(p_values[3]) < sig_thresh_fdr and (float(sl[dnase_index])>0.0):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs])>0.0
                                 annoted_input_ofile_onlysig.write(l)
                         else:
-                            if float(p_values[3]) < sig_thresh:
+                            if float(p_values[3]) < sig_thresh_fdr:
                                 annoted_input_ofile_onlysig.write(l)
                     else:
                         if filter_on_signal:
@@ -716,10 +716,10 @@ def get_muts_sig_per_TF(annoted_input_file, dict_simulated_mean_sd_per_TF_motif,
                 if filter_on_qval:
                     if filter_on_signal:
                         #otherwise check for existence of a Dnase1 peak and Pval<0.05
-                        if adjusted_dict_p_values_overall_per_tf[tf][i]<sig_thresh and (float(tf_motif[dnase_index])>0.0):# or float(tf_motif[fantom_index])>0.0 or float(tf_motif[num_other_tfs])>0.0
+                        if adjusted_dict_p_values_per_tf[tf][i]<sig_thresh_fdr and (float(tf_motif[dnase_index])>0.0):# or float(tf_motif[fantom_index])>0.0 or float(tf_motif[num_other_tfs])>0.0
                             annoted_input_ofile_onlysig.write('\t'.join(tf_motif) + '\n')
                     else:
-                        if adjusted_dict_p_values_overall_per_tf[tf][i]<sig_thresh: #or adjusted_dict_p_values_per_tf[tf][i]<0.05:
+                        if adjusted_dict_p_values_per_tf[tf][i]<sig_thresh_fdr: #or adjusted_dict_p_values_per_tf[tf][i]<0.05:
                             annoted_input_ofile_onlysig.write('\t'.join(tf_motif) + '\n')
                 else:
                     if filter_on_signal:

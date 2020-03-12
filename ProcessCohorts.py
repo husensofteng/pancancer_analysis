@@ -164,9 +164,9 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, 
                                                                              motif_name_index = motif_name_index, f_score_index = f_score_index, motif_breaking_score_index = motif_breaking_score_index)
     #get sig muts with fdr<0.2
     muts_sig_per_TF_file = get_muts_sig_per_TF(annoted_input_file=created_cohorts[cohort][0], dict_simulated_mean_sd_per_TF_motif=dict_simulated_mean_sd_per_TF_motif, 
-                                               annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), annoted_output_file_extension_onlysig="_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_level_per_TF_thresh),
+                                               annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), annoted_output_file_extension_onlysig="_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh_fdr),
                                                motif_name_index = motif_name_index, f_score_index = f_score_index, motif_breaking_score_index = motif_breaking_score_index,
-                                               filter_on_qval=False, sig_thresh=sig_level_per_TF_thresh, 
+                                               filter_on_qval=True, sig_thresh_fdr = sig_thresh_fdr, sig_thresh=sig_level_per_TF_thresh, 
                                                filter_on_signal = True, dnase_index = 24, fantom_index = 25, num_other_tfs = 27)
     sig_muts_per_tf_mutation_input_files = [muts_sig_per_TF_file]
     #get sig muts from the simulated with pval<0.5
@@ -175,7 +175,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, 
         muts_sig_per_TF_file = get_muts_sig_per_TF(annoted_input_file=mutations_input_file, dict_simulated_mean_sd_per_TF_motif=dict_simulated_mean_sd_per_TF_motif,
                                                    annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), annoted_output_file_extension_onlysig=sim_output_extension,
                                                    motif_name_index = motif_name_index, f_score_index = f_score_index, motif_breaking_score_index = motif_breaking_score_index,
-                                                   filter_on_qval=False, sig_thresh=sim_sig_level_per_TF_thresh)
+                                                   filter_on_qval=True, sig_thresh_fdr = sig_thresh_fdr, sig_thresh=sim_sig_level_per_TF_thresh)
         sig_muts_per_tf_mutation_input_files.append(muts_sig_per_TF_file)
      
     #mutation_input_files[0]
@@ -204,6 +204,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir, observed_input_fi
     mutation_input_files = [observed_input_file]
     mutation_input_files.extend(simulated_input_files)
     
+    sig_thresh_fdr = 0.2
     sig_level_per_TF_thresh = 0.05
     sim_sig_level_per_TF_thresh = 1.0#0.05
     motif_name_index = 17

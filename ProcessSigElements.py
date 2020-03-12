@@ -673,7 +673,7 @@ def get_features_from_gencode(gencode_input_file, gencode_output_file):
                 
     return gencode_output_file
     
-def getSigElements(generated_sig_merged_element_files, n, max_dist, window):
+def getSigElements(generated_sig_merged_element_files, n, max_dist, window, output_dir):
     
     upstream=True
     downstream=True
@@ -686,16 +686,16 @@ def getSigElements(generated_sig_merged_element_files, n, max_dist, window):
         print "error: ", generated_sig_merged_element_files
         sys.exit()
 
-    aggregated_output_file = 'analysis/combined{ext}_merged_intersectedmuts_grouped_aggregated{n}{up}{dw}maxdist{max_dist}kb_within{window}kb.tsv'.format(ext=ext, n=n, up="Up", dw="Dw", max_dist=max_dist/1000, window=window/1000)
+    aggregated_output_file = output_dir+'/combined{ext}_merged_intersectedmuts_grouped_aggregated{n}{up}{dw}maxdist{max_dist}kb_within{window}kb.tsv'.format(ext=ext, n=n, up="Up", dw="Dw", max_dist=max_dist/1000, window=window/1000)
     if os.path.exists(aggregated_output_file):
         return aggregated_output_file
     
     print generated_sig_merged_element_files
-    annotated_motifs = 'mutations_files/observed_annotated_agreement_22May2017.bed9'
-    tracks_dir = 'datafiles/chromatin_marks_all_cells_onlynarrowpeaks'
-    observed_mutations_all = 'mutations_files/observed_agreement_22May2017.bed9'#_notInExonsProteinCodingProcessedTranscriptIG.bed9'#'mutations_files/observedunique.bed9'
-    #regions_input_file = 'analysis/combined_onlysig_merged_intersectedmuts_grouped_recurrent.col12'
-    combined_mut_grouped_file = 'analysis/combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
+    annotated_motifs = '/home/huum/projs/pancan12Feb2020/mutations_files/observed_annotated22May2017.bed9'
+    tracks_dir = '/home/huum/projs/pancan12Feb2020/GeneExp_datafiles/chromatin_marks_all_cells_onlynarrowpeaks'
+    observed_mutations_all = '/home/huum/projs/pancan12Feb2020/mutations_files/observed_annotated_agreement_22May2017.bed9'#_notInExonsProteinCodingProcessedTranscriptIG.bed9'#'mutations_files/observedunique.bed9'
+    #regions_input_file = output_dir+'/combined_onlysig_merged_intersectedmuts_grouped_recurrent.col12'
+    combined_mut_grouped_file = output_dir+'/combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
     if not os.path.exists(combined_mut_grouped_file):
         combined_file_all = combined_mut_grouped_file+'_temp'
         with open(combined_file_all, 'w') as regions_input_ofile:
@@ -775,9 +775,9 @@ def getSigElements(generated_sig_merged_element_files, n, max_dist, window):
                      'Feature_type'
                      ]
     
-    chr_lengths_file = 'datafiles/chr_lengths_hg19.txt'
-    genes_input_file = "datafiles/GeneExp/gencode.v19.annotation.gff3_onlygenes.bed"
-    genocode_genes_segments_input_file = "datafiles/GeneExp/gencode.v19.annotation.gff3"
+    chr_lengths_file = '/home/huum/projs/pancan12Feb2020/cancer_datafiles/chr_lengths_hg19.txt'
+    genes_input_file = '/home/huum/projs/pancan12Feb2020/GeneExp_datafiles/gencode.v19.annotation.gff3_onlygenes.bed'
+    genocode_genes_segments_input_file = '/home/huum/projs/pancan12Feb2020/GeneExp_datafiles/gencode.v19.annotation.gff3'
     
     #gene_types_to_consider = ['protein_coding', 'lincRNA', 'miRNA', 'snRNA', 'snoRNA', 'rRNA', 'Mt_tRNA', 'Mt_rRNA', 'antisense', 'sense_intronic', 'sense_overlapping', '3prime_overlapping_ncrna']
     gene_types_to_consider = ['protein_coding', 'lincRNA',
@@ -786,7 +786,7 @@ def getSigElements(generated_sig_merged_element_files, n, max_dist, window):
                               'processed_transcript']
     gene_status_to_consider = ['KNOWN']
     
-    #aggregated_output_file = 'analysis/combined{ext}_merged_intersectedmuts_grouped_aggregated{n}{up}{dw}maxdist{max_dist}kb_within{window}kb.tsv'.format(ext=ext, n=n, up="Up", dw="Dw", max_dist=max_dist/1000, window=window/1000)
+    #aggregated_output_file = output_dir+'/combined{ext}_merged_intersectedmuts_grouped_aggregated{n}{up}{dw}maxdist{max_dist}kb_within{window}kb.tsv'.format(ext=ext, n=n, up="Up", dw="Dw", max_dist=max_dist/1000, window=window/1000)
     
     
     chr_lengths = get_chr_lengths(chr_lengths_file)
@@ -808,9 +808,9 @@ def getSigElements(generated_sig_merged_element_files, n, max_dist, window):
     summary_dicts_to_write = {"All genes:": genes_all, "All genes per dir:": genes_all_per_side ,"Enriched genes:": enriched_genesets_dict_overall, "Enriched genes per dir:": enriched_genesets_dict}
     summary_info_to_write = {'Element Info': summaries_dict}
     
-    gencode_output_file="datafiles/GeneExp/gencode.v19.annotation.gff3_extractedinfo"
+    gencode_output_file="/home/huum/projs/pancan12Feb2020/GeneExp_datafiles/gencode.v19.annotation.gff3_extractedinfo"
     if not os.path.exists(gencode_output_file):
-        get_features_from_gencode(gencode_input_file="datafiles/GeneExp/gencode.v19.annotation.gff3", gencode_output_file=gencode_output_file)
+        get_features_from_gencode(gencode_input_file=="/home/huum/projs/pancan12Feb2020/GeneExp_datafiles/gencode.v19.annotation.gff3", gencode_output_file=gencode_output_file)
     gene_types_to_consider = ['protein_coding',
                               'IG_V_gene', 'IG_C_gene', 'IG_J_gene', 'IG_D_gene', 
                               'TR_V_gene', 'TR_C_gene', 'TR_J_gene', 'TR_D_gene', 
@@ -827,7 +827,7 @@ def getSigElements(generated_sig_merged_element_files, n, max_dist, window):
     
     return aggregated_output_file
 
-def combine_sig_TFs(sig_tfs_files, tf_label='TFs'):
+def combine_sig_TFs(sig_tfs_files, tf_label='TFs', output_dir='.'):
     ext = ""
     try:
         ext = sig_tfs_files[0].split('/')[-1].split('.bed9')[1]
@@ -835,7 +835,7 @@ def combine_sig_TFs(sig_tfs_files, tf_label='TFs'):
         print "error: ", generated_sig_merged_element_files
         sys.exit()
     
-    aggregated_output_file = 'analysis/combined{ext}.tsv'.format(ext=ext)
+    aggregated_output_file = output_dir+'/combined{ext}.tsv'.format(ext=ext)
     if os.path.exists(aggregated_output_file):
         return aggregated_output_file
     header_cols = [tf_label, 'P-Val', 'FDR', '#Mutated Motifs', 'Mean #Mutated Motifs in Simulated Sets','#Mutated Motifs in Simulated Sets', 'Cohorts']
@@ -952,17 +952,29 @@ def get_sample_pathways(calculated_p_value_sig_out_file, output_file, total_numb
 if __name__ == '__main__':
     
     cohort_names_input = sys.argv[1]#'meta_tumor_cohorts_v2_22May2017/cohorts_to_run_definedPCAWG'
-    generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(cohort_names_input)
-    
+    mutations_cohorts_dir = '/home/huum/projs/pancan12Feb2020/pancan_output_12Feb'#_Alltumors_noexon'
+    observed_input_file = '/home/huum/projs/pancan12Feb2020/mutations_files/observed_annotated22May2017.bed9'
+    simulated_input_dir = '/home/huum/projs/pancan12Feb2020/mutations_files/mutations_simulations_files_103sets'
+    generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(cohort_names_input, mutations_cohorts_dir, observed_input_file, simulated_input_dir)
+
+    #mutation_input_dir = 'mutations_cohorts_output_exclVEP'
+    #generated_sig_merged_element_files =  [mutation_input_dir+'/'+x for x in os.listdir(mutation_input_dir) if 'statspvalueslocalw25000onlysig0.05' in x]
+    #sig_tfs_files = [mutation_input_dir+'/'+x for x in os.listdir(mutation_input_dir) if 'sigTFs_0.05' in x]
+
+    #sig_tfpos_files = [mutation_input_dir+'/'+x for x in os.listdir(mutation_input_dir) if 'sigTFpos_0.05' in x]    
+    #print sig_tfpos_files
     n=int(sys.argv[2])#3
     max_dist = int(sys.argv[3])#500000
     window = int(sys.argv[4])#500000
     
-    aggregated_output_file = getSigElements(generated_sig_merged_element_files, n, max_dist, window)
-    combine_sig_TFs(sig_tfs_files)
-    combine_sig_TFs(sig_tfpos_files, tf_label='TF Positions')
+    output_dir = sys.argv[5]
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    aggregated_output_file = getSigElements(generated_sig_merged_element_files, n, max_dist, window, output_dir)
+    combine_sig_TFs(sig_tfs_files, output_dir=output_dir)
+    combine_sig_TFs(sig_tfpos_files, tf_label='TF Positions', output_dir=output_dir)
     
-    geneset_input_file = 'analysis/kegg_pathways_fromdb_madeAgenesetPerPathway.gmt'
+    geneset_input_file = '/home/huum/projs/pancan12Feb2020/GeneExp_datafiles/kegg_pathways_fromdb_madeAgenesetPerPathway.gmt'
     elements_output_file = get_gene_enrichments(elements_input_file=aggregated_output_file, elements_output_file=aggregated_output_file+"_GenesInclCDS.tsv", skip_exon_elements=False)
     calculated_p_value_sig_out_file = find_overlap_genesets_genelist(geneset_input_file, elements_output_file, elements_output_file+'_pathways.tsv', total_number_of_genes_in_the_universe=20278, 
                                    min_number_of_genes_be_enriched_for_geneset_to_be_reported = 10, index_gene_name=0, index_gene_names_start=3, 
