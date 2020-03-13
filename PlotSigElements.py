@@ -140,9 +140,9 @@ def plot_element_mutation_rate_per_cancer_type(box_plot_dict, output_files_mutat
 
 def plot_enrichment(dict_data, output_file, count_uniq_items):
     threshold_to_include_element = 40
-    print dict_data.keys()
+    print(dict_data.keys())
     for k in dict_data.keys():
-        print 'Plotting ', k
+        print('Plotting ', k)
         main_items = []
         secondary_items = []
         number_items = []
@@ -174,7 +174,7 @@ def plot_enrichment(dict_data, output_file, count_uniq_items):
                             number_items.append(len(set(dict_data[k][main_item][secondary_item])))
                         else:
                             number_items.append(len(dict_data[k][main_item][secondary_item]))
-        print k, len(main_items), len(secondary_items), len(number_items)
+        print(k, len(main_items), len(secondary_items), len(number_items))
         df = pd.DataFrame()
         df[x_label] = pd.Series(main_items).values
         df[k] = pd.Series(secondary_items).values
@@ -195,16 +195,16 @@ def plot_enrichment(dict_data, output_file, count_uniq_items):
             fig = plt_results.get_figure()
             fig.savefig(output_file+ k +".pdf")
         else:
-            print 'Skipped: ', k, df_pivot_filtered.shape
+            print('Skipped: ', k, df_pivot_filtered.shape)
         '''if plot_counts:
-            print df.head(2)
+            print(df.head(2))
             for main_item in sorted(set(df[x_label])):
                 #df_main = df[(df[x_label] == main_item) & (df[y_label] > 10)].sort_values(by=y_label)
                 df_main = df[(df[x_label] == main_item)].sort_values(by=y_label, ascending=False)
                 if len(df_main[k])>1:
                     if len(df_main)>20:
                         df_main = df_main[0:20]
-                    print len(df_main)
+                    print(len(df_main))
                     plot_count_plots(df_main, x=k, y=y_label,title="Frequency of {k} in {m}".format(k=k.replace(' per Chromatin Status', ' in '), m=main_item), 
                                  out_file=output_file+'_'+main_item.replace('/','-')+'_bar')
         '''
@@ -228,7 +228,7 @@ def plot_count_from_dict(dict_data, output_file, top_n=0):
             main_items.append(main_item)
             number_items.append(sum(values))#sum(dict_data[k][main_item]))
         
-        print k, len(main_items), len(number_items)
+        print(k, len(main_items), len(number_items))
         
         df = pd.DataFrame()
         df[k] = pd.Series(main_items).values
@@ -243,8 +243,8 @@ def plot_count_from_dict(dict_data, output_file, top_n=0):
 #not used:
 def stat_plot_scores(mut_file, ovcombined, ov, ovc, ovp):
     
-    print mut_file
-    print len(ov), np.mean(ov), np.std(ov)
+    print(mut_file)
+    print(len(ov), np.mean(ov), np.std(ov))
     
     title = (mut_file.split('/')[-1]).split('.')[0]
     plt.hist(ov)
@@ -254,9 +254,9 @@ def stat_plot_scores(mut_file, ovcombined, ov, ovc, ovp):
     plt.savefig('{}.png'.format(mut_file))
     
     for c in ovc:
-        print c, len(ovc[c]), np.mean(ovc[c]), np.std(ovc[c])
+        print(c, len(ovc[c]), np.mean(ovc[c]), np.std(ovc[c]))
     for p in ovp:
-        print p, len(ovp[p]), np.mean(ovp[p]), np.std(ovp[p])
+        print(p, len(ovp[p]), np.mean(ovp[p]), np.std(ovp[p]))
     
     dfcombined = pd.DataFrame(ovcombined)
     plt.clf()
@@ -610,7 +610,7 @@ def elements_fdr(elements_input, output_file_ext):
         if row[filter_col_for_text]>=min_value_to_write_text:
             plt_results.ax.text(row[x] ,row[y], key_value, size='xx-small', color='darkslategrey', rotation=5, verticalalignment='bottom')
             regions_written.append(row[region_name_key])
-            print key_value
+            print(key_value)
     '''for i, row in elements_input.sort_values(by=x, ascending=False)[0:num_labels_to_write].iterrows():#len(regions_written)
         key_value = '|'.join([v.split('::')[0] for v in row[key_name].split(',')])
         if row[region_name_key] not in regions_written:
@@ -625,8 +625,8 @@ def elements_fdr(elements_input, output_file_ext):
 def read_sig_elements_file(elements_input_file, output_file_ext="Fig"):
     elements_input = pd.read_table(elements_input_file, sep='\t', skiprows=6, header=0)
     elements_input = elements_input[(elements_input['#Samples(RegMuts)']>1)]
-    print len(elements_input)
-    print elements_input.head(2)
+    print(len(elements_input))
+    print(elements_input.head(2))
     elements_fdr(elements_input, output_file_ext+"_elementsFDRMuts")
     cols_names_to_use_for_barchars = {'Reg. Mutations in Sig Elements per Cancer Type': 'Cancer-Types:#RegMuts',
                                       'Unique Reg. Mutations in Sig Elements per Cancer Type': 'Cancer-Types:#Samples(RegMuts)',
@@ -681,9 +681,9 @@ def read_sig_tfs(sig_tfs_file, output_file_ext="Fig", key_name='TFs', threshold_
     else:
         sig_tfs[key_name] = sig_tfs[key_name].apply(lambda x: x.split('_')[0])
     #sig_tfs = sig_tfs[(sig_tfs['#Mutated Motifs']>50)]
-    print sig_tfs.columns
-    print len(sig_tfs)
-    print sig_tfs.head(2)
+    print(sig_tfs.columns)
+    print(len(sig_tfs))
+    print(sig_tfs.head(2))
     df_pivot = sig_tfs.pivot('Cohorts', key_name, 'FDR')#.fillna(0)
     df_pivot_annot = sig_tfs.pivot('Cohorts', key_name, '#Mutated Motifs')#.fillna(0)
     df_pivot_annot_filtered = pd.DataFrame()
@@ -692,7 +692,7 @@ def read_sig_tfs(sig_tfs_file, output_file_ext="Fig", key_name='TFs', threshold_
         if df_pivot[c].max()>fdr_log10neg_threshold and df_pivot_annot[c].max()>threshold_to_include_element:
             df_pivot_filtered[c] = df_pivot[c]
             df_pivot_annot_filtered[c] = df_pivot_annot[c]
-    print 'df_pivot_annot_filtered.shape: ', df_pivot_annot_filtered.shape
+    print('df_pivot_annot_filtered.shape: ', df_pivot_annot_filtered.shape)
     #df_pivot = df_pivot[df_pivot.sum(axis=0) > 20]
     if df_pivot_filtered.shape[0]>0 and df_pivot_filtered.shape[1]>0:
         plt.figure(figsize=(25, 10))
@@ -774,16 +774,16 @@ def plot_motifs(input_file, x_label='TF-Motifs', y_label='Cancer Types', output_
             x_labels.append(x)
             values.append(dict_data[y][x])
     df = pd.DataFrame({y_label: y_labels , x_label: x_labels, values_label: values})
-    print df.columns, df.shape
-    print df.head(10)
+    print(df.columns, df.shape)
+    print(df.head(10))
     df_pivot = df.pivot(y_label, x_label, values_label)#.fillna(0)
     df_pivot_filtered = pd.DataFrame()
     for c in df_pivot.columns:
         if df_pivot[c].sum()>threshold_to_include_element:
             df_pivot_filtered[c] = df_pivot[c]
             
-    print df_pivot_filtered.head(4)
-    print 'df_pivot_filtered.shape: ', df_pivot_filtered.shape
+    print(df_pivot_filtered.head(4))
+    print('df_pivot_filtered.shape: ', df_pivot_filtered.shape)
     #df_pivot = df_pivot[df_pivot.sum(axis=0) > 20]
     if df_pivot_filtered.shape[0]>0 and df_pivot_filtered.shape[1]>0:
         plt.figure(figsize=(25, 10))
@@ -805,7 +805,7 @@ def get_info_from_sigelements(elements_input_file):
     c = 0
     for i, r in sorted_elements_by_fdr.iterrows():
         if 'WDR74' in r['Nearby-Genes(Name::ID::O|U|Ddistance::COSMIC|KCP|PCD)']:
-            print c,r
+            print(c,r)
         c+=1
 
 if __name__ == '__main__':

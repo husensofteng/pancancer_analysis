@@ -35,9 +35,9 @@ def unify_muts(annotated_mutations_input_file, annotated_mutations_grouped_file,
         sort -k1,1n -k2,2n -k3,3n -k4 -k5 -k6 -k7 -k8 -k9 | 
         groupBy -g 1-9 -c 10,11 -o {operation_on_unify},collapse > {grouped_file}""".format(
                                             fsep=fsep, vsep=vsep, filter_cond=filter_cond, infile=annotated_mutations_input_file, operation_on_unify=operation_on_unify, grouped_file=annotated_mutations_grouped_file)
-        #print awk_stmt
+        #print(awk_stmt)
         os.system(awk_stmt)
-        #print "groupBy mutation is done"
+        #print("groupBy mutation is done")
     
     return annotated_mutations_grouped_file
     
@@ -46,7 +46,7 @@ def get_max_motif_in_grouped_muts(annotated_mutations_grouped_file, annotated_mu
     vsep = '#'
     if os.path.exists(annotated_mutations_grouped_output_file):
         return annotated_mutations_grouped_output_file
-    #print "Reading the grouped mutations file"
+    #print("Reading the grouped mutations file")
     score_index_in_grouped_file = 9
     motif_index_in_grouped_file = 10
     score_index_in_motif_info = 0
@@ -79,7 +79,7 @@ def get_scores(annotated_mutations_grouped_file):
     mut_scores_overall_combined_file = annotated_mutations_grouped_file+"_combined"
     if (os.path.exists(overall_scores_file) and os.path.exists(overall_scores_chromatin_status_file) and os.path.exists(overall_scores_phenotype_file) 
         and os.path.exists(mut_scores_overall_combined_file)):
-        print 'Loading scores'
+        print('Loading scores')
         with open(overall_scores_file, 'r') as gp:
             mut_scores_overall = pickle.load(gp)
         with open(overall_scores_chromatin_status_file, 'r') as gp:
@@ -89,12 +89,12 @@ def get_scores(annotated_mutations_grouped_file):
         with open(mut_scores_overall_combined_file, 'r') as gp:
             mut_scores_overall_combined = pickle.load(gp)
         
-        print mut_scores_overall_per_chromatin_status.keys()
-        print mut_scores_overall_per_phenotype.keys()
-        print mut_scores_overall_combined.keys()
+        print(mut_scores_overall_per_chromatin_status.keys())
+        print(mut_scores_overall_per_phenotype.keys())
+        print(mut_scores_overall_combined.keys())
         
         return mut_scores_overall_combined, mut_scores_overall, mut_scores_overall_per_chromatin_status, mut_scores_overall_per_phenotype
-    print "Reading the grouped file"
+    print("Reading the grouped file")
     motif_index_in_grouped_file = 11
     chromatin_status_index_in_motif_info = 13
     phenotype_index_in_grouped_file = 5
@@ -129,7 +129,7 @@ def get_scores(annotated_mutations_grouped_file):
             
             l = grouped_file.readline()
             
-    #print mut_scores_overall
+    #print(mut_scores_overall)
     with open(overall_scores_file, 'w') as gp:
         pickle.dump(mut_scores_overall, gp)
     with open(overall_scores_chromatin_status_file, 'w') as gp:
@@ -185,7 +185,7 @@ def assess_stat_muts(muts_input_file, simulated_input_file, observed_output_file
     
     if len(stats_dict.keys())==0:
         stats_dict = get_mean_and_sd_from_file(simulated_input_file, scores_index=score_index_sim_elements, index_mut_type = index_mut_type)
-    print "getting pval for muts in {} using {}: {}".format(muts_input_file, simulated_input_file, stats_dict)
+    print("getting pval for muts in {} using {}: {}".format(muts_input_file, simulated_input_file, stats_dict))
     
     n_sig = 0
     with open(muts_input_file, 'r') as observed_infile, open(observed_output_file, 'w') as observed_outfile, open(observed_onlysig_output_file, 'w') as observed_onlysig_outfile:
@@ -240,9 +240,9 @@ def merge_muts(muts_input_file, merged_muts_output_file, filter_mut_motifs=False
     
     awk_stmt = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{{cond}{{ gsub(",", "MotifInfo"); print $1,$2,$3,$10,$6,$12,$13,$14,$9,$1"{vsep}"$2"{vsep}"$3"{vsep}"$4"{vsep}"$5"{vsep}"$6"{vsep}"$7"{vsep}"$8"{vsep}"$9"{vsep}"$10"{matching_motifs_sep}"$11"{MaxMotif_sep}"$15}}}}' {muts_input_file} | sort -k1,1n -k2,2n -k3,3n | mergeBed -i stdin -d {distance_to_merge} -c 4,10,9,5,6,7,8,4,5,9,9,10 -o sum,count_distinct,count_distinct,distinct,collapse,collapse,collapse,collapse,collapse,distinct,collapse,collapse > {merged_muts_output_file}""".format(**locals()) # | awk 'BEGIN{{FS=OFS="\t"}}{{if($2!=$3){{$2=$2+1; $3=$3-1}}; if($2>$3){{$2=$2-1; $3=$3+1}}; print}}
     #awk_stmt = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{{cond}{{ gsub(",", "MotifInfo"); print $1,$2,$3,$10,$6,$12,$13,$14,$9,$1"{vsep}"$2"{vsep}"$3"{vsep}"$4"{vsep}"$5"{vsep}"$6"{vsep}"$7"{vsep}"$8"{vsep}"$9"{vsep}"$10"{matching_motifs_sep}"$11"{MaxMotif_sep}"$15}}}}' {muts_input_file} | sort -k1,1n -k2,2n -k3,3n | intersectBed -split -wo -a stdin -b {selected_regions_file} | sort -k11,11n -k12,12n -k13,13n | groupBy -g 11,12,13 -c 4,10,9,5,6,7,8,4,5,9,9,10 -o sum,count_distinct,count_distinct,distinct,collapse,collapse,collapse,collapse,collapse,distinct,collapse,collapse > {merged_muts_output_file}""".format(**locals())
-    #print awk_stmt
+    #print(awk_stmt)
     os.system(awk_stmt)
-    #print "merge mutations process is done"
+    #print("merge mutations process is done")
     
     return merged_muts_output_file
     
@@ -287,11 +287,11 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
             observed_input_file_temp_ofile.write(l[0] + '\t' + str(extended_element_start) + '\t' + str(extended_element_end) + '\t' + str(line_number) + '\n')
             line_number+=1
             l = observed_infile.readline().strip().split('\t')
-    print 'observed_input_file: ', observed_input_file_temp_file
+    print('observed_input_file: ', observed_input_file_temp_file)
     observed_input_file_obj = BedTool(observed_input_file_temp_file)
     for simulated_input_file in simulated_input_files:
         simulated_input_file_temp = simulated_input_file+"_temp"
-        #print 'simulated_input_file: ', simulated_input_file
+        #print('simulated_input_file: ', simulated_input_file)
         simulated_input_file_obj = BedTool(simulated_input_file)
         observed_input_file_obj.intersect(simulated_input_file_obj, loj=True).groupby(g=[4], c=8, o=['collapse']).saveas(simulated_input_file_temp)
         with open(simulated_input_file_temp, 'r') as simulated_input_file_temp_ifile:
@@ -321,12 +321,12 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
         if mean>0 and std>0:
             p_value = get_pval(element_score, mean, std)
         elif std<=0 and mean>0:
-            print 'mean>0&sd=0', mean,std, dict_lines_observed[l]
+            print('mean>0&sd=0', mean,std, dict_lines_observed[l])
             if element_score > mean+(mean/2):#1.5 fold times larger
                 p_value = 0.0
         else:
             p_value = 0.0
-            print 'mean=0&sd=0', mean,std, dict_lines_observed[l]
+            print('mean=0&sd=0', mean,std, dict_lines_observed[l])
             
         p_values.append(p_value)
         lines.append(dict_lines_observed[l][0])
@@ -344,13 +344,18 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
     cleanup()
     return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, n_sig
 
-def assess_stat_elements(observed_input_file, simulated_input_file, merged_elements_statspvalues, merged_elements_statspvaluesonlysig, merged_mut_sig_threshold = 0.05, score_index_observed_elements=4, score_index_sim_elements=4):
+def assess_stat_elements(observed_input_file, simulated_input_file, 
+                         merged_elements_statspvalues, 
+                         merged_elements_statspvaluesonlysig, 
+                         merged_mut_sig_threshold = 0.05, 
+                         score_index_observed_elements=4, 
+                         score_index_sim_elements=4):
     
     if os.path.exists(merged_elements_statspvalues) and os.path.exists(merged_elements_statspvaluesonlysig):
         return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 'NA'
     
     stats_dict = get_mean_and_sd_from_file(simulated_input_file, scores_index=score_index_sim_elements, report_overlall_score=True)
-    print "getting pval for elements in {} using {}: {}".format(observed_input_file, simulated_input_file, stats_dict)
+    print("getting pval for elements in {} using {}: {}".format(observed_input_file, simulated_input_file, stats_dict))
     
     #extend each merged region by wbp and combine all columns into one; intersect the entire list with the combine simulated list of elemenets, group by the column ID, take average and std from the grouping;  
     
@@ -380,7 +385,7 @@ def assess_stat_elements(observed_input_file, simulated_input_file, merged_eleme
 
 def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index, f_score_index, motif_breaking_score_index,
                sig_level_per_TF_thresh, filter_cond, fsep, sig_tfs_file, sig_tfpos_file, filter_on_qval=True,
-               filter_on_signal = True, dnase_index = 24, fantom_index = 25, num_other_tfs = 27):
+               filter_on_signal = True, dnase_index = 24, fantom_index = 25, num_other_tfs_index = 27):
     print('sig_muts_per_tf_mutation_input_files: ', sig_muts_per_tf_mutation_input_files)
     observed_mut_motifs = sig_muts_per_tf_mutation_input_files[0]
     print('line 386: observed_mut_motifs: ', observed_mut_motifs)
@@ -388,7 +393,7 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index, 
         return sig_tfs_file, sig_tfpos_file
     
     observed_mut_motifs_temp = observed_mut_motifs+'_sigTFs_mintfscores_temp'
-    print 'Calculating pval for TFs in ', cohort
+    print('Calculating pval for TFs in ', cohort)
     threshold_value_index = 3
     if filter_on_qval:
         os.system("""awk 'BEGIN{{FS=OFS="{fsep}"}}{{split($12,p,";"); {filter_cond}{{if(p[4]<{sig_level_per_TF_thresh}) print ${motif_name_index},${f_score_index}+${mut_break_score_index}}}}}' {observed_mut_motifs} | sort -k1 | groupBy -g 1 -c 2 -o min > {observed_mut_motifs_temp}""".format(
@@ -422,7 +427,7 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index, 
                     try:
                         if len(l[11].split(';'))>threshold_value_index:
                             #check FDR if given
-                            if ( ((float(l[11].split(';')[threshold_value_index])) < sig_level_per_TF_thresh and (float(l[dnase_index])>0.0)) or# or float(l[fantom_index])>0.0 or float(l[num_other_tfs])>0.0
+                            if ( ((float(l[11].split(';')[threshold_value_index])) < sig_level_per_TF_thresh and (float(l[dnase_index])>0.0)) or# or float(l[fantom_index])>0.0 or float(l[num_other_tfs_index])>0.0
                                  (float(l[tf_binding_index])>0 and l[tf_binding_index]!="nan")):
                                 try:
                                     tf_counts_in_this_sim_set[l[motif_name_index]] +=1
@@ -435,7 +440,7 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index, 
                                     tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
                                     
                         else:
-                            if ( ((float(l[f_score_index])+float(l[motif_breaking_score_index])) >= tf_min_scores_in_sig_obs_motifs[l[motif_name_index]] and (float(l[dnase_index])>0.0)) or# or float(l[fantom_index])>0.0 or float(l[num_other_tfs])>0.0 
+                            if ( ((float(l[f_score_index])+float(l[motif_breaking_score_index])) >= tf_min_scores_in_sig_obs_motifs[l[motif_name_index]] and (float(l[dnase_index])>0.0)) or# or float(l[fantom_index])>0.0 or float(l[num_other_tfs_index])>0.0 
                                  (float(l[tf_binding_index])>0 and l[tf_binding_index]!="nan")):
                                 try:
                                     tf_counts_in_this_sim_set[l[motif_name_index]] +=1
@@ -478,7 +483,7 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index, 
     if len(tf_p_values)>0:
         adjusted_tf_p_values = adjust_pvales(tf_p_values)
     else:
-        print 'tf_p_values nothing:', tf_p_values
+        print('tf_p_values nothing:', tf_p_values)
     with open(sig_tfs_file, 'w') as ofile:
         for i,tf in enumerate(tf_names):
             ofile.write(tf + '\t' + str(tf_p_values[i]) + '\t' + str(adjusted_tf_p_values[i]) + '\t' + str(tf_counts_in_sim_sets[tf][0]) + '\t' + str(np.mean(tf_counts_in_sim_sets[tf][1:])) + '\t' + ','.join([str(x) for x in tf_counts_in_sim_sets[tf][1:]])+ '\n')
@@ -528,13 +533,13 @@ def process_input_file(observed_input_file, simulated_input_files, combined_simu
             for simulated_input_file in simulated_input_files:
                 
                 unified_muts_file = simulated_input_file + output_extension + "_groupedbymut" 
-                print unified_muts_file
+                print(unified_muts_file)
                 unified_muts_file = unify_muts(simulated_input_file, unified_muts_file, filter_mut_motifs=True, filter_cond=filter_cond)
                 with open(unified_muts_file, 'r') as unified_muts_readfile:
                     combined_simulated_muts_outfile.write(unified_muts_readfile.read())
                 
                 unified_muts_file_wihtmotifinfo = unified_muts_file+"withmotifinfo"
-                print unified_muts_file_wihtmotifinfo
+                print(unified_muts_file_wihtmotifinfo)
                 unified_muts_file_wihtmotifinfo = get_max_motif_in_grouped_muts(annotated_mutations_grouped_file=unified_muts_file, annotated_mutations_grouped_output_file=unified_muts_file_wihtmotifinfo)
                 
                 calculated_pvalues_unified_muts_file_wihtmotifinfo = unified_muts_file_wihtmotifinfo+"_statmuts"
@@ -546,8 +551,8 @@ def process_input_file(observed_input_file, simulated_input_files, combined_simu
                 with open(merged_muts_output_file, 'r') as merged_muts_read_file:
                     combined_simulated_muts_merged_oufile.write(merged_muts_read_file.read())
                 
-    print combined_simulated_muts_output_file
-    print combined_simulated_muts_merged_output_file
+    print(combined_simulated_muts_output_file)
+    print(combined_simulated_muts_merged_output_file)
     
     unified_muts_file = observed_input_file + output_extension + "_groupedbymut" 
     unified_muts_file = unify_muts(observed_input_file, unified_muts_file, filter_mut_motifs=True, filter_cond=filter_cond)
@@ -563,7 +568,7 @@ def process_input_file(observed_input_file, simulated_input_files, combined_simu
     merged_elements_statspvalues = merged_muts_output_file+"_statspvalues"
     merged_elements_statspvaluesonlysig = merged_muts_output_file+"_statspvaluesonlysig"
     merged_elements_statspvalues, merged_elements_statspvaluesonlysig, n_sig = assess_stat_elements(observed_input_file=merged_muts_output_file, simulated_input_file=combined_simulated_muts_merged_output_file, merged_elements_statspvalues=merged_elements_statspvalues, merged_elements_statspvaluesonlysig=merged_elements_statspvaluesonlysig, score_index_observed_elements=3, score_index_sim_elements=3)
-    print 'Number of Sig elements: ', n_sig, 'initial #sig muts ', n_sig_muts
+    print('Number of Sig elements: ', n_sig, 'initial #sig muts ', n_sig_muts)
     
     return merged_elements_statspvaluesonlysig
 
@@ -573,12 +578,12 @@ def get_simulated_mean_sd_per_TF_motif(simulated_annotated_input_files, cohort_m
         with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'r') as dict_simulated_mean_sd_per_TF_motif_ifile:
             dict_simulated_mean_sd_per_TF_motif = json.loads(dict_simulated_mean_sd_per_TF_motif_ifile.readline())
         return dict_simulated_mean_sd_per_TF_motif
-    print "Extracting avg and std per TF and overall from the simulation sets... onto: ", cohort_mean_sd_per_tf_overall_output_dict_file
+    print("Extracting avg and std per TF and overall from the simulation sets... onto: ", cohort_mean_sd_per_tf_overall_output_dict_file)
     dict_simulated_score_per_TF_motif = {}
     dict_simulated_mean_sd_per_TF_motif = {}
     overall_score_values = []
     for simulated_annotated_input_file in simulated_annotated_input_files:
-        print simulated_annotated_input_file
+        print(simulated_annotated_input_file)
         with open(simulated_annotated_input_file, 'r') as simulated_annotated_ifile:
             l = simulated_annotated_ifile.readline().strip().split('\t')
             while l and len(l)>motif_name_index:
@@ -622,12 +627,15 @@ def get_simulated_mean_sd_per_TF_motif(simulated_annotated_input_files, cohort_m
     
     return dict_simulated_mean_sd_per_TF_motif
 
-def get_muts_sig_per_TF(annoted_input_file, dict_simulated_mean_sd_per_TF_motif, annoted_output_file_extension, annoted_output_file_extension_onlysig, 
-                        motif_name_index = 17, f_score_index = 9, motif_breaking_score_index = 10,
-                        filter_on_qval=True, sig_thresh_fdr=0.2, sig_thresh=0.2,
-                        filter_on_signal = True, dnase_index = 24, fantom_index = 25, num_other_tfs = 27, tf_binding_index=30):
+def get_muts_sig_per_TF(annoted_input_file, dict_simulated_mean_sd_per_TF_motif, 
+                        annoted_output_file_extension, annoted_output_file_extension_onlysig, 
+                        motif_name_index = 17, f_score_index = 9, 
+                        motif_breaking_score_index = 10,
+                        filter_on_qval=True, sig_thresh_fdr=0.2, sig_thresh_pval=0.2,
+                        filter_on_signal = True, dnase_index = 24, fantom_index = 25, 
+                        num_other_tfs_index = 27, tf_binding_index=30):
     
-    if sig_thresh>=1.0:
+    if sig_thresh_pval>=1.0:
         return annoted_input_file
     annoted_output_file = annoted_input_file + annoted_output_file_extension
     annoted_output_file_onlysig = annoted_input_file + annoted_output_file_extension_onlysig
@@ -636,9 +644,9 @@ def get_muts_sig_per_TF(annoted_input_file, dict_simulated_mean_sd_per_TF_motif,
         return annoted_output_file_onlysig
     
     if filter_on_qval:
-        print "Calculating Q-values for set: ", annoted_input_file
+        print("Calculating Q-values for set: ", annoted_input_file)
     else:
-        print "Calculating P-values for set: ", annoted_input_file
+        print("Calculating P-values for set: ", annoted_input_file)
     if os.path.exists(annoted_output_file):
         with open(annoted_output_file, 'r') as annoted_output_ifile, open(annoted_output_file_onlysig, 'w') as annoted_input_ofile_onlysig:
             l = annoted_output_ifile.readline()
@@ -654,17 +662,17 @@ def get_muts_sig_per_TF(annoted_input_file, dict_simulated_mean_sd_per_TF_motif,
                     p_values = sl[motif_breaking_score_index+1].split(';')
                     if filter_on_qval:
                         if filter_on_signal:
-                            if float(p_values[3]) < sig_thresh_fdr and (float(sl[dnase_index])>0.0):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs])>0.0
+                            if float(p_values[3]) < sig_thresh_fdr and (float(sl[dnase_index])>0.0):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs_index])>0.0
                                 annoted_input_ofile_onlysig.write(l)
                         else:
                             if float(p_values[3]) < sig_thresh_fdr:
                                 annoted_input_ofile_onlysig.write(l)
                     else:
                         if filter_on_signal:
-                            if float(p_values[1]) < sig_thresh and (float(sl[dnase_index])>0.0):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs])>0.0
+                            if float(p_values[1]) < sig_thresh_pval and (float(sl[dnase_index])>0.0):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs_index])>0.0
                                 annoted_input_ofile_onlysig.write(l)
                         else:
-                            if float(p_values[1]) < sig_thresh:
+                            if float(p_values[1]) < sig_thresh_pval:
                                 annoted_input_ofile_onlysig.write(l)
                 l = annoted_output_ifile.readline()
         return annoted_output_file_onlysig
@@ -674,7 +682,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_simulated_mean_sd_per_TF_motif,
     dict_p_values_overall_per_tf = {}
     with open(annoted_input_file, 'r') as observed_annoted_input_ifile:
         l = observed_annoted_input_ifile.readline().strip().split('\t')
-        print "Computing P-values (TF motifs) for: ", annoted_input_file
+        print("Computing P-values (TF motifs) for: ", annoted_input_file)
         
         while l and len(l)>motif_name_index:
             p_val = 1.0
@@ -696,7 +704,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_simulated_mean_sd_per_TF_motif,
             l = observed_annoted_input_ifile.readline().strip().split('\t')
     
     with open(annoted_output_file, 'w') as annoted_input_ofile, open(annoted_output_file_onlysig, 'w') as annoted_input_ofile_onlysig:
-        print "Computing adjusted P-values"
+        print("Computing adjusted P-values")
         adjusted_dict_p_values_per_tf = {}
         adjusted_dict_p_values_overall_per_tf = {}
         for tf in dict_lines_to_keep_per_tf.keys():
@@ -716,18 +724,18 @@ def get_muts_sig_per_TF(annoted_input_file, dict_simulated_mean_sd_per_TF_motif,
                 if filter_on_qval:
                     if filter_on_signal:
                         #otherwise check for existence of a Dnase1 peak and Pval<0.05
-                        if adjusted_dict_p_values_per_tf[tf][i]<sig_thresh_fdr and (float(tf_motif[dnase_index])>0.0):# or float(tf_motif[fantom_index])>0.0 or float(tf_motif[num_other_tfs])>0.0
+                        if adjusted_dict_p_values_per_tf[tf][i]<sig_thresh_fdr and (float(tf_motif[dnase_index])>0.0):# or float(tf_motif[fantom_index])>0.0 or float(tf_motif[num_other_tfs_index])>0.0
                             annoted_input_ofile_onlysig.write('\t'.join(tf_motif) + '\n')
                     else:
                         if adjusted_dict_p_values_per_tf[tf][i]<sig_thresh_fdr: #or adjusted_dict_p_values_per_tf[tf][i]<0.05:
                             annoted_input_ofile_onlysig.write('\t'.join(tf_motif) + '\n')
                 else:
                     if filter_on_signal:
-                        if dict_p_values_overall_per_tf[tf][i]<sig_thresh and (float(tf_motif[dnase_index])>0.0): #or adjusted_dict_p_values_per_tf[tf][i]<0.05: # or float(tf_motif[fantom_index])>0.0 or float(tf_motif[num_other_tfs])>0.0
+                        if dict_p_values_overall_per_tf[tf][i]<sig_thresh_pval and (float(tf_motif[dnase_index])>0.0): #or adjusted_dict_p_values_per_tf[tf][i]<0.05: # or float(tf_motif[fantom_index])>0.0 or float(tf_motif[num_other_tfs_index])>0.0
                             #tf_motif[motif_breaking_score_index+1] = str(dict_p_values_per_tf[tf][i]) + ';' + str(dict_p_values_overall_per_tf[tf][i]) + ";" + str(adjusted_dict_p_values_per_tf[tf][i]) + ";" + str(adjusted_dict_p_values_overall_per_tf[tf][i])
                             annoted_input_ofile_onlysig.write('\t'.join(tf_motif) + '\n')
                     else:
-                        if dict_p_values_overall_per_tf[tf][i]<sig_thresh: #or adjusted_dict_p_values_per_tf[tf][i]<0.05:
+                        if dict_p_values_overall_per_tf[tf][i]<sig_thresh_pval: #or adjusted_dict_p_values_per_tf[tf][i]<0.05:
                             #tf_motif[motif_breaking_score_index+1] = str(dict_p_values_per_tf[tf][i]) + ';' + str(dict_p_values_overall_per_tf[tf][i]) + ";" + str(adjusted_dict_p_values_per_tf[tf][i]) + ";" + str(adjusted_dict_p_values_overall_per_tf[tf][i])
                             annoted_input_ofile_onlysig.write('\t'.join(tf_motif) + '\n')
     
@@ -737,7 +745,12 @@ def get_muts_sig_per_TF(annoted_input_file, dict_simulated_mean_sd_per_TF_motif,
     
     return annoted_output_file_onlysig
  
-def calculate_p_value_motifregions(mutated_regions_list, num_muts_per_sample_dict, total_number_of_regions_tested, index_mutation_frequency=12, index_sample_ids=-1, index_elment_start_coordinate=1, index_elment_stop_coordinate=2, genome_size=3000000000.0):
+def calculate_p_value_motifregions(mutated_regions_list, num_muts_per_sample_dict, 
+                                   total_number_of_regions_tested, 
+                                   index_mutation_frequency=12, index_sample_ids=-1, 
+                                   index_elment_start_coordinate=1, 
+                                   index_elment_stop_coordinate=2, 
+                                   genome_size=3000000000.0):
     
     reported_p_values = []#this holds p-values of all the regions, it will be used for p-value correction and after correction it is written to the output file as an additional column after the calculated p-value, the full list of p-values is need to make the correction test
     for element in mutated_regions_list:
@@ -761,7 +774,7 @@ def calculate_p_value_motifregions(mutated_regions_list, num_muts_per_sample_dic
     for i in range(n_elements, total_number_of_regions_tested):
         reported_p_values.append(1) 
     
-    print "correcting p-values for multiple testing"
+    print("correcting p-values for multiple testing")
     if len(reported_p_values)>0:
         significant_bool_report, corrected_p_values_array, alphacSidak, alphacBonf = multipletests(reported_p_values, alpha=0.05, method='fdr_bh', returnsorted=False) #returns 4 things: a boolean array contains True or False for each value meaning wether the value after correction compared to the given alpha is significant or not, an array of the values after correction, a single for corrected alpha for Sidak method, a single value for corrected alpha for Bonferroni method 
         corrected_p_values_list = corrected_p_values_array.tolist()
@@ -774,7 +787,7 @@ def get_number_of_mutations_per_sample_list_and_write_to_file(mutations_file, nu
     
     num_muts_per_sample_dict = {}  
     if not os.path.exists(numberofmutationspersample_output_file):
-        print "Counting number of mutations per sample from the initial mutation file"
+        print("Counting number of mutations per sample from the initial mutation file")
         with open(mutations_file, "r") as mutations_infile:
             mutations_line = mutations_infile.readline().strip().split('\t')
             while len(mutations_line)>index_sample_ids:
@@ -796,8 +809,7 @@ def get_number_of_mutations_per_sample_list_and_write_to_file(mutations_file, nu
                 num_muts_per_sample_dict[line.split('\t')[0].strip()] = int(line.split('\t')[1].strip()) # append sample id # append number of mutations in this sample id
     return num_muts_per_sample_dict
 
-'''
-'''
+
 def get_unique_muts_from_collection(mutations_file, unique_muts_file, sample_id_index=8, mut_type_index=6, prioritize_SNP_over_indel=True):
     
     muts_per_position_per_sample = {}
@@ -829,9 +841,9 @@ def get_unique_mutsmotifs_from_collection(mutations_file, unique_muts_file, samp
             k = '::'.join([l[0], l[1], l[sample_id_index], l[motif_start_index], l[motif_end_index], l[motif_name_index]])
             try:
                 muts_per_position_per_sample[k].append("duplicate")
-                print muts_per_position_per_sample[k]
+                print(muts_per_position_per_sample[k])
                 muts_per_position_per_sample[k].append(l)
-                print muts_per_position_per_sample[k]
+                print(muts_per_position_per_sample[k])
                 sys.exit(0)
             except KeyError:
                 muts_per_position_per_sample[k] = l
@@ -880,7 +892,7 @@ def calculate_pval_for_genesets(geneset_enrichement_results_input_file, index_to
     elif len(calculated_pvalues)==1:
         corrected_p_values_list = calculated_pvalues
     else:
-        print "No genesets are reported, check the filters, params and gene names"
+        print("No genesets are reported, check the filters, params and gene names")
     number_of_sig_enriched_genesets = 0
     for l in range(0, len(inlines)):
         outfile.write(sep.join(inlines[l].strip().split(sep)) + sep + str(calculated_pvalues[l]) + sep + str(corrected_p_values_list[l]) +"\n")
@@ -893,7 +905,7 @@ def calculate_pval_for_genesets(geneset_enrichement_results_input_file, index_to
                     if keyword.upper() in inlines[l].split(sep)[0].upper() or keyword.upper() in inlines[l].split(sep)[1].upper(): #if the given keyword(s) was found in the gene set name or discreption then report 
                         outfile_sig_keywords.write(sep.join(inlines[l].strip().split()) + sep + str(calculated_pvalues[l]) + sep + str(corrected_p_values_list[l]) + "\n")
                         break
-    print "Number of significantly enriched genesets: "  + str(number_of_sig_enriched_genesets)
+    print("Number of significantly enriched genesets: "  + str(number_of_sig_enriched_genesets))
     return calculated_p_value_out_file, calculated_p_value_sig_out_file, calculated_p_value_sig_out_file_keywords
     
 def find_overlap_genesets_genelist(geneset_input_file, genelist_input_file, enriched_genes_output_file, total_number_of_genes_in_the_universe=27000, 
@@ -907,8 +919,8 @@ def find_overlap_genesets_genelist(geneset_input_file, genelist_input_file, enri
     enriched_genes_outfile = open(enriched_genes_output_file, 'w')
     
     #read the gene names from the gene input list
-    print "Number of genes provided for search: " + str(len(genelist_lines))
-    print "Total number of genesets to try: " + str(len(genesets_lines))
+    print("Number of genes provided for search: " + str(len(genelist_lines)))
+    print("Total number of genesets to try: " + str(len(genesets_lines)))
     
     number_of_tried_genesets = 0
     if header_line:
@@ -951,68 +963,3 @@ def find_overlap_genesets_genelist(geneset_input_file, genelist_input_file, enri
         os.remove(enriched_genes_output_file)    
 
     return calculated_p_value_sig_out_file
-
-if __name__ == '__main__':
-    
-    get_unique_muts_from_collection(mutations_file=sys.argv[1], unique_muts_file=sys.argv[2])
-    get_unique_mutsmotifs_from_collection(mutations_file=sys.argv[3], unique_muts_file=sys.argv[4])
-    
-    '''distance_to_merge = 20
-    mut_sig_threshold = 0.05
-    observed_input_file = 'pancanmuts/observed_annotated.bed'
-    #observed_input_file = 'pancanmuts/o'
-    #simulated_input_files = ['pancanmuts/s', 'pancanmuts/b', 'pancanmuts/d']
-    simulated_input_files = ['pancanmuts/simulatedsets/broad_annotated.bed', 
-                             'pancanmuts/simulatedsets/dkfz_annotated.bed', 
-                             'pancanmuts/simulatedsets/Sangerneutral_annotated.bed']
-    
-    output_extension = "_simulatedTFExprTFBindMotifBreaking03Filters"
-    combined_simulated_muts_output_file = "pancanmuts/combined_simulated_muts_unified"+output_extension
-    combined_simulated_muts_merged_output_file = "pancanmuts/combined_simulated_muts_unified_merged{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+output_extension
-    filter_cond = 'if((30>0 || $30~"nan")  && ($31>0 || $31~"nan") && $11>=0.3)'
-    merged_elements_statspvaluesonlysig = process_input_file(observed_input_file, simulated_input_files, combined_simulated_muts_output_file, combined_simulated_muts_merged_output_file, output_extension, distance_to_merge, filter_cond, mut_sig_threshold) 
-    print merged_elements_statspvaluesonlysig
-    '''
-    '''
-    output_extension = "_simulatedTFExprTFBindFilters"
-    combined_simulated_muts_output_file = "pancanmuts/combined_simulated_muts_unified"+output_extension
-    combined_simulated_muts_merged_output_file = "pancanmuts/combined_simulated_muts_unified_merged{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+output_extension
-    filter_cond = 'if((30>0 || $30~"nan")  && ($31>0 || $31~"nan"))'
-    merged_elements_statspvaluesonlysig = process_input_file(observed_input_file, simulated_input_files, combined_simulated_muts_output_file, combined_simulated_muts_merged_output_file, output_extension, distance_to_merge, filter_cond) 
-    print merged_elements_statspvaluesonlysig
-    
-    output_extension = "_simulatedTFExprFilters"
-    combined_simulated_muts_output_file = "pancanmuts/combined_simulated_muts_unified"+output_extension
-    combined_simulated_muts_merged_output_file = "pancanmuts/combined_simulated_muts_unified_merged{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+output_extension
-    filter_cond = 'if((30>0 || $30~"nan"))'
-    merged_elements_statspvaluesonlysig = process_input_file(observed_input_file, simulated_input_files, combined_simulated_muts_output_file, combined_simulated_muts_merged_output_file, output_extension, distance_to_merge, filter_cond) 
-    print merged_elements_statspvaluesonlysig
-    
-    output_extension = "_simulatedTFExprTFBindMotifBreaking02Filters"
-    combined_simulated_muts_output_file = "pancanmuts/combined_simulated_muts_unified"+output_extension
-    combined_simulated_muts_merged_output_file = "pancanmuts/combined_simulated_muts_unified_merged{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+output_extension
-    filter_cond = 'if((30>0 || $30~"nan")  && ($31>0 || $31~"nan") && $11>=0.2)'
-    merged_elements_statspvaluesonlysig = process_input_file(observed_input_file, simulated_input_files, combined_simulated_muts_output_file, combined_simulated_muts_merged_output_file, output_extension, distance_to_merge, filter_cond) 
-    print merged_elements_statspvaluesonlysig
-    
-    output_extension = "_simulatedTFExprTFBindMotifBreaking04Filters"
-    combined_simulated_muts_output_file = "pancanmuts/combined_simulated_muts_unified"+output_extension
-    combined_simulated_muts_merged_output_file = "pancanmuts/combined_simulated_muts_unified_merged{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+output_extension
-    filter_cond = 'if((30>0 || $30~"nan")  && ($31>0 || $31~"nan") && $11>=0.4)'
-    merged_elements_statspvaluesonlysig = process_input_file(observed_input_file, simulated_input_files, combined_simulated_muts_output_file, combined_simulated_muts_merged_output_file, output_extension, distance_to_merge, filter_cond) 
-    print merged_elements_statspvaluesonlysig
-    
-    simulated_input_files = ['pancanmuts/simulatedsets/shuffledseed100_observed_annotated.bed9', 
-                             'pancanmuts/simulatedsets/shuffledseed200_observed_annotated.bed9']#'pancanmuts/simulatedsets/shuffledseed300_observed_annotated.bed9'
-    
-    output_extension = "_shuffledTFExprTFBindFilters"
-    combined_simulated_muts_output_file = "pancanmuts/combined_simulated_muts_unified"+output_extension
-    combined_simulated_muts_merged_output_file = "pancanmuts/combined_simulated_muts_unified_merged{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+output_extension
-    filter_cond = 'if((30>0 || $30~"nan")  && ($31>0 || $31~"nan"))'
-    merged_elements_statspvaluesonlysig = process_input_file(observed_input_file, simulated_input_files, combined_simulated_muts_output_file, combined_simulated_muts_merged_output_file, output_extension, distance_to_merge, filter_cond) 
-    print merged_elements_statspvaluesonlysig
-    '''
-    #ovcombined, ov, ovc, ovp = get_scores(annotated_mutations_grouped_file=annotated_mutations_grouped_file_bed12)
-    #stat_plot_scores(muts_file, ovcombined, ov, ovc, ovp)
-    
-        
