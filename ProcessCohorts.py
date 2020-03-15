@@ -371,11 +371,14 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                        distance_to_merge, merged_mut_sig_threshold,
                        local_domain_window, chr_lengths_file, sig_elements_output_file, 
                        sig_tfs_file, sig_tfpos_file)
-        generated_sig_merged_element_files.append(sig_elements_output_file)
-        sig_tfs_files.append(sig_tfs_file)
-        sig_tfpos_files.append(sig_tfpos_file)
-        print("Processed:" + sig_elements_output_file)
-    
+        if os.path.exists(sig_elements_output_file) and os.path.exists(sig_tfs_file) and os.path.exists(sig_tfpos_file):
+            generated_sig_merged_element_files.append(sig_elements_output_file)
+            sig_tfs_files.append(sig_tfs_file)
+            sig_tfpos_files.append(sig_tfpos_file)
+            print("Generated for cohort:" + cohort + sig_elements_output_file)
+        else:
+            print("Failed to Generate for cohort:" + cohort + sig_elements_output_file)
+        
     if num_cores>1:
         p.close()
         p.join()

@@ -459,11 +459,7 @@ def aggregate_results(regions_input_file):
             
     return aggregated_lines, summaries_dict
 
-def generate_genesets_genes_dict(geneset_files):
-    
-    cosmic_genes_file = "analysis/cancer_gene_census.csv"
-    kegg_pathways_file = "analysis/kegg_pathways_fromdb_madeAgenesetPerPathway.gmt"
-    pcawg_drivers_file = "analysis/PCAWG_cancer_drivers_fulllist.txt"
+def generate_genesets_genes_dict(cosmic_genes_file, kegg_pathways_file, pcawg_drivers_file):
     
     genesets_genes_dict = {'KCP':[], 'COSMIC': [], 'PCD': []}
     with open(cosmic_genes_file, 'r') as cosmic_genes_ifile:
@@ -679,8 +675,9 @@ def get_features_from_gencode(gencode_input_file, gencode_output_file):
 def getSigElements(generated_sig_merged_element_files, n, max_dist, window, output_dir,
                    annotated_motifs, tracks_dir, observed_mutations_all, chr_lengths_file,
                    genes_input_file, gencode_input_file, 
-                   cell_names_to_use, tissue_cell_mappings_file
-    ):
+                   cell_names_to_use, tissue_cell_mappings_file,
+                   cosmic_genes_file, kegg_pathways_file, pcawg_drivers_file
+                   ):
     
     upstream=True
     downstream=True
@@ -727,7 +724,7 @@ def getSigElements(generated_sig_merged_element_files, n, max_dist, window, outp
         muts_overlapping_combined_file_all_annotated = get_annotated_muts(
             muts_input_file=muts_overlapping_combined_file_all, tracks_dir=tracks_dir, 
             muts_out=muts_overlapping_combined_file_all_annotated, 
-            cell_names_to_use, tissue_cell_mappings_file,
+            cell_names_to_use=cell_names_to_use, tissue_cell_mappings_file=tissue_cell_mappings_file,
             filter_on_dnase1_or_tf_peak=False)
         #sort and merge the file
         combined_mut_grouped_file_with_annotated_muts = combined_mut_grouped_file + "_withannotatedmuts"
@@ -808,8 +805,7 @@ def getSigElements(generated_sig_merged_element_files, n, max_dist, window, outp
                         )
     os.remove(extended_output_file)
     
-    geneset_files = ['']
-    genesets_genes_dict = generate_genesets_genes_dict(geneset_files)
+    genesets_genes_dict = generate_genesets_genes_dict(cosmic_genes_file, kegg_pathways_file, pcawg_drivers_file)
     enrichment_regions_genes_dict, genes_all, genes_all_per_side, enriched_genesets_dict_overall, enriched_genesets_dict = get_enriched_gene_geneset(
                                                                                                                         regions_genes_dict, genesets_genes_dict)
     summary_dicts_to_write = {"All genes:": genes_all, "All genes per dir:": genes_all_per_side ,"Enriched genes:": enriched_genesets_dict_overall, "Enriched genes per dir:": enriched_genesets_dict}
@@ -982,9 +978,11 @@ def parse_args():
     parser.add_argument('--tracks_dir', help='')
     parser.add_argument('--genes_input_file', help='')
     parser.add_argument('--gencode_input_file', help='')
-    parser.add_argument('--geneset_input_file', help='')
     parser.add_argument('--cell_names_to_use', help='')
     parser.add_argument('--tissue_cell_mappings_file', help='')
+    parser.add_argument('--kegg_pathways_file', help='')
+    parser.add_argument('--cosmic_genes_file', help='')
+    parser.add_argument('--pcawg_drivers_file', help='')
     
     return parser.parse_args(sys.argv[1:])
     
@@ -992,12 +990,14 @@ if __name__ == '__main__':
     
     args = parse_args()
     
+    print("Generated significant elements")
     generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
         args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
         args.simulated_input_dir, args.chr_lengths_file, args.num_cores,
         args.sig_thresh_fdr, args.sig_thresh_pval, args.sim_sig_thresh_pval,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
         args.local_domain_window)
+    print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
     
     '''
     cohort_names_input = sys.argv[1]#'meta_tumor_cohorts_v2_22May2017/cohorts_to_run_definedPCAWG'
@@ -1021,7 +1021,8 @@ if __name__ == '__main__':
         generated_sig_merged_element_files, args.n, args.max_dist, args.window, 
         args.output_dir, args.observed_input_file, args.tracks_dir, 
         args.observed_mutations_all, args.chr_lengths_file, args.genes_input_file, 
-        args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file
+        args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
+        args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file
         )
     combine_sig_TFs(sig_tfs_files, output_dir=args.output_dir)
     combine_sig_TFs(sig_tfpos_files, tf_label='TF Positions', output_dir=args.output_dir)
@@ -1032,7 +1033,7 @@ if __name__ == '__main__':
         skip_exon_elements=False)
     
     calculated_p_value_sig_out_file = find_overlap_genesets_genelist(
-        args.geneset_input_file, elements_output_file, 
+        args.kegg_pathways_file, elements_output_file, 
         elements_output_file+'_pathways.tsv', 
         total_number_of_genes_in_the_universe=20278, 
         min_number_of_genes_be_enriched_for_geneset_to_be_reported = 10, 
