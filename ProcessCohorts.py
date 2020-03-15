@@ -413,6 +413,9 @@ if __name__ == '__main__':
     
     args = parse_args()
     
+    if not os.path.exists(args.mutations_cohorts_outdir):
+        os.makedirs(args.mutations_cohorts_outdir)
+    
     generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
         args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
         args.simulated_input_dir, args.chr_lengths_file, args.num_cores,

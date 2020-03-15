@@ -990,6 +990,12 @@ if __name__ == '__main__':
     
     args = parse_args()
     
+    if not os.path.exists(args.mutations_cohorts_outdir):
+        os.makedirs(args.mutations_cohorts_outdir)
+    
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
+    
     print("Generated significant elements")
     generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
         args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
@@ -1013,9 +1019,6 @@ if __name__ == '__main__':
 
     #sig_tfpos_files = [mutation_input_dir+'/'+x for x in os.listdir(mutation_input_dir) if 'sigTFpos_0.05' in x]    
     #print(sig_tfpos_files)
-    
-    if not os.path.exists(args.output_dir):
-        os.makedirs(args.output_dir)
     
     aggregated_output_file = getSigElements(
         generated_sig_merged_element_files, args.n, args.max_dist, args.window, 
