@@ -42,9 +42,9 @@ def generate_extended_regions(regions, extended_output_file, chr_lengths, window
     return extended_output_file
 
 def get_nearby_genes(regions_input_file, genes_input_file,
-                     gene_types_to_consider = ['protein_coding', 'RNA'], gene_status_to_consider = ['KNOWN'],
-                     n=3, upstream=True, downstream=True, overlapping = True, max_dist = 100000,
-                     genesets_to_check_for_overlap_input_files=[]):
+                     gene_types_to_consider = ['protein_coding', 'RNA'], 
+                     gene_status_to_consider = ['KNOWN'], n=3, 
+                     upstream=True, downstream=True, overlapping = True, max_dist = 100000):
     
     regions_input_file_intersect_genes = regions_input_file+"intersect_genes"
     BedTool(regions_input_file).intersect(BedTool(genes_input_file), wo=True).saveas(regions_input_file_intersect_genes)#groupby(g=4, c=[], o=[])
@@ -676,7 +676,11 @@ def get_features_from_gencode(gencode_input_file, gencode_output_file):
                 
     return gencode_output_file
     
-def getSigElements(generated_sig_merged_element_files, n, max_dist, window, output_dir):
+def getSigElements(generated_sig_merged_element_files, n, max_dist, window, output_dir,
+                   annotated_motifs, tracks_dir, observed_mutations_all, chr_lengths_file,
+                   genes_input_file, gencode_input_file, 
+                   cell_names_to_use, tissue_cell_mappings_file
+    ):
     
     upstream=True
     downstream=True
@@ -694,9 +698,6 @@ def getSigElements(generated_sig_merged_element_files, n, max_dist, window, outp
         return aggregated_output_file
     
     print(generated_sig_merged_element_files)
-    annotated_motifs = '/home/huum/projs/pancan12Feb2020/mutations_files/observed_annotated22May2017.bed9'
-    tracks_dir = '/home/huum/projs/pancan12Feb2020/GeneExp_datafiles/chromatin_marks_all_cells_onlynarrowpeaks'
-    observed_mutations_all = '/home/huum/projs/pancan12Feb2020/mutations_files/observed_annotated_agreement_22May2017.bed9'#_notInExonsProteinCodingProcessedTranscriptIG.bed9'#'mutations_files/observedunique.bed9'
     #regions_input_file = output_dir+'/combined_onlysig_merged_intersectedmuts_grouped_recurrent.col12'
     combined_mut_grouped_file = output_dir+'/combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
     if not os.path.exists(combined_mut_grouped_file):
@@ -723,7 +724,11 @@ def getSigElements(generated_sig_merged_element_files, n, max_dist, window, outp
         BedTool(observed_mutations_all).intersect(BedTool(combined_file_all_merged)).saveas(muts_overlapping_combined_file_all)
         #annotat the overlapping muts
         muts_overlapping_combined_file_all_annotated = muts_overlapping_combined_file_all+'_annotated'
-        muts_overlapping_combined_file_all_annotated = get_annotated_muts(muts_input_file=muts_overlapping_combined_file_all, tracks_dir=tracks_dir, muts_out=muts_overlapping_combined_file_all_annotated, filter_on_dnase1_or_tf_peak=False)
+        muts_overlapping_combined_file_all_annotated = get_annotated_muts(
+            muts_input_file=muts_overlapping_combined_file_all, tracks_dir=tracks_dir, 
+            muts_out=muts_overlapping_combined_file_all_annotated, 
+            cell_names_to_use, tissue_cell_mappings_file,
+            filter_on_dnase1_or_tf_peak=False)
         #sort and merge the file
         combined_mut_grouped_file_with_annotated_muts = combined_mut_grouped_file + "_withannotatedmuts"
         print("Combining results")
@@ -778,9 +783,6 @@ def getSigElements(generated_sig_merged_element_files, n, max_dist, window, outp
                      'Feature_type'
                      ]
     
-    chr_lengths_file = '/home/huum/projs/pancan12Feb2020/cancer_datafiles/chr_lengths_hg19.txt'
-    genes_input_file = '/home/huum/projs/pancan12Feb2020/GeneExp_datafiles/gencode.v19.annotation.gff3_onlygenes.bed'
-    genocode_genes_segments_input_file = '/home/huum/projs/pancan12Feb2020/GeneExp_datafiles/gencode.v19.annotation.gff3'
     
     #gene_types_to_consider = ['protein_coding', 'lincRNA', 'miRNA', 'snRNA', 'snoRNA', 'rRNA', 'Mt_tRNA', 'Mt_rRNA', 'antisense', 'sense_intronic', 'sense_overlapping', '3prime_overlapping_ncrna']
     gene_types_to_consider = ['protein_coding', 'lincRNA',
@@ -799,9 +801,11 @@ def getSigElements(generated_sig_merged_element_files, n, max_dist, window, outp
     
     regions_genes_dict = get_nearby_genes(regions_input_file=extended_output_file, 
                         genes_input_file = genes_input_file, 
-                        gene_types_to_consider = gene_types_to_consider, gene_status_to_consider = gene_status_to_consider,
-                        n=n, upstream=upstream, downstream=downstream, overlapping = overlapping, max_dist = max_dist,
-                        genesets_to_check_for_overlap_input_files=[])
+                        gene_types_to_consider = gene_types_to_consider, 
+                        gene_status_to_consider = gene_status_to_consider, 
+                        n=n, upstream=upstream, downstream=downstream, 
+                        overlapping = overlapping, max_dist = max_dist,
+                        )
     os.remove(extended_output_file)
     
     geneset_files = ['']
@@ -811,9 +815,9 @@ def getSigElements(generated_sig_merged_element_files, n, max_dist, window, outp
     summary_dicts_to_write = {"All genes:": genes_all, "All genes per dir:": genes_all_per_side ,"Enriched genes:": enriched_genesets_dict_overall, "Enriched genes per dir:": enriched_genesets_dict}
     summary_info_to_write = {'Element Info': summaries_dict}
     
-    gencode_output_file="/home/huum/projs/pancan12Feb2020/GeneExp_datafiles/gencode.v19.annotation.gff3_extractedinfo"
+    gencode_output_file = gencode_input_file + "_extractedinfo"
     if not os.path.exists(gencode_output_file):
-        get_features_from_gencode(gencode_input_file=="/home/huum/projs/pancan12Feb2020/GeneExp_datafiles/gencode.v19.annotation.gff3", gencode_output_file=gencode_output_file)
+        get_features_from_gencode(gencode_input_file, gencode_output_file)
     gene_types_to_consider = ['protein_coding',
                               'IG_V_gene', 'IG_C_gene', 'IG_J_gene', 'IG_D_gene', 
                               'TR_V_gene', 'TR_C_gene', 'TR_J_gene', 'TR_D_gene', 
@@ -974,6 +978,14 @@ def parse_args():
     
     parser.add_argument('--num_cores', type=int, default=10, help='')
     
+    parser.add_argument('--observed_mutations_all', help='')
+    parser.add_argument('--tracks_dir', help='')
+    parser.add_argument('--genes_input_file', help='')
+    parser.add_argument('--gencode_input_file', help='')
+    parser.add_argument('--geneset_input_file', help='')
+    parser.add_argument('--cell_names_to_use', help='')
+    parser.add_argument('--tissue_cell_mappings_file', help='')
+    
     return parser.parse_args(sys.argv[1:])
     
 if __name__ == '__main__':
@@ -1004,12 +1016,15 @@ if __name__ == '__main__':
     
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
+    
     aggregated_output_file = getSigElements(
-        generated_sig_merged_element_files, args.n, args.max_dist, args.window, args.output_dir)
+        generated_sig_merged_element_files, args.n, args.max_dist, args.window, 
+        args.output_dir, args.observed_input_file, args.tracks_dir, 
+        args.observed_mutations_all, args.chr_lengths_file, args.genes_input_file, 
+        args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file
+        )
     combine_sig_TFs(sig_tfs_files, output_dir=args.output_dir)
     combine_sig_TFs(sig_tfpos_files, tf_label='TF Positions', output_dir=args.output_dir)
-    
-    geneset_input_file = '/home/huum/projs/pancan12Feb2020/GeneExp_datafiles/kegg_pathways_fromdb_madeAgenesetPerPathway.gmt'
     
     elements_output_file = get_gene_enrichments(
         elements_input_file=aggregated_output_file, 
@@ -1017,7 +1032,7 @@ if __name__ == '__main__':
         skip_exon_elements=False)
     
     calculated_p_value_sig_out_file = find_overlap_genesets_genelist(
-        geneset_input_file, elements_output_file, 
+        args.geneset_input_file, elements_output_file, 
         elements_output_file+'_pathways.tsv', 
         total_number_of_genes_in_the_universe=20278, 
         min_number_of_genes_be_enriched_for_geneset_to_be_reported = 10, 

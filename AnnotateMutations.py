@@ -180,9 +180,9 @@ def get_tissue_cell_mappings(tissue_cell_mappings_file, matching_cell_name_repre
     return tissue_cell_assays
 
 
-def get_annotated_muts(muts_input_file, tracks_dir, muts_out, filter_on_dnase1_or_tf_peak=False):
-    cell_names_to_use = '/home/huum/projs/pancancer_analysis/datafiles/CellNamesDict'
-    tissue_cell_mappings_file='/home/huum/projs/pancancer_analysis/datafiles/TissueCellMatches'
+def get_annotated_muts(muts_input_file, tracks_dir, muts_out, 
+                       cell_names_to_use, tissue_cell_mappings_file,
+                       filter_on_dnase1_or_tf_peak=False):
     representative_cell_name_matchings_dict, matching_cell_name_representative_dict = retreive_key_values_from_dict_file(cell_names_to_use)
     tissue_cell_assays = get_tissue_cell_mappings(tissue_cell_mappings_file=tissue_cell_mappings_file,
                                                   matching_cell_name_representative_dict=matching_cell_name_representative_dict, 

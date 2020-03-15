@@ -908,10 +908,17 @@ def calculate_pval_for_genesets(geneset_enrichement_results_input_file, index_to
     print("Number of significantly enriched genesets: "  + str(number_of_sig_enriched_genesets))
     return calculated_p_value_out_file, calculated_p_value_sig_out_file, calculated_p_value_sig_out_file_keywords
     
-def find_overlap_genesets_genelist(geneset_input_file, genelist_input_file, enriched_genes_output_file, total_number_of_genes_in_the_universe=27000, 
-                                   min_number_of_genes_be_enriched_for_geneset_to_be_reported = 10, index_gene_name=0, index_gene_names_start=3, 
-                                   keywords_to_filter_out_with=[], only_keep_the_sig_file = True, min_number_of_genes_in_geneset_to_consider_the_geneset = 10, header_line = False,
+def find_overlap_genesets_genelist(geneset_input_file, genelist_input_file, 
+                                   enriched_genes_output_file, 
+                                   total_number_of_genes_in_the_universe=27000, 
+                                   min_number_of_genes_be_enriched_for_geneset_to_be_reported = 10, 
+                                   index_gene_name=0, index_gene_names_start=3, 
+                                   keywords_to_filter_out_with=[], 
+                                   only_keep_the_sig_file = True, 
+                                   min_number_of_genes_in_geneset_to_consider_the_geneset = 10, 
+                                   header_line = False,
                                    sample_ids_given=False):
+    
     with open(geneset_input_file, 'r') as ifile:
         genesets_lines = ifile.readlines()
     with open(genelist_input_file, 'r') as ifile:
