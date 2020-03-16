@@ -960,12 +960,13 @@ def parse_args():
     parser.add_argument('-m', '--observed_input_file', default='', help='')
     parser.add_argument('-s', '--simulated_input_dir', default='', help='')
     parser.add_argument('-l', '--chr_lengths_file', default='', help='')
-    parser.add_argument('--sig_thresh_pval', type=float, default=0.05, help='P-value threshold on mutation score level')
-    parser.add_argument('--sig_thresh_fdr', type=float, default=0.05, help='FDR threshold on mutation score level')
-    parser.add_argument('--sim_sig_thresh_pval', type=float, default=1.0, help='P-value threshold for simulated mutations on score level')
+    parser.add_argument('--sig_thresh', type=float, default=0.05, help='Sig level threshold on mutation score level')
+    parser.add_argument('--sim_sig_thresh', type=float, default=1.0, help='Sig level threshold for simulated mutations on score level')
     parser.add_argument('--merged_mut_sig_threshold', type=float, default=0.05, help='P-value threshold for simulated mutations on score level')
     parser.add_argument('--distance_to_merge', type=int, default=200, help='Window size (number of base-pairs) to merge nearby mutations within')
     parser.add_argument('--local_domain_window', type=int, default=25000, help='Window width for capturing simulated elements to compare mutation frequency ')
+    parser.add_argument('--filter_on_qval', action='store_const', const=True, help='Filter on FDR (adjusted p-values), if the flag is missing it would filter on p-value')
+    parser.add_argument('--use_per_tf_sig', action='store_const', const=True, help='When the flag is present it will use avg and std scores from muts in the corresponding TF-motifs otherwise it would use an overal score avg and std that is extracted from all TFs.')
     
     parser.add_argument('--n', type=int, default=0, help='n')
     parser.add_argument('--max_dist', type=int, default=500000, help='max_dist')
@@ -1000,7 +1001,7 @@ if __name__ == '__main__':
     generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
         args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
         args.simulated_input_dir, args.chr_lengths_file, args.num_cores,
-        args.sig_thresh_fdr, args.sig_thresh_pval, args.sim_sig_thresh_pval,  
+        args.filter_on_qval, args.use_per_tf_sig, args.sig_thresh, args.sim_sig_thresh,
         args.distance_to_merge, args.merged_mut_sig_threshold,
         args.local_domain_window)
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))

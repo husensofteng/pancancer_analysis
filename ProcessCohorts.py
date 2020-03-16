@@ -117,7 +117,7 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
                             output_extension, distance_to_merge, 
                             merged_mut_sig_threshold, local_domain_window, 
                             chr_lengths_file, sig_elements_output_file, 
-                            simulated_mut_motif_sig_val):
+                            sim_sig_thresh):
     
     combined_simulated_muts_merged_output_file = cohort_full_name + output_extension + '_unified_combined' + '_merged{distance_to_merge}bp'.format(distance_to_merge=distance_to_merge) + '_combined'
     
@@ -155,8 +155,8 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
     '''Calcuate pval for each element by comparing its score to 
        the std and mean of scores in all elements across the genome
     '''
-    merged_elements_statspvalues = merged_muts_output_file+"_statspvaluesSimSig" + str(simulated_mut_motif_sig_val)
-    merged_elements_statspvaluesonlysig = merged_muts_output_file+"_statspvaluesSimSig{simulated_mut_motif_sig_val}onlysig{merged_mut_sig_threshold}".format(simulated_mut_motif_sig_val=simulated_mut_motif_sig_val, merged_mut_sig_threshold=merged_mut_sig_threshold)
+    merged_elements_statspvalues = merged_muts_output_file+"_statspvaluesSimSig" + str(sim_sig_thresh)
+    merged_elements_statspvaluesonlysig = merged_muts_output_file+"_statspvaluesSimSig{simulated_mut_motif_sig_val}onlysig{merged_mut_sig_threshold}".format(simulated_mut_motif_sig_val=sim_sig_thresh, merged_mut_sig_threshold=merged_mut_sig_threshold)
     Utilities.assess_stat_elements(observed_input_file=merged_muts_output_file, 
                                    simulated_input_file=combined_simulated_muts_merged_output_file, 
                                    merged_elements_statspvalues=merged_elements_statspvalues, 
@@ -187,8 +187,8 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
 
 def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, 
                f_score_index, motif_breaking_score_index, 
-               sig_thresh_fdr, sig_thresh_pval, 
-               sim_output_extension, sim_sig_level_per_TF_thresh,
+               filter_on_qval, use_per_tf_sig, sig_thresh, sim_sig_thresh,
+               sim_output_extension,
                filter_cond, operation_on_unify, output_extension, 
                distance_to_merge, merged_mut_sig_threshold,
                local_domain_window, chr_lengths_file,
@@ -200,10 +200,6 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index,
         cohort_full_name = '/'.join(created_cohorts[cohort][0].split('/')[0:-1]) + "/" + created_cohorts[cohort][0].split('/')[-1].split('_')[0]
     
     print('Processing: ', cohort_full_name)
-    
-    filter_on_qval = False
-    if sig_thresh_fdr<1.0:
-        filter_on_qval = True
     
     '''Calculate std, nummotifs and mean of the scores per TF-motif in the simulation sets
        The first file in each created_cohorts[cohort] is the observed set, so skip it
@@ -225,14 +221,16 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index,
         dict_simulated_mean_sd_per_TF_motif=dict_simulated_mean_sd_per_TF_motif, 
         annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), 
         annoted_output_file_extension_onlysig="_rand{}setsTFsigQval{}".format(
-            len(mutation_input_files)-1, sig_thresh_fdr),
+            len(mutation_input_files)-1, sig_thresh),
         motif_name_index = motif_name_index, f_score_index = f_score_index, 
-        motif_breaking_score_index = motif_breaking_score_index, filter_on_qval=filter_on_qval, 
-        sig_thresh_fdr = sig_thresh_fdr, sig_thresh_pval=sig_thresh_pval, 
+        motif_breaking_score_index = motif_breaking_score_index, 
+        filter_on_qval=filter_on_qval, use_per_tf_sig=use_per_tf_sig, 
+        sig_thresh=sig_thresh,
         filter_on_signal = True, dnase_index = 24, fantom_index = 25, num_other_tfs_index = 27)
     sig_muts_per_tf_mutation_input_files = [muts_sig_per_TF_file]
     
-    'repeat the same process to keep only sig muts from the simulated with pval<0.5'
+    '''repeat the same process to keep only sig muts from the simulated, but use sim_sig_thresh
+    if sim_sig_thresh >=1.0 no sig is performed and all muts are written to the output'''
     for mutations_input_file in created_cohorts[cohort][1:]: 
         muts_sig_per_TF_file = Utilities.get_muts_sig_per_TF(
             annoted_input_file=mutations_input_file, 
@@ -241,8 +239,9 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index,
             annoted_output_file_extension_onlysig=sim_output_extension,
             motif_name_index = motif_name_index, f_score_index = f_score_index, 
             motif_breaking_score_index = motif_breaking_score_index,
-            filter_on_qval=filter_on_qval, sig_thresh_fdr = sig_thresh_fdr, 
-            sig_thresh_pval=sim_sig_level_per_TF_thresh)
+            filter_on_qval=filter_on_qval, use_per_tf_sig=use_per_tf_sig, 
+            sig_thresh=sim_sig_thresh
+            )
         sig_muts_per_tf_mutation_input_files.append(muts_sig_per_TF_file)
     
     '''Based on the mutations that have a significant score (specify if qval should be used)
@@ -252,7 +251,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index,
     '''
     sig_tfs_file, sig_tfpos_file = Utilities.get_tf_pval(
         cohort, sig_muts_per_tf_mutation_input_files, motif_name_index, 
-        f_score_index, motif_breaking_score_index, sig_thresh_pval, 
+        f_score_index, motif_breaking_score_index, sig_thresh, 
         filter_cond, fsep='\t', sig_tfs_file=sig_tfs_file, sig_tfpos_file=sig_tfpos_file, 
         filter_on_qval=filter_on_qval, filter_on_signal = True, 
         dnase_index = 24, fantom_index = 25, num_other_tfs_index = 27)
@@ -285,14 +284,15 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index,
                             sim_output_extension+output_extension, 
                             distance_to_merge, merged_mut_sig_threshold, 
                             local_domain_window, chr_lengths_file, 
-                            sig_elements_output_file, sim_sig_level_per_TF_thresh)
+                            sig_elements_output_file, sim_sig_thresh)
     
     return sig_elements_output_file, sig_tfs_file, sig_tfpos_file
     
 def process_cohorts(cohort_names_input, mutations_cohorts_dir, 
                     observed_input_file, simulated_input_dir,
-                    chr_lengths_file, num_cores, sig_thresh_fdr,
-                    sig_thresh_pval, sim_sig_thresh_pval, distance_to_merge, 
+                    chr_lengths_file, num_cores,
+                    filter_on_qval, use_per_tf_sig, sig_thresh, sim_sig_thresh_pval,
+                    distance_to_merge, 
                     merged_mut_sig_threshold, local_domain_window):
     
     simulated_input_files = [simulated_input_dir+'/'+x for x in os.listdir(simulated_input_dir) if '_annotated.bed9' in x]
@@ -343,10 +343,10 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                                        mutations_cohorts_dir, stats_ext,
                                        num_cores)
     for cohort in created_cohorts.keys():
-        sig_elements_output_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh_pval) + output_extension + "_groupedbymut"+"withmotifinfo"+"_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+"_statspvaluesSimSig"+str(sim_sig_thresh_pval)+"_statspvalueslocalw{local_domain_window}onlysig{merged_mut_sig_threshold}".format(
+        sig_elements_output_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + output_extension + "_groupedbymut"+"withmotifinfo"+"_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+"_statspvaluesSimSig"+str(sim_sig_thresh_pval)+"_statspvalueslocalw{local_domain_window}onlysig{merged_mut_sig_threshold}".format(
             local_domain_window=local_domain_window, merged_mut_sig_threshold=merged_mut_sig_threshold)
-        sig_tfs_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh_pval) + '_sigTFs_{}'.format(sig_thresh_pval) 
-        sig_tfpos_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh_pval) + '_sigTFpos_{}'.format(sig_thresh_pval)
+        sig_tfs_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + '_sigTFs_{}'.format(sig_thresh) 
+        sig_tfpos_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + '_sigTFpos_{}'.format(sig_thresh)
         if os.path.exists(sig_elements_output_file) and os.path.exists(sig_tfs_file) and os.path.exists(sig_tfpos_file):
             generated_sig_merged_element_files.append(sig_elements_output_file)
             sig_tfs_files.append(sig_tfs_file)
@@ -360,8 +360,8 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
             p.apply_async(run_cohort, args=(cohort, created_cohorts, 
                     mutation_input_files, motif_name_index, 
                     f_score_index, motif_breaking_score_index, 
-                    sig_thresh_fdr, sig_thresh_pval, 
-                    sim_output_extension, sim_sig_thresh_pval,
+                    filter_on_qval, use_per_tf_sig, sig_thresh, sim_sig_thresh_pval,
+                    sim_output_extension,
                     filter_cond, operation_on_unify, output_extension, 
                     distance_to_merge, merged_mut_sig_threshold,
                local_domain_window, chr_lengths_file, sig_elements_output_file, 
@@ -369,8 +369,8 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
         else:
             run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, 
                        f_score_index, motif_breaking_score_index,
-                       sig_thresh_fdr, sig_thresh_pval, 
-                       sim_output_extension, sim_sig_thresh_pval,
+                       filter_on_qval, use_per_tf_sig, sig_thresh, sim_sig_thresh_pval,
+                       sim_output_extension,
                        filter_cond, operation_on_unify, output_extension, 
                        distance_to_merge, merged_mut_sig_threshold,
                        local_domain_window, chr_lengths_file, sig_elements_output_file, 
@@ -404,15 +404,14 @@ def parse_args():
     parser.add_argument('-m', '--observed_input_file', default='', help='')
     parser.add_argument('-s', '--simulated_input_dir', default='', help='')
     parser.add_argument('-l', '--chr_lengths_file', default='', help='')
-    parser.add_argument('--sig_thresh_pval', type=float, default=0.05, help='P-value threshold on mutation score level')
-    parser.add_argument('--sig_thresh_fdr', type=float, default=0.05, help='FDR threshold on mutation score level')
-    parser.add_argument('--sim_sig_thresh_pval', type=float, default=1.0, help='P-value threshold for simulated mutations on score level')
+    parser.add_argument('--sig_thresh', type=float, default=0.05, help='Sig level threshold on mutation score level')
+    parser.add_argument('--sim_sig_thresh', type=float, default=1.0, help='Sig level threshold for simulated mutations on score level')
     parser.add_argument('--merged_mut_sig_threshold', type=float, default=0.05, help='P-value threshold for simulated mutations on score level')
     parser.add_argument('--distance_to_merge', type=int, default=200, help='Window size (number of base-pairs) to merge nearby mutations within')
     parser.add_argument('--local_domain_window', type=int, default=25000, help='Window width for capturing simulated elements to compare mutation frequency ')
-    
-    parser.add_argument('--num_cores', type=int, default=10, help='')
-    
+    parser.add_argument('--filter_on_qval', action='store_const', const=True, help='Filter on FDR (adjusted p-values), if the flag is missing it would filter on p-value')
+    parser.add_argument('--use_per_tf_sig', action='store_const', const=True, help='When the flag is present it will use avg and std scores from muts in the corresponding TF-motifs otherwise it would use an overal score avg and std that is extracted from all TFs.')
+    parser.add_argument('--num_cores', type=int, default=10, help='number of cores (cpus) to use in parallel')
     
     return parser.parse_args(sys.argv[1:])
     
@@ -426,7 +425,7 @@ if __name__ == '__main__':
     generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
         args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
         args.simulated_input_dir, args.chr_lengths_file, args.num_cores,
-        args.sig_thresh_fdr, args.sig_thresh_pval, args.sim_sig_thresh_pval,  
+        args.filter_on_qval, args.use_per_tf_sig, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
         args.local_domain_window)
     #print("Generated Sig. Element Sets: \n", '\n'.join(generated_sig_merged_element_files))
