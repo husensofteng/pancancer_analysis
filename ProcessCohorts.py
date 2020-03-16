@@ -364,7 +364,8 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                     sim_output_extension, sim_sig_thresh_pval,
                     filter_cond, operation_on_unify, output_extension, 
                     distance_to_merge, merged_mut_sig_threshold,
-               local_domain_window, chr_lengths_file, sig_elements_output_file, sig_tfs_file, sig_tfpos_file))#, callback=generated_sig_merged_element_files.append)
+               local_domain_window, chr_lengths_file, sig_elements_output_file, 
+               sig_tfs_file, sig_tfpos_file))#, callback=generated_sig_merged_element_files.append)
         else:
             run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, 
                        f_score_index, motif_breaking_score_index,
@@ -374,13 +375,16 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                        distance_to_merge, merged_mut_sig_threshold,
                        local_domain_window, chr_lengths_file, sig_elements_output_file, 
                        sig_tfs_file, sig_tfpos_file)
-        if os.path.exists(sig_elements_output_file) and os.path.exists(sig_tfs_file) and os.path.exists(sig_tfpos_file):
+        if (os.path.exists(sig_elements_output_file) and
+            os.path.exists(sig_tfs_file) and os.path.exists(sig_tfpos_file)):
+            
             generated_sig_merged_element_files.append(sig_elements_output_file)
             sig_tfs_files.append(sig_tfs_file)
             sig_tfpos_files.append(sig_tfpos_file)
-            print("Generated for cohort:" + cohort + sig_elements_output_file)
+            print("Generated for cohort ({}): {}".format(cohort, sig_elements_output_file))
         else:
-            print("Failed to Generate for cohort:" + cohort + sig_elements_output_file)
+            print("Failed to Generate for cohort ({}): \n{} or \n{} or \n{}".format(
+                cohort, sig_elements_output_file, sig_tfs_file, sig_tfpos_file))
         
     if num_cores>1:
         p.close()
