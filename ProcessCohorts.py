@@ -86,7 +86,7 @@ def get_cohorts(cohort_names_input):
         with open(cohort_names_input, 'r') as cohort_names_infile:
             lines = cohort_names_infile.readlines()
     for line in lines:
-        if line!='' and not line.startswith('//') and not line.startswith('#'):
+        if line.strip()!='' and not line.startswith('//') and not line.startswith('#'):
             if '=' not in line and '::' not in line and '*' not in line:
                 cohorts.append(line.strip())
             elif '=' in line:
@@ -375,16 +375,10 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                        distance_to_merge, merged_mut_sig_threshold,
                        local_domain_window, chr_lengths_file, sig_elements_output_file, 
                        sig_tfs_file, sig_tfpos_file)
-        if (os.path.exists(sig_elements_output_file) and
-            os.path.exists(sig_tfs_file) and os.path.exists(sig_tfpos_file)):
-            
-            generated_sig_merged_element_files.append(sig_elements_output_file)
-            sig_tfs_files.append(sig_tfs_file)
-            sig_tfpos_files.append(sig_tfpos_file)
-            print("Generated for cohort ({}): {}".format(cohort, sig_elements_output_file))
-        else:
-            print("Failed to Generate for cohort ({}): \n{} or \n{} or \n{}".format(
-                cohort, sig_elements_output_file, sig_tfs_file, sig_tfpos_file))
+        generated_sig_merged_element_files.append(sig_elements_output_file)
+        sig_tfs_files.append(sig_tfs_file)
+        sig_tfpos_files.append(sig_tfpos_file)
+        print("Generated for cohort ({}): {}".format(cohort, sig_elements_output_file))
         
     if num_cores>1:
         p.close()
