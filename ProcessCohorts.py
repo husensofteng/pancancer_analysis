@@ -61,18 +61,21 @@ def generate_cohorts_per_mut_file(cohort_value, cohort_file, mutations_input_fil
         if len(cohort_sample_ids)>0:
             n=0
             with open(mutations_input_file, 'r') as mutations_infile:
-                with open(cohort_value.split('=')[0] + "_mutations_temp", 'w') as mutations_temp_outfile:
+                #write mutations that belong to the samples from cohort_value to a temp file
+                with open(cohort_file + "_mutations_temp", 'w') as mutations_temp_outfile:
                     line = mutations_infile.readline()
                     while line!="":
                         if line.strip().split('\t')[8].strip() in cohort_sample_ids or line.strip().split('\t')[7].strip() in cohort_sample_ids:
                             mutations_temp_outfile.write(line)
                             n+=1
                         line = mutations_infile.readline()
-        print("written lines to {}: {}".format(cohort_file, n))
-        awk_stm = """awk 'BEGIN{FS=OFS="\t"}{print $0 >> "%s"}' %s""" %(cohort_file, cohort_value.split('=')[0] + "_mutations_temp")
+        print("written lines to {}: {}".format(cohort_file + "_mutations_temp", n))
+        #write the temp file to cohort_file (safe writting)
+        awk_stm = """awk 'BEGIN{FS=OFS="\t"}{print $0 >> "%s"}' %s""" %(cohort_file, cohort_file + "_mutations_temp")
         os.system(awk_stm)
-        if os.path.exists(cohort_value.split('=')[0] + "_mutations_temp"):
-            os.remove(cohort_value.split('=')[0] + "_mutations_temp")            
+        print("written lines to {}: {}".format(cohort_file, n))
+        if os.path.exists(cohort_file + "_mutations_temp"):
+            os.remove(cohort_file + "_mutations_temp")            
     
     return cohort_file
 
