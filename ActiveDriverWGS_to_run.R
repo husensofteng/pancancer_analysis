@@ -30,7 +30,7 @@ data_elem$id <- as.character(data_elem$id)
 #mutations to test
 data_mut <- fread(df_mut)
 mut <- data_mut
-colnames(mut) <- c('chr', 'pos1', 'pos2','ref', 'alt', 'cohort','var_type', 'sample_id','patient', 'pval','fsore',paste0('V', seq(from = 12, to = 32)))
+colnames(mut) <- c('chr', 'pos1', 'pos2','ref', 'alt', 'cohort','var_type', 'sample_id','patient')
 mut_in <- mut[,c('chr', 'pos1', 'pos2','ref', 'alt', 'patient')] %>%  unique
 mut_in$chr <- gsub('23','X',mut_in$chr)
 mut_in$chr <- gsub('24','Y',mut_in$chr)
