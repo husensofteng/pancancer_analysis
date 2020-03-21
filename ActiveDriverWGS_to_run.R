@@ -2,14 +2,16 @@ library(ActiveDriverWGS)
 library(tidyverse)
 library(data.table)
 #args
+args = commandArgs(trailingOnly=TRUE)
 df_elem = args[1]
 df_mut = args[2]
 n_mut_ele = args[3]
-num_cores = args[4]
-
+#num_cores = args[4]
+print(df_elem)
+print(n_mut_ele)
 #elements
 data_my <- read.csv(df_elem, sep = '\t', header = TRUE, skip = 6)
-
+head(data_my) %>%  print
 
 #at least 2 mutations in an element
 data_my_2mut <- data_my[which(data_my$X.Muts >= n_mut_ele),] 
@@ -36,7 +38,7 @@ mut_in$chr <- gsub('23','X',mut_in$chr)
 mut_in$chr <- gsub('24','Y',mut_in$chr)
 mut_in$pos1 <- as.numeric(mut_in$pos1)
 mut_in$pos2 <- as.numeric(mut_in$pos2)
-result = ActiveDriverWGS(mutations = mut_in,
-                         elements = data_elem, mc.cores = num_cores)
+result = ActiveDriverWGS(mutations = mut_in[1:10,],
+                         elements = data_elem[1:10,], mc.cores = 10)
 
-saveRDS(results, file= paste0('ActiveDriverWGS_results',n_mut_ele,'.RDS'))
+saveRDS(result, file= paste0('ActiveDriverWGS_results_',n_mut_ele,'.RDS'))
