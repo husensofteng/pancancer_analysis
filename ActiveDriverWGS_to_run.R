@@ -38,7 +38,7 @@ mut_in$chr <- gsub('23','X',mut_in$chr)
 mut_in$chr <- gsub('24','Y',mut_in$chr)
 mut_in$pos1 <- as.numeric(mut_in$pos1)
 mut_in$pos2 <- as.numeric(mut_in$pos2)
-result = ActiveDriverWGS(mutations = mut_in[1:10,],
-                         elements = data_elem[1:10,], mc.cores = 10)
+result = ActiveDriverWGS(mutations = mut_in,
+                         elements = data_elem, mc.cores = 10)
 
 saveRDS(result, file= paste0('ActiveDriverWGS_results_',n_mut_ele,'.RDS'))
