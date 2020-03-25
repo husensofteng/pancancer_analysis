@@ -966,7 +966,7 @@ def parse_args():
     parser.add_argument('--distance_to_merge', type=int, default=200, help='Window size (number of base-pairs) to merge nearby mutations within')
     parser.add_argument('--local_domain_window', type=int, default=25000, help='Window width for capturing simulated elements to compare mutation frequency ')
     parser.add_argument('--filter_on_qval', action='store_const', const=True, help='Filter on FDR (adjusted p-values), if the flag is missing it would filter on p-value')
-    parser.add_argument('--use_per_tf_sig', action='store_const', const=True, help='When the flag is present it will use avg and std scores from muts in the corresponding TF-motifs otherwise it would use an overal score avg and std that is extracted from all TFs.')
+    parser.add_argument('--sig_category', default = 'perTF', choices=['overallTFs', 'perTF', 'perChromatinCat', 'perTF_perChromatinCat'], help='')
     
     parser.add_argument('--n', type=int, default=0, help='n')
     parser.add_argument('--max_dist', type=int, default=500000, help='max_dist')
@@ -1001,25 +1001,10 @@ if __name__ == '__main__':
     generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
         args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
         args.simulated_input_dir, args.chr_lengths_file, args.num_cores,
-        args.filter_on_qval, args.use_per_tf_sig, args.sig_thresh, args.sim_sig_thresh,
+        args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,
         args.distance_to_merge, args.merged_mut_sig_threshold,
         args.local_domain_window)
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
-    
-    '''
-    cohort_names_input = sys.argv[1]#'meta_tumor_cohorts_v2_22May2017/cohorts_to_run_definedPCAWG'
-    mutations_cohorts_dir = '/home/huum/projs/pancan12Feb2020/pancan_output_12Feb'#_Alltumors_noexon'
-    observed_input_file = '/home/huum/projs/pancan12Feb2020/mutations_files/observed_annotated22May2017.bed9'
-    simulated_input_dir = '/home/huum/projs/pancan12Feb2020/mutations_files/mutations_simulations_files_103sets'
-    generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
-        cohort_names_input, mutations_cohorts_dir, observed_input_file, simulated_input_dir)
-    '''
-    #mutation_input_dir = 'mutations_cohorts_output_exclVEP'
-    #generated_sig_merged_element_files =  [mutation_input_dir+'/'+x for x in os.listdir(mutation_input_dir) if 'statspvalueslocalw25000onlysig0.05' in x]
-    #sig_tfs_files = [mutation_input_dir+'/'+x for x in os.listdir(mutation_input_dir) if 'sigTFs_0.05' in x]
-
-    #sig_tfpos_files = [mutation_input_dir+'/'+x for x in os.listdir(mutation_input_dir) if 'sigTFpos_0.05' in x]    
-    #print(sig_tfpos_files)
     
     aggregated_output_file = getSigElements(
         generated_sig_merged_element_files, args.n, args.max_dist, args.window, 

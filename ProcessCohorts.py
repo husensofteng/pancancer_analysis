@@ -187,7 +187,7 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
 
 def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, 
                f_score_index, motif_breaking_score_index, 
-               filter_on_qval, use_per_tf_sig, sig_thresh, sim_sig_thresh,
+               filter_on_qval, sig_category, sig_thresh, sim_sig_thresh,
                sim_output_extension,
                filter_cond, operation_on_unify, output_extension, 
                distance_to_merge, merged_mut_sig_threshold,
@@ -205,7 +205,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index,
        The first file in each created_cohorts[cohort] is the observed set, so skip it
     '''
     dict_simulated_mean_sd_per_TF_motif_output_file = cohort_full_name + "_meansdrand{}sets.dict".format(len(mutation_input_files)-1)
-    dict_simulated_mean_sd_per_TF_motif = Utilities.get_simulated_mean_sd_per_TF_motif(
+    dict_type_mean_std_scores = Utilities.get_simulated_mean_sd_per_TF_motif(
         simulated_annotated_input_files=created_cohorts[cohort][1:], 
         cohort_mean_sd_per_tf_overall_output_dict_file= dict_simulated_mean_sd_per_TF_motif_output_file, 
         motif_name_index = motif_name_index, f_score_index = f_score_index, 
@@ -218,13 +218,13 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index,
     '''
     muts_sig_per_TF_file = Utilities.get_muts_sig_per_TF(
         annoted_input_file=created_cohorts[cohort][0], 
-        dict_simulated_mean_sd_per_TF_motif=dict_simulated_mean_sd_per_TF_motif, 
+        dict_type_mean_std_scores=dict_type_mean_std_scores, 
         annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), 
         annoted_output_file_extension_onlysig="_rand{}setsTFsigQval{}".format(
             len(mutation_input_files)-1, sig_thresh),
         motif_name_index = motif_name_index, f_score_index = f_score_index, 
         motif_breaking_score_index = motif_breaking_score_index, 
-        filter_on_qval=filter_on_qval, use_per_tf_sig=use_per_tf_sig, 
+        filter_on_qval=filter_on_qval, sig_cat=sig_category, 
         sig_thresh=sig_thresh,
         filter_on_signal = True, dnase_index = 24, fantom_index = 25, num_other_tfs_index = 27)
     sig_muts_per_tf_mutation_input_files = [muts_sig_per_TF_file]
@@ -234,12 +234,12 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index,
     for mutations_input_file in created_cohorts[cohort][1:]: 
         muts_sig_per_TF_file = Utilities.get_muts_sig_per_TF(
             annoted_input_file=mutations_input_file, 
-            dict_simulated_mean_sd_per_TF_motif=dict_simulated_mean_sd_per_TF_motif,
+            dict_type_mean_std_scores=dict_type_mean_std_scores,
             annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), 
             annoted_output_file_extension_onlysig=sim_output_extension,
             motif_name_index = motif_name_index, f_score_index = f_score_index, 
             motif_breaking_score_index = motif_breaking_score_index,
-            filter_on_qval=filter_on_qval, use_per_tf_sig=use_per_tf_sig, 
+            filter_on_qval=filter_on_qval, sig_cat=sig_category, 
             sig_thresh=sim_sig_thresh
             )
         sig_muts_per_tf_mutation_input_files.append(muts_sig_per_TF_file)
@@ -291,7 +291,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index,
 def process_cohorts(cohort_names_input, mutations_cohorts_dir, 
                     observed_input_file, simulated_input_dir,
                     chr_lengths_file, num_cores,
-                    filter_on_qval, use_per_tf_sig, sig_thresh, sim_sig_thresh_pval,
+                    filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                     distance_to_merge, 
                     merged_mut_sig_threshold, local_domain_window):
     
@@ -360,7 +360,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
             p.apply_async(run_cohort, args=(cohort, created_cohorts, 
                     mutation_input_files, motif_name_index, 
                     f_score_index, motif_breaking_score_index, 
-                    filter_on_qval, use_per_tf_sig, sig_thresh, sim_sig_thresh_pval,
+                    filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                     sim_output_extension,
                     filter_cond, operation_on_unify, output_extension, 
                     distance_to_merge, merged_mut_sig_threshold,
@@ -369,7 +369,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
         else:
             run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, 
                        f_score_index, motif_breaking_score_index,
-                       filter_on_qval, use_per_tf_sig, sig_thresh, sim_sig_thresh_pval,
+                       filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                        sim_output_extension,
                        filter_cond, operation_on_unify, output_extension, 
                        distance_to_merge, merged_mut_sig_threshold,
@@ -404,7 +404,7 @@ def parse_args():
     parser.add_argument('--distance_to_merge', type=int, default=200, help='Window size (number of base-pairs) to merge nearby mutations within')
     parser.add_argument('--local_domain_window', type=int, default=25000, help='Window width for capturing simulated elements to compare mutation frequency ')
     parser.add_argument('--filter_on_qval', action='store_const', const=True, help='Filter on FDR (adjusted p-values), if the flag is missing it would filter on p-value')
-    parser.add_argument('--use_per_tf_sig', action='store_const', const=True, help='When the flag is present it will use avg and std scores from muts in the corresponding TF-motifs otherwise it would use an overal score avg and std that is extracted from all TFs.')
+    parser.add_argument('--sig_category', default = 'perTF', choices=['overallTFs', 'perTF', 'perChromatinCat', 'perTF_perChromatinCat'], help='')
     parser.add_argument('--num_cores', type=int, default=10, help='number of cores (cpus) to use in parallel')
     
     return parser.parse_args(sys.argv[1:])
@@ -419,7 +419,7 @@ if __name__ == '__main__':
     generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
         args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
         args.simulated_input_dir, args.chr_lengths_file, args.num_cores,
-        args.filter_on_qval, args.use_per_tf_sig, args.sig_thresh, args.sim_sig_thresh,  
+        args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
         args.local_domain_window)
     #print("Generated Sig. Element Sets: \n", '\n'.join(generated_sig_merged_element_files))
