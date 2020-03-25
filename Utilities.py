@@ -57,12 +57,17 @@ def get_max_motif_in_grouped_muts(annotated_mutations_grouped_file, annotated_mu
         l = grouped_file.readline()
         while l:
             sl = l.strip().split(fsep)
+            print(sl)
             max_mut_score = float(sl[score_index_in_grouped_file]) 
             motifs_info = [s.strip().split(vsep) for s in sl[motif_index_in_grouped_file].split(',')]
             for motif_info in motifs_info:
                 mut_motif_score = float(motif_info[score_index_in_motif_info])
                 if mut_motif_score>=max_mut_score:#append the max score to the chromatin status of the overlapping motif
-                    annotated_mutations_grouped_outfile_bed12.write(l.strip() + '\t' + motif_info[ref_alt_index_in_motif_info]+ '\t' + motif_info[mutpos_index_in_motif_info]+ '\t' + motif_info[motifname_index_in_motif_info] + '\t' + vsep.join(motif_info) + '\n')
+                    annotated_mutations_grouped_outfile_bed12.write(
+                        l.strip() + '\t' + motif_info[ref_alt_index_in_motif_info]+ '\t' + 
+                        motif_info[mutpos_index_in_motif_info]+ '\t' + 
+                        motif_info[motifname_index_in_motif_info] + '\t' + 
+                        vsep.join(motif_info) + '\n')
                     break
             l = grouped_file.readline()
             
@@ -719,8 +724,8 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                             annoted_input_ofile_onlysig.write(l)
                             l = annoted_output_ifile.readline()
                             continue
-                    pvalues = dict(json.loads(sl[motif_breaking_score_index+1].split(';')[0]))
-                    adj_pvalues = dict(json.loads(sl[motif_breaking_score_index+1].split(';')[1]))
+                    pvalues = dict(json.loads(sl[motif_breaking_score_index+1].split('@')[0]).replace(';', ','))
+                    adj_pvalues = dict(json.loads(sl[motif_breaking_score_index+1].split('@')[1].replace(';', ',')))
                     sig_level = 1.0
                     if filter_on_qval:
                         sig_level = float(adj_pvalues[sig_cat])
@@ -877,11 +882,11 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                 elif pval_type == "perTF_perChromatinCat":
                     sub_type = sl[motif_name_index]
                     sub_sub_type = sl[chromatin_index]
-                    pvals[pval_type] = dict_pvals[pval_type][sub_type][sub_sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
+                    pvals[pval_type] = dict_pvals[pval_type][sub_type][sub_sub_type][dict_line_indices[pval_type][sub_type][sub_sub_type].index(line_index)]
                     adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][sub_sub_type][dict_line_indices[pval_type][sub_type][sub_sub_type].index(line_index)]
                 
                 
-            sl[motif_breaking_score_index+1] = json.dumps(pvals)+';'+json.dumps(adjust_pvals)
+            sl[motif_breaking_score_index+1] = (json.dumps(pvals)+'@'+json.dumps(adjust_pvals)).replace(',', ';')
             
             annoted_input_ofile.write('\t'.join(sl) + '\n')
             sig_level = 1.0
