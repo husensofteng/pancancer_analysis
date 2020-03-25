@@ -749,8 +749,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
             "calculate the p-vale based on avg and std from the different categories"
             for pval_type in dict_type_mean_std_scores.keys():
                 p_value = 1.0
-                #if p_val_type == "overallTFs":
-                try:
+                if pval_type == "overallTFs":
                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
                                      avg=dict_type_mean_std_scores[pval_type]['mean'], 
                                      sd=dict_type_mean_std_scores[pval_type]['std'])
@@ -760,30 +759,24 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     except KeyError:
                         dict_pvals[pval_type] = [p_value]
                         dict_line_indices[pval_type] = [line_index]
-                except KeyError:
-                    pass
                 
-                #if p_val_type == "perTF":
-                try:
+                if pval_type == "perTF":
                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
                                      avg=dict_type_mean_std_scores[pval_type][l[motif_name_index]]['mean'], 
                                      sd=dict_type_mean_std_scores[pval_type][l[motif_name_index]]['std'])
                     try:
-                        dict_pvals[pval_type][l[motif_breaking_score_index]].append(p_value)
-                        dict_line_indices[pval_type][l[motif_breaking_score_index]].append(line_index)
+                        dict_pvals[pval_type][l[motif_name_index]].append(p_value)
+                        dict_line_indices[pval_type][l[motif_name_index]].append(line_index)
                     except KeyError:
                         try:
-                            dict_pvals[pval_type][l[motif_breaking_score_index]] = [p_value]
-                            dict_line_indices[pval_type][l[motif_breaking_score_index]] = [line_index]
+                            dict_pvals[pval_type][l[motif_name_index]] = [p_value]
+                            dict_line_indices[pval_type][l[motif_name_index]] = [line_index]
                         except KeyError:
-                            dict_pvals[pval_type] = {l[motif_breaking_score_index] : [p_value]}
-                            dict_line_indices[pval_type] = {l[motif_breaking_score_index] :[line_index]}
+                            dict_pvals[pval_type] = {l[motif_name_index] : [p_value]}
+                            dict_line_indices[pval_type] = {l[motif_name_index] :[line_index]}
                             
-                except KeyError:
-                    pass
                 
-                #if p_val_type == "perChromatinCat":
-                try:
+                if pval_type == "perChromatinCat":
                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
                                      avg=dict_type_mean_std_scores[pval_type][l[chromatin_index]]['mean'], 
                                      sd=dict_type_mean_std_scores[pval_type][l[chromatin_index]]['std'])
@@ -798,33 +791,28 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                             dict_pvals[pval_type] = {l[chromatin_index] : [p_value]}
                             dict_line_indices[pval_type] = {l[chromatin_index] :[line_index]}
                     
-                except KeyError:
-                    pass
                 
-                #if p_val_type == "perTF_perChromatinCat":
-                try:
+                if pval_type == "perTF_perChromatinCat":
                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
                                      avg=dict_type_mean_std_scores[pval_type][l[motif_name_index]][l[chromatin_index]]['mean'], 
                                      sd=dict_type_mean_std_scores[pval_type][l[motif_name_index]][l[chromatin_index]]['std'])
                     try:
-                        dict_pvals[pval_type][l[motif_breaking_score_index]][l[chromatin_index]].append(p_value)
-                        dict_line_indices[pval_type][l[motif_breaking_score_index]][l[chromatin_index]].append(line_index)
+                        dict_pvals[pval_type][l[motif_name_index]][l[chromatin_index]].append(p_value)
+                        dict_line_indices[pval_type][l[motif_name_index]][l[chromatin_index]].append(line_index)
                     except KeyError:
                         try:
-                            dict_pvals[pval_type][l[motif_breaking_score_index]][l[chromatin_index]] = [p_value]
-                            dict_line_indices[pval_type][l[motif_breaking_score_index]][l[chromatin_index]] = [line_index]
+                            dict_pvals[pval_type][l[motif_name_index]][l[chromatin_index]] = [p_value]
+                            dict_line_indices[pval_type][l[motif_name_index]][l[chromatin_index]] = [line_index]
                         except KeyError:
                             try:
-                                dict_pvals[pval_type][l[motif_breaking_score_index]] = {l[chromatin_index] : [p_value]}
-                                dict_line_indices[pval_type][l[motif_breaking_score_index]] = {l[chromatin_index] :[line_index]}
+                                dict_pvals[pval_type][l[motif_name_index]] = {l[chromatin_index] : [p_value]}
+                                dict_line_indices[pval_type][l[motif_name_index]] = {l[chromatin_index] :[line_index]}
                             except KeyError:
-                                dict_pvals[pval_type] = {l[motif_breaking_score_index]: {l[chromatin_index] : [p_value]}}
-                                dict_line_indices[pval_type] = {l[motif_breaking_score_index]: {l[chromatin_index] :[line_index]}}
-                except KeyError:
-                    pass
-            
+                                dict_pvals[pval_type] = {l[motif_name_index]: {l[chromatin_index] : [p_value]}}
+                                dict_line_indices[pval_type] = {l[motif_name_index]: {l[chromatin_index] :[line_index]}}
+                
     with open(annoted_output_file, 'w') as annoted_input_ofile, open(annoted_output_file_onlysig, 'w') as annoted_input_ofile_onlysig:
-        print("Computing adjusted P-values")
+        print("Computing adjusted P-values for {}".format(annoted_input_file))
         adjusted_dict_pvals = {} 
         
         for pval_type in dict_pvals.keys():
@@ -857,6 +845,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][dict_line_indices[pval_type].index(line_index)]
                 except (KeyError, IndexError, ValueError, TypeError):
                     pass
+                
                 try:
                     for sub_type in  dict_pvals[pval_type].keys():
                         pvals[pval_type] = dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
