@@ -865,20 +865,20 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][dict_line_indices[pval_type].index(line_index)]
                 
                 elif pval_type == "perTF":
-                    for sub_type in  dict_pvals[pval_type].keys():
-                        pvals[pval_type] = dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
-                        adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
+                    sub_type = sl[motif_name_index]
+                    pvals[pval_type] = dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
+                    adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
                 
                 elif pval_type == "perChromatinCat":
-                    for sub_type in  dict_pvals[pval_type].keys():
-                        pvals[pval_type] = dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
-                        adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
+                    sub_type = sl[chromatin_index]
+                    pvals[pval_type] = dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
+                    adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
                 
                 elif pval_type == "perTF_perChromatinCat":
-                    for sub_type in  dict_pvals[pval_type].keys():
-                        for sub_sub_type in  dict_pvals[pval_type][sub_type].keys():
-                            pvals[pval_type] = dict_pvals[pval_type][sub_type][sub_sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
-                            adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][sub_sub_type][dict_line_indices[pval_type][sub_type][sub_sub_type].index(line_index)]
+                    sub_type = sl[motif_name_index]
+                    sub_sub_type = sl[chromatin_index]
+                    pvals[pval_type] = dict_pvals[pval_type][sub_type][sub_sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
+                    adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][sub_sub_type][dict_line_indices[pval_type][sub_type][sub_sub_type].index(line_index)]
                 
                 
             sl[motif_breaking_score_index+1] = json.dumps(pvals)+';'+json.dumps(adjust_pvals)
