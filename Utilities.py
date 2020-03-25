@@ -850,7 +850,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                 adjusted_dict_pvals[pval_type][tf] = {}
                 for chrom_cat in dict_pvals[pval_type][tf].keys():
                     adjusted_dict_pvals[pval_type][tf][chrom_cat] = adjust_pvales(dict_pvals[pval_type][tf][chrom_cat])
-                
+    
     with open(annoted_output_file, 'w') as annoted_input_ofile, open(annoted_output_file_onlysig, 'w') as annoted_input_ofile_onlysig:
         
         for line_index, line in enumerate(lines):
@@ -860,27 +860,27 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
             pvals = {}
             adjust_pvals = {}
             for pval_type in sorted(dict_pvals.keys()):
-                try:
+                if pval_type == "overallTFs":
                     pvals[pval_type] = dict_pvals[pval_type][dict_line_indices[pval_type].index(line_index)]
                     adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][dict_line_indices[pval_type].index(line_index)]
-                except (KeyError, IndexError, ValueError, TypeError, AttributeError):
-                    pass
                 
-                try:
+                elif pval_type == "perTF":
                     for sub_type in  dict_pvals[pval_type].keys():
                         pvals[pval_type] = dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
                         adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
-                except (KeyError, IndexError, ValueError, TypeError, AttributeError):
-                    pass
                 
-                try:
+                elif pval_type == "perChromatinCat":
+                    for sub_type in  dict_pvals[pval_type].keys():
+                        pvals[pval_type] = dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
+                        adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
+                
+                elif pval_type == "perTF_perChromatinCat":
                     for sub_type in  dict_pvals[pval_type].keys():
                         for sub_sub_type in  dict_pvals[pval_type][sub_type].keys():
                             pvals[pval_type] = dict_pvals[pval_type][sub_type][sub_sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
                             adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][sub_sub_type][dict_line_indices[pval_type][sub_type][sub_sub_type].index(line_index)]
-                except (KeyError, IndexError, ValueError, TypeError, AttributeError):
-                    pass
-            
+                
+                
             sl[motif_breaking_score_index+1] = json.dumps(pvals)+';'+json.dumps(adjust_pvals)
             
             annoted_input_ofile.write('\t'.join(sl) + '\n')
