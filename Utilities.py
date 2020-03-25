@@ -750,9 +750,13 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
             for pval_type in dict_type_mean_std_scores.keys():
                 p_value = 1.0
                 if pval_type == "overallTFs":
-                    p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
-                                     avg=dict_type_mean_std_scores[pval_type]['mean'], 
-                                     sd=dict_type_mean_std_scores[pval_type]['std'])
+                    try:
+                        p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
+                                         avg=dict_type_mean_std_scores[pval_type]['mean'], 
+                                         sd=dict_type_mean_std_scores[pval_type]['std'])
+                    except KeyError:
+                        p_value = 0.0
+                        
                     try:
                         dict_pvals[pval_type].append(p_value)
                         dict_line_indices[pval_type].append(line_index)
@@ -761,9 +765,13 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                         dict_line_indices[pval_type] = [line_index]
                 
                 if pval_type == "perTF":
-                    p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
+                    try:
+                        p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
                                      avg=dict_type_mean_std_scores[pval_type][l[motif_name_index]]['mean'], 
                                      sd=dict_type_mean_std_scores[pval_type][l[motif_name_index]]['std'])
+                    except KeyError:
+                        p_value = 0.0
+                    
                     try:
                         dict_pvals[pval_type][l[motif_name_index]].append(p_value)
                         dict_line_indices[pval_type][l[motif_name_index]].append(line_index)
@@ -777,9 +785,13 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                             
                 
                 if pval_type == "perChromatinCat":
-                    p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
+                    try:
+                        p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
                                      avg=dict_type_mean_std_scores[pval_type][l[chromatin_index]]['mean'], 
                                      sd=dict_type_mean_std_scores[pval_type][l[chromatin_index]]['std'])
+                    except KeyError:
+                        p_value = 0.0
+                    
                     try:
                         dict_pvals[pval_type][l[chromatin_index]].append(p_value)
                         dict_line_indices[pval_type][l[chromatin_index]].append(line_index)
@@ -793,9 +805,13 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     
                 
                 if pval_type == "perTF_perChromatinCat":
-                    p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
+                    try:
+                        p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
                                      avg=dict_type_mean_std_scores[pval_type][l[motif_name_index]][l[chromatin_index]]['mean'], 
                                      sd=dict_type_mean_std_scores[pval_type][l[motif_name_index]][l[chromatin_index]]['std'])
+                    except KeyError:
+                        p_value = 0.0
+                    
                     try:
                         dict_pvals[pval_type][l[motif_name_index]][l[chromatin_index]].append(p_value)
                         dict_line_indices[pval_type][l[motif_name_index]][l[chromatin_index]].append(line_index)
