@@ -314,7 +314,8 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
     generated_sig_merged_element_files = []
     sig_tfs_files = []
     sig_tfpos_files = []
-    p = Pool(num_cores)
+    if num_cores>1:
+        p = Pool(num_cores)
     
     stats_ext = "_rand{}setsTF".format(len(mutation_input_files)-1)
     
