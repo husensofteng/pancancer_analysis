@@ -429,27 +429,34 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index,
             while l and len(l)>gene_expression_index:
                 if ((l[gene_expression_index]=='nan' or float(l[gene_expression_index])>0) and 
                     float(l[motif_breaking_score_index])>=breaking_score_threshold):
-                    try:
-                        if len(l[11].split(';'))>1: #it means sig level has been calculated and checked already
-                            #just add the count (usually for the observed set this is the case)
-                            try:
-                                tf_counts_in_this_sim_set[l[motif_name_index]] +=1
-                            except KeyError:
-                                tf_counts_in_this_sim_set[l[motif_name_index]] = 1
-                            
-                            try:
-                                tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
-                            except KeyError:
-                                tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
-                            
-                        else:
-                            '''means no fdr and signal check has been applied therefore only keep motifs that have:
-                                (f_score+breaking_score> minimum score obtained for the same motif in the obs set
-                                (instead of FDR calculations to ensure only reasonable mutations are counted)
-                                and there is dnase signal 
-                                or there is tf binindg signal 
-                                this is usually the case for sim sets. (the idea is to get mut similar to those in obs set)''' 
-                            if ( ((float(l[f_score_index])+float(l[motif_breaking_score_index])) >= tf_min_scores_in_sig_obs_motifs[l[motif_name_index]] and (float(l[dnase_index])>0.0)) or# or float(l[fantom_index])>0.0 or float(l[num_other_tfs_index])>0.0 
+                    
+                    if len(l[11].split(';'))>1: #it means sig level has been calculated and checked already
+                        #just add the count (usually for the observed set this is the case)
+                        try:
+                            tf_counts_in_this_sim_set[l[motif_name_index]] +=1
+                        except KeyError:
+                            tf_counts_in_this_sim_set[l[motif_name_index]] = 1
+                        
+                        try:
+                            tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
+                        except KeyError:
+                            tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
+                        
+                    else:
+                        '''means no fdr and signal check has been applied therefore only keep motifs that have:
+                            (f_score+breaking_score> minimum score obtained for the same motif in the obs set
+                            (instead of FDR calculations to ensure only reasonable mutations are counted)
+                            and there is dnase signal 
+                            or there is tf binindg signal 
+                            this is usually the case for sim sets. (the idea is to get mut similar to those in obs set)'''
+                        try:
+                            min_obs_score_this_motif = tf_min_scores_in_sig_obs_motifs[l[motif_name_index]]
+                        except KeyError:
+                            min_obs_score_this_motif = None
+                        
+                        if min_obs_score_this_motif:
+                            if ( ((float(l[f_score_index])+float(l[motif_breaking_score_index])) >= min_obs_score_this_motif 
+                                  and (float(l[dnase_index])>0.0)) or# or float(l[fantom_index])>0.0 or float(l[num_other_tfs_index])>0.0 
                                  (float(l[tf_binding_index])>0 and l[tf_binding_index]!="nan")):
                                 try:
                                     tf_counts_in_this_sim_set[l[motif_name_index]] +=1
@@ -460,8 +467,7 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index,
                                     tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
                                 except KeyError:
                                     tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
-                    except KeyError:
-                        pass
+                    
                 l = i_sim_file.readline().strip().split('\t')
         for tf in tf_counts_in_this_sim_set.keys():
             try:
