@@ -57,7 +57,6 @@ def get_max_motif_in_grouped_muts(annotated_mutations_grouped_file, annotated_mu
         l = grouped_file.readline()
         while l:
             sl = l.strip().split(fsep)
-            print(sl)
             max_mut_score = float(sl[score_index_in_grouped_file]) 
             motifs_info = [s.strip().split(vsep) for s in sl[motif_index_in_grouped_file].split(',')]
             for motif_info in motifs_info:
