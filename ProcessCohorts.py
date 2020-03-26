@@ -251,12 +251,11 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index,
     '''
     sig_tfs_file, sig_tfpos_file = Utilities.get_tf_pval(
         cohort, sig_muts_per_tf_mutation_input_files, motif_name_index, 
-        f_score_index, motif_breaking_score_index, 
-        filter_cond, fsep='\t', sig_tfs_file=sig_tfs_file, 
-        sig_tfpos_file=sig_tfpos_file, 
-        filter_on_qval=filter_on_qval, 
-        filter_on_qval=True, sig_cat=sig_cat, sig_thresh=sig_thresh, 
-        dnase_index = 24, fantom_index = 25, num_other_tfs_index = 27)
+                f_score_index, motif_breaking_score_index, 
+                filter_cond, fsep='\t', sig_tfs_file=sig_tfs_file, 
+                sig_tfpos_file=sig_tfpos_file,
+                filter_on_signal = True, dnase_index = 24, fantom_index = 25, 
+                num_other_tfs_index = 27)
     
     '''Unify the mutations that have significant scores accross the cohorts
        Make one record for mutations that overlap multiple motifs
