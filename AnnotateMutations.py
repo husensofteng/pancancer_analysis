@@ -55,7 +55,8 @@ def get_muts_tracks_info(muts_input_file, tracks_dir, muts_dir_out, split_muts_f
     
     
     return muts_tracks_files
-def annotate_muts(muts_tracks_file, muts_tracks_ouput_file, tissue_cell_assays, matching_cell_name_representative_dict, cancer_type_index = 9, 
+def annotate_muts(muts_tracks_file, muts_tracks_ouput_file, tissue_cell_assays, 
+                  matching_cell_name_representative_dict, cancer_type_index = 9, 
                   tracks_info_index = 3, filter_on_dnase1_or_tf_peak=False):
     with open(muts_tracks_file, 'r') as mut_tracks_ifile, open(muts_tracks_ouput_file, 'w') as mut_tracks_ofile:
         l = mut_tracks_ifile.readline().strip().split('\t')
@@ -123,9 +124,13 @@ def annotate_muts(muts_tracks_file, muts_tracks_ouput_file, tissue_cell_assays, 
             
             if filter_on_dnase1_or_tf_peak:
                 if tf_binding_peak or dnase_peak:
-                    mut_tracks_ofile.write('\t'.join(l[0:9]) + '\t' + '|'.join(annotations_combined) + '\t' + '|'.join(cell_names_used) +'\n')
+                    mut_tracks_ofile.write('\t'.join(l[0:9]) + '\t' + 
+                                           '|'.join(annotations_combined) + '\t' + 
+                                           '|'.join(cell_names_used) +'\n')
             else:
-                mut_tracks_ofile.write('\t'.join(l[0:9]) + '\t' + '|'.join(annotations_combined) + '\t' + '|'.join(cell_names_used) +'\n')
+                mut_tracks_ofile.write('\t'.join(l[0:9]) + '\t' + 
+                                       '|'.join(annotations_combined) + '\t' + 
+                                       '|'.join(cell_names_used) +'\n')
             
             l = mut_tracks_ifile.readline().strip().split('\t')
             
@@ -194,7 +199,10 @@ def get_annotated_muts(muts_input_file, tracks_dir, muts_out,
             for muts_tracks_file in muts_tracks_files:
                 muts_tracks_ouput_file = muts_tracks_file+"_annotated" 
                 print("Annotating: ", muts_tracks_ouput_file)
-                annotate_muts(muts_tracks_file, muts_tracks_ouput_file, tissue_cell_assays, matching_cell_name_representative_dict, cancer_type_index = 5, tracks_info_index = 9, filter_on_dnase1_or_tf_peak=filter_on_dnase1_or_tf_peak)
+                annotate_muts(muts_tracks_file, muts_tracks_ouput_file, 
+                              tissue_cell_assays, matching_cell_name_representative_dict, 
+                              cancer_type_index = 5, tracks_info_index = 9, 
+                              filter_on_dnase1_or_tf_peak=filter_on_dnase1_or_tf_peak)
                 with open(muts_tracks_ouput_file, 'r') as muts_tracks_ouput_ifile:
                     muts_ofile.write(muts_tracks_ouput_ifile.read())
         #if os.path.exists(muts_out+'_tmp'):

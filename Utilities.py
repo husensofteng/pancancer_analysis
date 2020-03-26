@@ -388,27 +388,26 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
     
     return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, n_sig
 
-def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index, f_score_index, motif_breaking_score_index,
-               sig_level_per_TF_thresh, filter_cond, fsep, sig_tfs_file, sig_tfpos_file, filter_on_qval=True,
-               filter_on_signal = True, dnase_index = 24, fantom_index = 25, num_other_tfs_index = 27):
+def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index, 
+                f_score_index, motif_breaking_score_index, 
+                filter_cond, fsep, sig_tfs_file, sig_tfpos_file,
+                filter_on_signal = True, dnase_index = 24, fantom_index = 25, 
+                num_other_tfs_index = 27):
+    
     print('sig_muts_per_tf_mutation_input_files: ', sig_muts_per_tf_mutation_input_files)
     observed_mut_motifs = sig_muts_per_tf_mutation_input_files[0]
-    print('line 386: observed_mut_motifs: ', observed_mut_motifs)
-    if os.path.exists(sig_tfs_file) and os.path.exists(sig_tfpos_file):
+    if os.path.isfile(sig_tfs_file) and os.path.isfile(sig_tfpos_file):
         return sig_tfs_file, sig_tfpos_file
     
     observed_mut_motifs_temp = observed_mut_motifs+'_sigTFs_mintfscores_temp'
     print('Calculating pval for TFs in ', cohort)
-    threshold_value_index = 3
-    if filter_on_qval:
-        os.system("""awk 'BEGIN{{FS=OFS="{fsep}"}}{{split($12,p,";"); {filter_cond}{{if(p[4]<{sig_level_per_TF_thresh}) print ${motif_name_index},${f_score_index}+${mut_break_score_index}}}}}' {observed_mut_motifs} | sort -k1 | groupBy -g 1 -c 2 -o min > {observed_mut_motifs_temp}""".format(
-                        filter_cond=filter_cond, observed_mut_motifs=observed_mut_motifs, sig_level_per_TF_thresh=sig_level_per_TF_thresh, motif_name_index=motif_name_index+1, f_score_index=f_score_index+1, mut_break_score_index=motif_breaking_score_index+1, observed_mut_motifs_temp=observed_mut_motifs_temp, fsep=fsep))
-    else:
-        print("""awk 'BEGIN{{FS=OFS="{fsep}"}}{{split($12,p,";"); {filter_cond}{{if(p[2]<{sig_level_per_TF_thresh}) print ${motif_name_index},${f_score_index}+${mut_break_score_index}}}}}' {observed_mut_motifs} | sort -k1 | groupBy -g 1 -c 2 -o min > {observed_mut_motifs_temp}""".format(
-                        filter_cond=filter_cond, observed_mut_motifs=observed_mut_motifs, sig_level_per_TF_thresh=sig_level_per_TF_thresh, motif_name_index=motif_name_index+1, f_score_index=f_score_index+1, mut_break_score_index=motif_breaking_score_index+1, observed_mut_motifs_temp=observed_mut_motifs_temp, fsep=fsep))
-        os.system("""awk 'BEGIN{{FS=OFS="{fsep}"}}{{split($12,p,";"); {filter_cond}{{if(p[2]<{sig_level_per_TF_thresh}) print ${motif_name_index},${f_score_index}+${mut_break_score_index}}}}}' {observed_mut_motifs} | sort -k1 | groupBy -g 1 -c 2 -o min > {observed_mut_motifs_temp}""".format(
-                        filter_cond=filter_cond, observed_mut_motifs=observed_mut_motifs, sig_level_per_TF_thresh=sig_level_per_TF_thresh, motif_name_index=motif_name_index+1, f_score_index=f_score_index+1, mut_break_score_index=motif_breaking_score_index+1, observed_mut_motifs_temp=observed_mut_motifs_temp, fsep=fsep))
-        threshold_value_index = 1
+    '''filter the mutations by motif-breaking score and gene-expression as given in filter_cond
+        the mutations in the input file are already checked for signicance (or TF binding>0)'''
+    os.system("""awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond}{{print ${motif_name_index},${f_score_index}+${mut_break_score_index}}}}}' {observed_mut_motifs} | sort -k1 | groupBy -g 1 -c 2 -o min > {observed_mut_motifs_temp}""".format(
+                        filter_cond=filter_cond, observed_mut_motifs=observed_mut_motifs, 
+                        motif_name_index=motif_name_index+1, f_score_index=f_score_index+1, 
+                        mut_break_score_index=motif_breaking_score_index+1, 
+                        observed_mut_motifs_temp=observed_mut_motifs_temp, fsep=fsep))
     
     tf_min_scores_in_sig_obs_motifs = {}
     with open(observed_mut_motifs_temp, 'r') as i_observed_mut_motifs_temp:
@@ -422,29 +421,34 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index, 
     breaking_score_threshold = 0.3
     tf_counts_in_sim_sets = {}
     tfpos_counts_in_sim_sets = {}
-    for sim_file in sig_muts_per_tf_mutation_input_files:
+    for sim_file in sig_muts_per_tf_mutation_input_files: #count for all files incl. observed
         tf_counts_in_this_sim_set = {}
         tfpos_counts_in_this_sim_set = {}
         with open(sim_file) as i_sim_file:
             l = i_sim_file.readline().strip().split('\t')
             while l and len(l)>gene_expression_index:
-                if (l[gene_expression_index]=='nan' or float(l[gene_expression_index])>0) and float(l[motif_breaking_score_index])>=breaking_score_threshold:
+                if ((l[gene_expression_index]=='nan' or float(l[gene_expression_index])>0) and 
+                    float(l[motif_breaking_score_index])>=breaking_score_threshold):
                     try:
-                        if len(l[11].split(';'))>threshold_value_index:
-                            #check FDR if given
-                            if ( ((float(l[11].split(';')[threshold_value_index])) < sig_level_per_TF_thresh and (float(l[dnase_index])>0.0)) or# or float(l[fantom_index])>0.0 or float(l[num_other_tfs_index])>0.0
-                                 (float(l[tf_binding_index])>0 and l[tf_binding_index]!="nan")):
-                                try:
-                                    tf_counts_in_this_sim_set[l[motif_name_index]] +=1
-                                except KeyError:
-                                    tf_counts_in_this_sim_set[l[motif_name_index]] = 1
-                                
-                                try:
-                                    tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
-                                except KeyError:
-                                    tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
-                                    
+                        if len(l[11].split(';'))>1: #it means sig level has been calculated and checked already
+                            #just add the count (usually for the observed set this is the case)
+                            try:
+                                tf_counts_in_this_sim_set[l[motif_name_index]] +=1
+                            except KeyError:
+                                tf_counts_in_this_sim_set[l[motif_name_index]] = 1
+                            
+                            try:
+                                tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
+                            except KeyError:
+                                tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
+                            
                         else:
+                            '''means no fdr and signal check has been applied therefore only keep motifs that have:
+                                (f_score+breaking_score> minimum score obtained for the same motif in the obs set
+                                (instead of FDR calculations to ensure only reasonable mutations are counted)
+                                and there is dnase signal 
+                                or there is tf binindg signal 
+                                this is usually the case for sim sets. (the idea is to get mut similar to those in obs set)''' 
                             if ( ((float(l[f_score_index])+float(l[motif_breaking_score_index])) >= tf_min_scores_in_sig_obs_motifs[l[motif_name_index]] and (float(l[dnase_index])>0.0)) or# or float(l[fantom_index])>0.0 or float(l[num_other_tfs_index])>0.0 
                                  (float(l[tf_binding_index])>0 and l[tf_binding_index]!="nan")):
                                 try:
@@ -464,7 +468,7 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index, 
                 tf_counts_in_sim_sets[tf].append(tf_counts_in_this_sim_set[tf])
             except KeyError:
                 tf_counts_in_sim_sets[tf] = [tf_counts_in_this_sim_set[tf]]
-                    
+        
         for tf in tfpos_counts_in_this_sim_set.keys():
             try:
                 tfpos_counts_in_sim_sets[tf].append(tfpos_counts_in_this_sim_set[tf])
@@ -532,7 +536,11 @@ def adjust_pvales(pvalues):
     significant_bool_report, corrected_p_values_array, alphacSidak, alphacBonf = multipletests(pvalues, alpha=0.05, method='fdr_bh', returnsorted=False) #returns 4 things: a boolean array contains True or False for each value meaning wether the value after correction compared to the given alpha is significant or not, an array of the values after correction, a single for corrected alpha for Sidak method, a single value for corrected alpha for Bonferroni method 
     return corrected_p_values_array.tolist()
     
-def process_input_file(observed_input_file, simulated_input_files, combined_simulated_muts_output_file, combined_simulated_muts_merged_output_file, output_extension, distance_to_merge, filter_cond, mut_sig_threshold):
+def process_input_file(observed_input_file, simulated_input_files, 
+                       combined_simulated_muts_output_file, 
+                       combined_simulated_muts_merged_output_file, 
+                       output_extension, distance_to_merge, 
+                       filter_cond, mut_sig_threshold):
     
     if os.path.exists(combined_simulated_muts_merged_output_file) and os.path.exists(combined_simulated_muts_output_file):
         pass
@@ -731,7 +739,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                         sig_level = float(adj_pvalues[sig_cat])
                     else:
                         sig_level = float(pvalues[sig_cat])
-                        
+                    
                     if filter_on_signal:
                         if (sig_level < sig_thresh and 
                             (float(sl[dnase_index])>0.0)):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs_index])>0.0
