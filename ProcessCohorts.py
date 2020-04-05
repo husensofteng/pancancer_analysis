@@ -185,8 +185,9 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
     return sig_elements_output_file
 
 
-def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, 
-               f_score_index, motif_breaking_score_index, 
+def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_dir, motif_name_index, 
+               f_score_index, motif_breaking_score_index,
+               background_window, background_window_size, 
                filter_on_qval, sig_category, sig_thresh, sim_sig_thresh,
                sim_output_extension,
                filter_cond, operation_on_unify, output_extension, 
@@ -205,11 +206,29 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index,
        The first file in each created_cohorts[cohort] is the observed set, so skip it
     '''
     dict_simulated_mean_sd_per_TF_motif_output_file = cohort_full_name + "_meansdrand{}sets.dict".format(len(mutation_input_files)-1)
-    dict_type_mean_std_scores = Utilities.get_simulated_mean_sd_per_TF_motif(
-        simulated_annotated_input_files=created_cohorts[cohort][1:], 
-        cohort_mean_sd_per_tf_overall_output_dict_file= dict_simulated_mean_sd_per_TF_motif_output_file, 
-        motif_name_index = motif_name_index, f_score_index = f_score_index, 
-        motif_breaking_score_index = motif_breaking_score_index)
+    
+    '''As background consider simulated mutations in provided bacground window size around mutation
+    '''
+    if background_window:
+        dict_type_mean_std_scores = Utilities.get_simulated_mean_sd_per_TF_motif_background_window(
+            cohort_full_name = cohort_full_name,
+            annotated_input_file = created_cohorts[cohort][0],
+            simulated_annotated_input_files=created_cohorts[cohort][1:],
+            mutations_cohorts_dir = mutations_cohorts_dir,
+            cohort_mean_sd_per_tf_overall_output_dict_file= dict_simulated_mean_sd_per_TF_motif_output_file, 
+            chr_lengths_file = chr_lengths_file,
+            background_window_size = background_window_size, 
+            motif_name_index = motif_name_index, f_score_index = f_score_index, 
+            motif_breaking_score_index = motif_breaking_score_index,
+            chromatin_cat_index = chromatin_cat_index)
+    else:
+        '''As background consider whole genome
+        '''
+        dict_type_mean_std_scores = Utilities.get_simulated_mean_sd_per_TF_motif(
+            simulated_annotated_input_files=created_cohorts[cohort][1:], 
+            cohort_mean_sd_per_tf_overall_output_dict_file= dict_simulated_mean_sd_per_TF_motif_output_file, 
+            motif_name_index = motif_name_index, f_score_index = f_score_index, 
+            motif_breaking_score_index = motif_breaking_score_index)
     
     '''For each mutation in the observed set created_cohorts[cohort][0]
        calculate pval and qval by comparing its score to the std and mean
@@ -222,6 +241,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index,
         annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), 
         annoted_output_file_extension_onlysig="_rand{}setsTFsigQval{}".format(
             len(mutation_input_files)-1, sig_thresh),
+        background_window = False,
         motif_name_index = motif_name_index, f_score_index = f_score_index, 
         motif_breaking_score_index = motif_breaking_score_index, 
         filter_on_qval=filter_on_qval, sig_cat=sig_category, 
@@ -291,7 +311,8 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index,
     
 def process_cohorts(cohort_names_input, mutations_cohorts_dir, 
                     observed_input_file, simulated_input_dir,
-                    chr_lengths_file, num_cores,
+                    chr_lengths_file, num_cores, 
+                    background_window, background_window_size,
                     filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                     distance_to_merge, 
                     merged_mut_sig_threshold, local_domain_window):
@@ -303,6 +324,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
     motif_name_index = 17
     f_score_index = 9
     motif_breaking_score_index = 10
+    chromatin_cat_index = 22
     sim_output_extension = "_rand{}setsTFsigPval{}".format(len(mutation_input_files)-1, sim_sig_thresh_pval)#len(mutation_input_files)-1 
     operation_on_unify = 'mean'#'max'
     
@@ -362,8 +384,9 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
         
         if num_cores>1:
             p.apply_async(run_cohort, args=(cohort, created_cohorts, 
-                    mutation_input_files, motif_name_index, 
+                    mutation_input_files, mutations_cohorts_dir, motif_name_index, 
                     f_score_index, motif_breaking_score_index, 
+                    background_window, background_window_size,
                     filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                     sim_output_extension,
                     filter_cond, operation_on_unify, output_extension, 
@@ -371,8 +394,9 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                local_domain_window, chr_lengths_file, sig_elements_output_file, 
                sig_tfs_file, sig_tfpos_file))#, callback=generated_sig_merged_element_files.append)
         else:
-            run_cohort(cohort, created_cohorts, mutation_input_files, motif_name_index, 
+            run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_dir, motif_name_index, 
                        f_score_index, motif_breaking_score_index,
+                       background_window, background_window_size,
                        filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                        sim_output_extension,
                        filter_cond, operation_on_unify, output_extension, 
@@ -402,6 +426,8 @@ def parse_args():
     parser.add_argument('-m', '--observed_input_file', default='', help='')
     parser.add_argument('-s', '--simulated_input_dir', default='', help='')
     parser.add_argument('-l', '--chr_lengths_file', default='', help='')
+    parser.add.argument('--background_window', action='store_const', const=False, help='Check mutation functional score significance by comparing to background window around mutation in simulated mutations, if the flag is missing it would use the whole genome as background')
+    parser.add.argument('--background_window_size', type=int, default=50000, help='Background window around mutation for capturing simulated mutation to compare mutation functional score')
     parser.add_argument('--sig_thresh', type=float, default=0.05, help='Sig level threshold on mutation score level')
     parser.add_argument('--sim_sig_thresh', type=float, default=1.0, help='Sig level threshold for simulated mutations on score level')
     parser.add_argument('--merged_mut_sig_threshold', type=float, default=0.05, help='P-value threshold for simulated mutations on score level')
@@ -422,7 +448,8 @@ if __name__ == '__main__':
     
     generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
         args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
-        args.simulated_input_dir, args.chr_lengths_file, args.num_cores,
+        args.simulated_input_dir, args.chr_lengths_file, args.num_cores, 
+        args.background_window, args.background_window_size,
         args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
         args.local_domain_window)
