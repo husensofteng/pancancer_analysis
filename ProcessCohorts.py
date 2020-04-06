@@ -426,7 +426,7 @@ def parse_args():
     parser.add_argument('-m', '--observed_input_file', default='', help='')
     parser.add_argument('-s', '--simulated_input_dir', default='', help='')
     parser.add_argument('-l', '--chr_lengths_file', default='', help='')
-    parser.add.argument('--background_window', action='store_const', const=False, help='Check mutation functional score significance by comparing to background window around mutation in simulated mutations, if the flag is missing it would use the whole genome as background')
+    parser.add.argument('--background_window', action='store_const', const=True, help='Check mutation functional score significance by comparing to background window around mutation in simulated mutations, if the flag is missing it would use the whole genome as background')
     parser.add.argument('--background_window_size', type=int, default=50000, help='Background window around mutation for capturing simulated mutation to compare mutation functional score')
     parser.add_argument('--sig_thresh', type=float, default=0.05, help='Sig level threshold on mutation score level')
     parser.add_argument('--sim_sig_thresh', type=float, default=1.0, help='Sig level threshold for simulated mutations on score level')
