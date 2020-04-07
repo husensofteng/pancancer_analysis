@@ -960,6 +960,8 @@ def parse_args():
     parser.add_argument('-m', '--observed_input_file', default='', help='')
     parser.add_argument('-s', '--simulated_input_dir', default='', help='')
     parser.add_argument('-l', '--chr_lengths_file', default='', help='')
+    parser.add.argument('--background_window', action='store_const', const=True, help='Check mutation functional score significance by comparing to background window around mutation in simulated mutations, if the flag is missing it would use the whole genome as background')
+    parser.add.argument('--background_window_size', type=int, default=50000, help='Background window around mutation for capturing simulated mutation to compare mutation functional score')
     parser.add_argument('--sig_thresh', type=float, default=0.05, help='Sig level threshold on mutation score level')
     parser.add_argument('--sim_sig_thresh', type=float, default=1.0, help='Sig level threshold for simulated mutations on score level')
     parser.add_argument('--merged_mut_sig_threshold', type=float, default=0.05, help='P-value threshold for simulated mutations on score level')
@@ -1000,8 +1002,9 @@ if __name__ == '__main__':
     print("Generated significant elements")
     generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
         args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
-        args.simulated_input_dir, args.chr_lengths_file, args.num_cores,
-        args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,
+        args.simulated_input_dir, args.chr_lengths_file, args.num_cores, 
+        args.background_window, args.background_window_size,
+        args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
         args.local_domain_window)
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
