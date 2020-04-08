@@ -15,6 +15,7 @@ from scipy import stats
 from statsmodels.sandbox.stats.multicomp import multipletests
 from scipy.stats import binom, hypergeom
 from scipy.stats import binom
+import shutil
 #from score_motifs_tissuepertable import open_connection, close_connection
 
 #import matplotlib.backends.backend_pdf
@@ -687,7 +688,6 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             simulated_input_file_tmp_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perChromatinCat_extension
             simulated_input_file_tmp_TFs_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perTF_perChromatinCat_extension
             #intedect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
-            
             observed_input_file_obj_inter = observed_input_file_obj.intersect(simulated_input_file_obj, wo = True).each(sum_fscore_motif_breaking_score, new_fscore_index, new_motif_breaking_score_index).saveas()
             print(observed_input_file_obj_inter)
             #group files to obtain the mean and stdev for the functional score
