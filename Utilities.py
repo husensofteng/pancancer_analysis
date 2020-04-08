@@ -616,15 +616,12 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     print("Extracting avg and std per TF and overall from the simulation sets... onto: ", cohort_mean_sd_per_tf_overall_output_dict_file)
     cohort = cohort_full_name.split('/')[-1]
     tmp_dir = mutations_cohorts_dir + '/' + cohort + '_tmp_pybedtoos'
-    print(mutations_cohorts_dir + '/' + cohort + '_tmp_pybedtoos')
     if not os.path.exists(tmp_dir):
         os.mkdir(tmp_dir) 
     
     chr_lengths = get_chr_lengths(chr_lengths_file)
-    print(tmp_dir)
     #divided observed mutations files into subfiles. Extend mutations with the backgroud window
     splited_file_name = tmp_dir  + '/' + cohort + '_splited'
-    print(splited_file_name)
     #lines_per_file = 10000
     line_number = 0
     with open(annotated_input_file, 'r') as observed_infile, open(splited_file_name, "w") as splited_ifile:
@@ -671,9 +668,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             simulated_input_file_name = simulated_input_file.split('/')[-1]
 
             with open(simulated_input_file, 'r') as simulated_ifile:
-                print(simulated_ifile)
                 line = simulated_ifile.readline()
-                print(line)
                 if line[0:3] == 'chr':
                     simulated_ifile_temp = simulated_input_file + '_tmp'
                     awk_stmt = """cat {simulated_file} | sed 's/^...//' > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
