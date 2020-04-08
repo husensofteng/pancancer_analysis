@@ -186,7 +186,7 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
 
 
 def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_dir, motif_name_index, 
-               f_score_index, motif_breaking_score_index,
+               f_score_index, motif_breaking_score_index,chromatin_cat_index,
                background_window, background_window_size, 
                filter_on_qval, sig_category, sig_thresh, sim_sig_thresh,
                sim_output_extension,
@@ -389,7 +389,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
         if num_cores>1:
             p.apply_async(run_cohort, args=(cohort, created_cohorts, 
                     mutation_input_files, mutations_cohorts_dir, motif_name_index, 
-                    f_score_index, motif_breaking_score_index, 
+                    f_score_index, motif_breaking_score_index, chromatin_cat_index,
                     background_window, background_window_size,
                     filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                     sim_output_extension,
@@ -399,7 +399,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                sig_tfs_file, sig_tfpos_file))#, callback=generated_sig_merged_element_files.append)
         else:
             run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_dir, motif_name_index, 
-                       f_score_index, motif_breaking_score_index,
+                       f_score_index, motif_breaking_score_index, chromatin_cat_index,
                        background_window, background_window_size,
                        filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                        sim_output_extension,
