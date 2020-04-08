@@ -613,19 +613,21 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         return  dict_type_mean_std_scores
     
     print("Extracting avg and std per TF and overall from the simulation sets... onto: ", cohort_mean_sd_per_tf_overall_output_dict_file)
-    
-    tmp_dir = mutations_cohorts_dir + '/' + cohort_full_name + '_tmp_pybedtoos'
+    cohort = cohort_full_name.split('/')[-1]
+    tmp_dir = mutations_cohorts_dir + '/' + cohort + '_tmp_pybedtoos'
+    print(mutations_cohorts_dir + '/' + cohort_full_name + '_tmp_pybedtoos')
     if not os.path.exists(tmp_dir):
         os.mkdir(tmp_dir) 
     
     chr_lengths = get_chr_lengths(chr_lengths_file)
-    
+    print(tmp_dir)
     #divided observed mutations files into subfiles. Extend mutations with the backgroud window
     splited_file_list =[]
-    splited_file_name = tmp_dir  + '/' + annotated_input_file + 'splited'
+    splited_file_name = tmp_dir  + '/' + cohort + 'splited'
+    print(splited_file_name)
     #lines_per_file = 10000
     line_number = 0
-    with open(annoted_input_file, 'r') as observed_infile, open(splited_file_name, "w") as splited_ifile:
+    with open(annotated_input_file, 'r') as observed_infile, open(splited_file_name, "w") as splited_ifile:
         l = observed_infile.readline().strip().split('\t')
         while l and len(l)>3:
             motif_start = (int(l[1])-background_window_size)
@@ -648,6 +650,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             # save background window, motif name, chromatin cat, and number of line
             splited_ifile.write(chr_name + '\t' + str(motif_start) + '\t' +   str(motif_end) + '\t' + str( motif_names) + '\t' +chrom_cat + '\t' + str(line_number) + '\n')
             line_number+=1
+            print(chr_name + '\t' + str(motif_start) + '\t' +   str(motif_end) + '\t' + str( motif_names) + '\t' +chrom_cat + '\t' + str(line_number) + '\n')
             l = observed_infile.readline().strip().split('\t')
         #if splited_file:
         #    splited_file.close()
