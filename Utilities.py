@@ -615,15 +615,14 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     print("Extracting avg and std per TF and overall from the simulation sets... onto: ", cohort_mean_sd_per_tf_overall_output_dict_file)
     cohort = cohort_full_name.split('/')[-1]
     tmp_dir = mutations_cohorts_dir + '/' + cohort + '_tmp_pybedtoos'
-    print(mutations_cohorts_dir + '/' + cohort_full_name + '_tmp_pybedtoos')
+    print(mutations_cohorts_dir + '/' + cohort + '_tmp_pybedtoos')
     if not os.path.exists(tmp_dir):
         os.mkdir(tmp_dir) 
     
     chr_lengths = get_chr_lengths(chr_lengths_file)
     print(tmp_dir)
     #divided observed mutations files into subfiles. Extend mutations with the backgroud window
-    splited_file_list =[]
-    splited_file_name = tmp_dir  + '/' + cohort + 'splited'
+    splited_file_name = tmp_dir  + '/' + cohort + '_splited'
     print(splited_file_name)
     #lines_per_file = 10000
     line_number = 0
@@ -650,7 +649,6 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             # save background window, motif name, chromatin cat, and number of line
             splited_ifile.write(chr_name + '\t' + str(motif_start) + '\t' +   str(motif_end) + '\t' + str( motif_names) + '\t' +chrom_cat + '\t' + str(line_number) + '\n')
             line_number+=1
-            print(chr_name + '\t' + str(motif_start) + '\t' +   str(motif_end) + '\t' + str( motif_names) + '\t' +chrom_cat + '\t' + str(line_number) + '\n')
             l = observed_infile.readline().strip().split('\t')
         #if splited_file:
         #    splited_file.close()
@@ -681,27 +679,27 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                     simulated_files_temp = simulated_ifile_temp
                     simulated_input_file = simulated_ifile_temp
             simulated_input_file_obj = BedTool(simulated_input_file)
-            for observed_input_file in splited_files_list:
-                observed_input_file_obj = BedTool(observed_input_file)
-                simulated_input_file_tmp_overallTFs = tmp_dir +'/' + simulated_input_file_name + '_' + observed_input_file.split('_')[-1] + simulated_input_file_tmp_overallTFs_extension
-                simulated_input_file_tmp_TFs = tmp_dir +'/' + simulated_input_file_name + '_' + observed_input_file.split('_')[-1] + simulated_input_file_tmp_perTF_extension
-                simulated_input_file_tmp_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + observed_input_file.split('_')[-1] + simulated_input_file_tmp_perChromatinCat_extension
-                simulated_input_file_tmp_TFs_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + observed_input_file.split('_')[-1] + simulated_input_file_tmp_perTF_perChromatinCat_extension
-                #intedect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
+
+            observed_input_file_obj = BedTool(splited_file_name)
+            simulated_input_file_tmp_overallTFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_overallTFs_extension
+            simulated_input_file_tmp_TFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perTF_extension
+            simulated_input_file_tmp_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perChromatinCat_extension
+            simulated_input_file_tmp_TFs_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perTF_perChromatinCat_extension
+            #intedect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
+            
+            observed_input_file_obj_inter = observed_input_file_obj.intersect(simulated_input_file_obj, wo = True).each(sum_fscore_motif_breaking_score, new_fscore_index, new_motif_breaking_score_index).saveas()
+            #group files to obtain the mean and stdev for the functional score
+            try: 
+                observed_input_file_obj_inter.groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_overallTFs)
+                observed_input_file_obj_inter.filter(lambda x: str(x[3]) == str(x[23])).groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_TFs)
+                observed_input_file_obj_inter.filter(lambda x: str(x[4]) == str(x[28])).groupby(g=[1,2,3,4,5,6], c=(new_fscore_index+1), o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_chromatin)
+                observed_input_file_obj_inter.filter(lambda x: (str(x[4]) == str(x[28])) & (str(x[3]) == str(x[23]))).groupby(g=[1,2,3,4,5,6], c=(new_fscore_index+1), o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_TFs_chromatin)
+            except KeyError:
+                open(simulated_input_file_tmp_overallTFs, 'a').close()
+                open(simulated_input_file_tmp_perTF, 'a').close()
+                open(simulated_input_file_tmp_chromatin, 'a').close()
+                open(simulated_input_file_tmp_perTF_perChromatinCat_extension, 'a').close()
                 
-                observed_input_file_obj_inter = observed_input_file_obj.intersect(simulated_input_file_obj, wo = True).each(sum_fscore_motif_breaking_score, new_fscore_index, new_motif_breaking_score_index).saveas()
-                #group files to obtain the mean and stdev for the functional score
-                try: 
-                    observed_input_file_obj_inter.groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_overallTFs)
-                    observed_input_file_obj_inter.filter(lambda x: str(x[3]) == str(x[23])).groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_TFs)
-                    observed_input_file_obj_inter.filter(lambda x: str(x[4]) == str(x[28])).groupby(g=[1,2,3,4,5,6], c=(new_fscore_index+1), o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_chromatin)
-                    observed_input_file_obj_inter.filter(lambda x: (str(x[4]) == str(x[28])) & (str(x[3]) == str(x[23]))).groupby(g=[1,2,3,4,5,6], c=(new_fscore_index+1), o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_TFs_chromatin)
-                except KeyError:
-                    open(simulated_input_file_tmp_overallTFs, 'a').close()
-                    open(simulated_input_file_tmp_perTF, 'a').close()
-                    open(simulated_input_file_tmp_chromatin, 'a').close()
-                    open(simulated_input_file_tmp_perTF_perChromatinCat_extension, 'a').close()
-                    
                     
             if "_tmp" in simulated_input_file:
                 os.remove(simulated_input_file)
