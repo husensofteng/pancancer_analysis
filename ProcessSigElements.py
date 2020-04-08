@@ -532,10 +532,10 @@ def get_enriched_gene_geneset(regions_genes_dict, genesets_genes_dict):
                     except KeyError:
                         enriched_genesets_dict_overall[geneset] = [gene_name]
     
-    print('\t'.join([r + ':' + str(len(genes_all[r])) for r in genes_all.keys()]))
-    print('\t'.join([r + ':' + str(len(genes_all_per_side[r])) for r in genes_all_per_side.keys()]))
-    print('\t'.join([r + ':' + str(len(enriched_genesets_dict_overall[r])) for r in enriched_genesets_dict_overall.keys()]))
-    print('\t'.join([r + ':' + str(len(enriched_genesets_dict[r])) for r in enriched_genesets_dict.keys()])) 
+    #print('\t'.join([r + ':' + str(len(genes_all[r])) for r in genes_all.keys()]))
+    #print('\t'.join([r + ':' + str(len(genes_all_per_side[r])) for r in genes_all_per_side.keys()]))
+    #print('\t'.join([r + ':' + str(len(enriched_genesets_dict_overall[r])) for r in enriched_genesets_dict_overall.keys()]))
+    #print('\t'.join([r + ':' + str(len(enriched_genesets_dict[r])) for r in enriched_genesets_dict.keys()])) 
     return regions_genes_dict, genes_all, genes_all_per_side, enriched_genesets_dict_overall, enriched_genesets_dict
 
 def write_aggregated_lines_to_outfile(aggregated_lines, cols_to_write, 
@@ -960,8 +960,8 @@ def parse_args():
     parser.add_argument('-m', '--observed_input_file', default='', help='')
     parser.add_argument('-s', '--simulated_input_dir', default='', help='')
     parser.add_argument('-l', '--chr_lengths_file', default='', help='')
-    parser.add.argument('--background_window', action='store_const', const=True, help='Check mutation functional score significance by comparing to background window around mutation in simulated mutations, if the flag is missing it would use the whole genome as background')
-    parser.add.argument('--background_window_size', type=int, default=50000, help='Background window around mutation for capturing simulated mutation to compare mutation functional score')
+    parser.add_argument('--background_window', action='store_const', const=True, help='Check mutation functional score significance by comparing to background window around mutation in simulated mutations, if the flag is missing it would use the whole genome as background')
+    parser.add_argument('--background_window_size', type=int, default=50000, help='Background window around mutation for capturing simulated mutation to compare mutation functional score')
     parser.add_argument('--sig_thresh', type=float, default=0.05, help='Sig level threshold on mutation score level')
     parser.add_argument('--sim_sig_thresh', type=float, default=1.0, help='Sig level threshold for simulated mutations on score level')
     parser.add_argument('--merged_mut_sig_threshold', type=float, default=0.05, help='P-value threshold for simulated mutations on score level')
