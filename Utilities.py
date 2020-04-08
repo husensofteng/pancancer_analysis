@@ -668,10 +668,11 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
 
     for simulated_input_file in simulated_annotated_input_files:
             simulated_input_file_name = simulated_input_file.split('/')[-1]
-            print(simulated_input_file_name)
+
             with open(simulated_input_file, 'r') as simulated_ifile:
+                print(simulated_ifile)
                 line = simulated_ifile.readline()
-                
+                print(line)
                 if line[0:3] == 'chr':
                     simulated_ifile_temp = simulated_input_file + '_tmp'
                     awk_stmt = """cat {simulated_file} | sed 's/^...//' > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
@@ -679,8 +680,10 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                     simulated_files_temp = simulated_ifile_temp
                     simulated_input_file = simulated_ifile_temp
             simulated_input_file_obj = BedTool(simulated_input_file)
+            print(simulated_input_file_obj)
 
             observed_input_file_obj = BedTool(splited_file_name)
+            print(observed_input_file_obj)
             simulated_input_file_tmp_overallTFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_overallTFs_extension
             simulated_input_file_tmp_TFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perTF_extension
             simulated_input_file_tmp_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perChromatinCat_extension
