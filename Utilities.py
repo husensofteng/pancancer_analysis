@@ -599,11 +599,11 @@ def process_input_file(observed_input_file, simulated_input_files,
     
     return merged_elements_statspvaluesonlysig
 
-def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annoted_input_file, simulated_annotated_input_files, 
+def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annotated_input_file, simulated_annotated_input_files, 
                                        mutations_cohorts_dir,
                                        cohort_mean_sd_per_tf_overall_output_dict_file, 
                                        chr_lengths_file,
-                                       background_window = 50000,
+                                       background_window_size = 50000,
                                        motif_name_index = 17, f_score_index = 9, 
                                        motif_breaking_score_index = 10, chromatin_cat_index=22):
     
@@ -622,23 +622,23 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     
     #divided observed mutations files into subfiles. Extend mutations with the backgroud window
     splited_file_list =[]
-    splited_file_name = tmp_dir  + '/' + annoted_input_file + 'splited'
+    splited_file_name = tmp_dir  + '/' + annotated_input_file + 'splited'
     #lines_per_file = 10000
     line_number = 0
     with open(annoted_input_file, 'r') as observed_infile, open(splited_file_name, "w") as splited_ifile:
         l = observed_infile.readline().strip().split('\t')
         while l and len(l)>3:
-            motif_start = (int(l[1])-background_window)
-            motif_end = int(l[2])+background_window
+            motif_start = (int(l[1])-background_window_size)
+            motif_end = int(l[2])+background_window_size
             motif_names = l[motif_name_index]
             chrom_cat = l[chromatin_cat_index]
             chr_name = l[0].replace('chr','').replace('X', '23').replace('Y','24').replace('MT','25').replace('M','25')
             if motif_start<0:
                 motif_start = 0
-                motif_end += 0 - (int(l[1])-background_window)
+                motif_end += 0 - (int(l[1])-background_window_size)
             if motif_end>chr_lengths[int(chr_name)]:
                 motif_end = chr_lengths[int(chr_name)]
-                motif_start -= (int(l[2])+background_window) - chr_lengths[int(chr_name)]
+                motif_start -= (int(l[2])+background_window_size) - chr_lengths[int(chr_name)]
             #if line_number % lines_per_file == 0:
             #    if splited_file:
             #        splited_file.close()
@@ -665,7 +665,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     # group by: 1 - position for all TFs within the window
     #2 - positions of the same TF motifs within the window in the simulated sets
 
-    for simulated_input_file in simulated_input_files:
+    for simulated_input_file in simulated_annotated_input_files:
             simulated_input_file_name = simulated_input_file.split('/')[-1]
             print(simulated_input_file_name)
             with open(simulated_input_file, 'r') as simulated_ifile:
