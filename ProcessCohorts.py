@@ -206,10 +206,13 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
        The first file in each created_cohorts[cohort] is the observed set, so skip it
     '''
     dict_simulated_mean_sd_per_TF_motif_output_file = cohort_full_name + "_meansdrand{}sets.dict".format(len(mutation_input_files)-1)
+    print(dict_simulated_mean_sd_per_TF_motif_output_file)
     
     '''As background consider simulated mutations in provided bacground window size around mutation
     '''
+    
     if background_window:
+        print(background_window_size)
         dict_type_mean_std_scores = Utilities.get_simulated_mean_sd_per_TF_motif_background_window(
             cohort_full_name = cohort_full_name,
             annotated_input_file = created_cohorts[cohort][0],
@@ -221,9 +224,11 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
             motif_name_index = motif_name_index, f_score_index = f_score_index, 
             motif_breaking_score_index = motif_breaking_score_index,
             chromatin_cat_index = chromatin_cat_index)
+        
     else:
         '''As background consider whole genome
         '''
+        print('No')
         dict_type_mean_std_scores = Utilities.get_simulated_mean_sd_per_TF_motif(
             simulated_annotated_input_files=created_cohorts[cohort][1:], 
             cohort_mean_sd_per_tf_overall_output_dict_file= dict_simulated_mean_sd_per_TF_motif_output_file, 
