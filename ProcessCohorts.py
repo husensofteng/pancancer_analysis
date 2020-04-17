@@ -210,16 +210,16 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
     '''Prepare mutation file'''
     mutation_file_oncodrive = mutation_input_files + '_oncodrive'
     fsep = '\t'
-    awk_stmt_var = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{print $1,$2,$4,$5,$8,$6}}' {infile} |
+    awk_stmt_mut = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{print $1,$2,$4,$5,$8,$6}}' {infile} |
     sort -k1,1n -k2,2n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); gsub("chr","", $1); print $0}}' > {mutation_file}""".format(
                                                 fsep=fsep,  infile=mutation_input_files, variants_file=mutation_file_oncodrive+'_tmp')
     os.system(awk_stmt_mut)
     #add header
-    awk_stmt_var2 = """echo "CHROMOSOME\tPOSITION\tREF\tALT\tSAMPLE\tCANCER_TYPE" | cat - {infile} > {mutation_file}""".format(
+    awk_stmt_mut2 = """echo "CHROMOSOME\tPOSITION\tREF\tALT\tSAMPLE\tCANCER_TYPE" | cat - {infile} > {mutation_file}""".format(
                                                  infile=mutation_file_oncodrive+'_tmp', variants_file=mutation_file_oncodrive)
     os.system(awk_stmt_mut2)
     
-    os.remove(mutation_file_oncodrive+'_tmp')
+    os.remove(mutation_file_oncodrive +'_tmp')
     
     '''Prepare elements file'''
     elements_file_oncodrive = merged_muts_output_file + '_oncodrive'
@@ -312,7 +312,6 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     else:
         '''As background consider whole genome
         '''
-        print('No')
         dict_type_mean_std_scores = Utilities.get_simulated_mean_sd_per_TF_motif(
             simulated_annotated_input_files=created_cohorts[cohort][1:], 
             cohort_mean_sd_per_tf_overall_output_dict_file= dict_simulated_mean_sd_per_TF_motif_output_file, 
@@ -389,6 +388,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     '''Combine nearby mutations accross the cohort into one element'''
         
     if elements_oncodrive: 
+        print('OncodriveFML')
         get_sig_merged_elements_oncodrive(unified_mutation_input_files, created_cohorts[cohort][0], cohort_full_name, 
                             sim_output_extension+output_extension, 
                             distance_to_merge, merged_mut_sig_threshold, 
@@ -410,7 +410,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
 def process_cohorts(cohort_names_input, mutations_cohorts_dir, 
                     observed_input_file, simulated_input_dir,
                     chr_lengths_file, num_cores, 
-                    background_window, background_window_size,elements_oncodrive,
+                    background_window, background_window_size, elements_oncodrive,
                     filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                     distance_to_merge, 
                     merged_mut_sig_threshold, local_domain_window):
