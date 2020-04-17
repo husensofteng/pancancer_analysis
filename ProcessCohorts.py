@@ -242,7 +242,7 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
     tmp_dir = mutation_file_oncodrive + 'oncodrive_tmp'
     if not os.path.exists(tmp_dir):
         os.mkdir(tmp_dir) 
-    awk_stm_oncodrive ="""oncodrivefml -i {mutation_file} -e {element_file} -s wgs -c {oncodrive_dir}""".format(mutation_file = mutation_file_oncodrive,
+    awk_stm_oncodrive ="""oncodrivefml -i {mutation_file} -e {element_file} -s wgs -c /proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/oncodrivefml_v2.conf -o {oncodrive_dir}""".format(mutation_file = mutation_file_oncodrive,
                                                                                                     element_file = elements_file_oncodrive, oncodrive_dir = tmp_dir)
     
     os.system(awk_stm_oncodrive)
