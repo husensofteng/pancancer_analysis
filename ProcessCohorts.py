@@ -239,12 +239,13 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
     
     '''Calcuate pval for each element using oncodrivefml'''
     
-    tmp_dir = mutation_file_oncodrive + 'oncodrive_tmp'
+    tmp_dir = mutation_file_oncodrive + '_tmp'
     if not os.path.exists(tmp_dir):
         os.mkdir(tmp_dir) 
     awk_stm_oncodrive ="""oncodrivefml -i {mutation_file} -e {element_file} -s wgs -c /proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/oncodrivefml_v2.conf -o {oncodrive_dir}""".format(mutation_file = mutation_file_oncodrive,
                                                                                                     element_file = elements_file_oncodrive, oncodrive_dir = tmp_dir)
     
+    print(awk_stm_oncodrive)
     os.system(awk_stm_oncodrive)
     
     #oncodrive result: tsv file
