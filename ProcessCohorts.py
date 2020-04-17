@@ -188,7 +188,7 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
                             output_extension, distance_to_merge, 
                             merged_mut_sig_threshold, local_domain_window, 
                             chr_lengths_file, sig_elements_output_file, 
-                            sim_sig_thresh):
+                            sig_thresh):
     
     
     if os.path.exists(sig_elements_output_file):
@@ -261,8 +261,8 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
     merged_element_removed_columns.to_csv(merged_elements_statspvalues, index=False, sep='\t', header =False)
                 
     #find significant elements in oncodrive results
-    awk_stm_sig_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{if ($16<= {sim_sig_thresh} && $16 != "") print $0; else if ($15<= {sim_sig_thresh} && $16 == "") print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$15}}' {infile} > {merged_elements_statspvaluesonlysig}""".format(
-    fsep=fsep, sim_sig_thresh=sim_sig_thresh, merged_elements_statspvaluesonlysig=sig_elements_output_file)
+    awk_stm_sig_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{if ($16<= {sig_thresh} && $16 != "") print $0; else if ($15<= {sig_thresh} && $16 == "") print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$15}}' {infile} > {merged_elements_statspvaluesonlysig}""".format(
+    fsep=fsep, sig_thresh=sig_thresh, merged_elements_statspvaluesonlysig=sig_elements_output_file)
     os.system(awk_stm_sig_elem)
    
     
@@ -393,7 +393,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                             sim_output_extension+output_extension, 
                             distance_to_merge, merged_mut_sig_threshold, 
                             local_domain_window, chr_lengths_file, 
-                            sig_elements_output_file, sim_sig_thresh)
+                            sig_elements_output_file, sig_thresh)
     else:   
         '''   Evaluate the significance of each element based on: 
            - the element score (sum of the score of its mutations)
