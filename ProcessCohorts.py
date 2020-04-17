@@ -184,10 +184,95 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
     
     return sig_elements_output_file
 
+def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_input_files, cohort_full_name, 
+                            output_extension, distance_to_merge, 
+                            merged_mut_sig_threshold, local_domain_window, 
+                            chr_lengths_file, sig_elements_output_file, 
+                            sim_sig_thresh):
+    
+    
+    if os.path.exists(sig_elements_output_file):
+        return sig_elements_output_file
+    
+    "Merge the observed mutations into elements"
+    unified_observed_muts_file_wihtmotifinfo = unified_mutation_input_files[0]
+    merged_muts_output_file = unified_observed_muts_file_wihtmotifinfo+"_mergedmuts{distance_to_merge}bp".format(
+                                            distance_to_merge=distance_to_merge)
+    Utilities.merge_muts(muts_input_file=unified_observed_muts_file_wihtmotifinfo, 
+                         merged_muts_output_file=merged_muts_output_file, 
+                         filter_mut_motifs=False, filter_col_index=15, 
+                         filter_value=merged_mut_sig_threshold, mut_score_index=9, 
+                         motifs_col_index =10, ref_alt_col_index=11, mutpos_col_index=12, 
+                         motifname_col_index=13, motif_col_index=14, 
+                         distance_to_merge=distance_to_merge)
+    
+    
+    '''Prepare mutation file'''
+    mutation_file_oncodrive = mutation_input_files + '_oncodrive'
+    fsep = '\t'
+    awk_stmt_var = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{print $1,$2,$4,$5,$8,$6}}' {infile} |
+    sort -k1,1n -k2,2n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); gsub("chr","", $1); print $0}}' > {mutation_file}""".format(
+                                                fsep=fsep,  infile=mutation_input_files, variants_file=mutation_file_oncodrive+'_tmp')
+    os.system(awk_stmt_mut)
+    #add header
+    awk_stmt_var2 = """echo "CHROMOSOME\tPOSITION\tREF\tALT\tSAMPLE\tCANCER_TYPE" | cat - {infile} > {mutation_file}""".format(
+                                                 infile=mutation_file_oncodrive+'_tmp', variants_file=mutation_file_oncodrive)
+    os.system(awk_stmt_mut2)
+    
+    os.remove(mutation_file_oncodrive+'_tmp')
+    
+    '''Prepare elements file'''
+    elements_file_oncodrive = merged_muts_output_file + '_oncodrive'
+
+    filter_cond = 'if($6>1)' #remove elements with one mutation
+    awk_stmt_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond} {{print $1,$2,$3,$15}}}}' {infile} |
+    sort -k1,1n -k2,3n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print $0}}' > {element_file}""".format(
+                                                fsep=fsep, filter_cond= filter_cond, infile=merged_muts_output_file, variants_file=element_file_oncodrive+'_tmp')
+    os.system(awk_stmt_elem)
+
+    #add header
+    awk_stmt_elem2 = """echo "CHROMOSOME\tSTART\tEND\tELEMENT" | cat - {infile} > {element_file}""".format(
+                                                 infile=element_file_oncodrive+'_tmp', variants_file=element_file_oncodrive)
+    os.system(awk_stmt_elem2)
+    
+    os.remove(element_file_oncodrive +'_tmp')
+    
+    '''Calcuate pval for each element using oncodrivefml'''
+    
+    tmp_dir = mutation_file_oncodrive + 'oncodrive_tmp'
+    if not os.path.exists(tmp_dir):
+        os.mkdir(tmp_dir) 
+    awk_stm_oncodrive ="""oncodrivefml -i {mutation_file} -e {element_file} -s wgs -c {oncodrive_dir}""".format(mutation_file = mutation_file_oncodrive,
+                                                                                                    element_file = elements_file_oncodrive, oncodrive_dir = tmp_dir)
+    
+    os.system(awk_stm_oncodrive)
+    
+    #oncodrive result: tsv file
+    oncodrive_out_file = [tmp_dir+'/'+x for x in os.listdir(tmp_dir) if '.tsv' in x]
+
+    #merge elements with oncodrive results
+    merged_elements_statspvalues = merged_muts_output_file+"_statspvalues"    
+
+    element=pd.read_csv(merged_muts_output_file, sep="\t",  header=None)
+    oncodrive_element=pd.read_csv(oncodrive_out_file, sep="\t",  header=None)
+    merged_element = element.merge(oncodrive_element, left_on=14, right_on='GENE_ID')
+    #remove unnecessary columns
+    merged_element_removed_columns = merged_element.drop(['GENE_ID','MUTS', 'MUTS_RECURRENCE', 'SAMPLES','SNP', 'MNP','INDELS', 'SYMBOL','P_VALUE_NEG', 'Q_VALUE_NEG'], axis=1)
+    merged_element_removed_columns.to_csv(merged_elements_statspvalues, index=False, sep='\t', header =False)
+                
+    #find significant elements in oncodrive results
+    awk_stm_sig_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{if ($16<= {sim_sig_thresh} && $16 != "") print $0; else if ($15<= {sim_sig_thresh} && $16 == "") print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$15}}' {infile} > {merged_elements_statspvaluesonlysig}""".format(
+    fsep=fsep, sim_sig_thresh=sim_sig_thresh, merged_elements_statspvaluesonlysig=sig_elements_output_file)
+    os.system(awk_stm_sig_elem)
+   
+    
+    return sig_elements_output_file
+
+
 
 def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_dir, motif_name_index, 
                f_score_index, motif_breaking_score_index,chromatin_cat_index,
-               background_window, background_window_size, 
+               background_window, background_window_size, elements_oncodrive,
                filter_on_qval, sig_category, sig_thresh, sim_sig_thresh,
                sim_output_extension,
                filter_cond, operation_on_unify, output_extension, 
@@ -300,23 +385,32 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
         unified_mutation_input_files.append(unified_muts_file_wihtmotifinfo)
     #print('Unified mutations input files: ', unified_mutation_input_files)
     
-    '''Combine nearby mutations accross the cohort into one element
-       Evaluate the significance of each element based on: 
-       - the element score (sum of the score of its mutations)
-       - number of mutations in the element 
-    '''
-    get_sig_merged_elements(unified_mutation_input_files, cohort_full_name, 
+    
+    '''Combine nearby mutations accross the cohort into one element'''
+        
+    if elements_oncodrive: 
+        get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_input_files=created_cohorts[cohort][0], cohort_full_name, 
                             sim_output_extension+output_extension, 
                             distance_to_merge, merged_mut_sig_threshold, 
                             local_domain_window, chr_lengths_file, 
                             sig_elements_output_file, sim_sig_thresh)
+    else:   
+        '''   Evaluate the significance of each element based on: 
+           - the element score (sum of the score of its mutations)
+           - number of mutations in the element 
+        '''
+        get_sig_merged_elements(unified_mutation_input_files, cohort_full_name, 
+                                sim_output_extension+output_extension, 
+                                distance_to_merge, merged_mut_sig_threshold, 
+                                local_domain_window, chr_lengths_file, 
+                                sig_elements_output_file, sim_sig_thresh)
     
     return sig_elements_output_file, sig_tfs_file, sig_tfpos_file
     
 def process_cohorts(cohort_names_input, mutations_cohorts_dir, 
                     observed_input_file, simulated_input_dir,
                     chr_lengths_file, num_cores, 
-                    background_window, background_window_size,
+                    background_window, background_window_size,elements_oncodrive,
                     filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                     distance_to_merge, 
                     merged_mut_sig_threshold, local_domain_window):
@@ -373,8 +467,8 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                                        mutations_cohorts_dir, stats_ext,
                                        num_cores)
     for cohort in created_cohorts.keys():
-        sig_elements_output_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + output_extension + "_groupedbymut"+"withmotifinfo"+"_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+"_statspvaluesSimSig"+str(sim_sig_thresh_pval)+"_statspvalueslocalw{local_domain_window}onlysig{merged_mut_sig_threshold}".format(
-            local_domain_window=local_domain_window, merged_mut_sig_threshold=merged_mut_sig_threshold)
+        sig_elements_output_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + output_extension + "_groupedbymut"+"withmotifinfo"+"_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+"_statspvaluesonlysig{merged_mut_sig_threshold}".format(
+            merged_mut_sig_threshold=merged_mut_sig_threshold)
         sig_tfs_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + '_sigTFs_{}'.format(sig_thresh) 
         sig_tfpos_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + '_sigTFpos_{}'.format(sig_thresh)
         if os.path.exists(sig_elements_output_file) and os.path.exists(sig_tfs_file) and os.path.exists(sig_tfpos_file):
@@ -390,7 +484,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
             p.apply_async(run_cohort, args=(cohort, created_cohorts, 
                     mutation_input_files, mutations_cohorts_dir, motif_name_index, 
                     f_score_index, motif_breaking_score_index, chromatin_cat_index,
-                    background_window, background_window_size,
+                    background_window, background_window_size, elements_oncodrive,
                     filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                     sim_output_extension,
                     filter_cond, operation_on_unify, output_extension, 
@@ -400,7 +494,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
         else:
             run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_dir, motif_name_index, 
                        f_score_index, motif_breaking_score_index, chromatin_cat_index,
-                       background_window, background_window_size,
+                       background_window, background_window_size, elements_oncodrive,
                        filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                        sim_output_extension,
                        filter_cond, operation_on_unify, output_extension, 
@@ -432,6 +526,7 @@ def parse_args():
     parser.add_argument('-l', '--chr_lengths_file', default='', help='')
     parser.add_argument('--background_window', action='store_const', const=True, help='Check mutation functional score significance by comparing to background window around mutation in simulated mutations, if the flag is missing it would use the whole genome as background')
     parser.add_argument('--background_window_size', type=int, default=50000, help='Background window around mutation for capturing simulated mutation to compare mutation functional score')
+    parser.add_argument('--elements_oncodrive', action='store_const', const=True, help='Identify significantly mutated elements using OncodriveFML')
     parser.add_argument('--sig_thresh', type=float, default=0.05, help='Sig level threshold on mutation score level')
     parser.add_argument('--sim_sig_thresh', type=float, default=1.0, help='Sig level threshold for simulated mutations on score level')
     parser.add_argument('--merged_mut_sig_threshold', type=float, default=0.05, help='P-value threshold for simulated mutations on score level')
@@ -453,7 +548,7 @@ if __name__ == '__main__':
     generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
         args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
         args.simulated_input_dir, args.chr_lengths_file, args.num_cores, 
-        args.background_window, args.background_window_size,
+        args.background_window, args.background_window_size, args.elements_oncodrive,
         args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
         args.local_domain_window)
