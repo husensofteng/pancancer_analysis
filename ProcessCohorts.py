@@ -389,7 +389,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     '''Combine nearby mutations accross the cohort into one element'''
         
     if elements_oncodrive: 
-        get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_input_files=created_cohorts[cohort][0], cohort_full_name, 
+        get_sig_merged_elements_oncodrive(unified_mutation_input_files, created_cohorts[cohort][0], cohort_full_name, 
                             sim_output_extension+output_extension, 
                             distance_to_merge, merged_mut_sig_threshold, 
                             local_domain_window, chr_lengths_file, 
