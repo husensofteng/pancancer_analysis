@@ -211,31 +211,31 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
     mutation_file_oncodrive = mutation_input_files + '_oncodrive'
     fsep = '\t'
     awk_stmt_mut = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{print $1,$2,$4,$5,$8,$6}}' {infile} | sort -k1,1n -k2,2n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); gsub("chr","", $1); print $0}}' > {mutation_file}""".format(
-                                                fsep=fsep,  infile=mutation_input_files, mutation_file=mutation_file_oncodrive+'_tmp')
+                                                fsep=fsep,  infile=mutation_input_files, mutation_file=mutation_file_oncodrive+'_header')
     print(awk_stmt_mut)
     os.system(awk_stmt_mut)
     
     #add header
     awk_stmt_mut2 = """echo "CHROMOSOME\tPOSITION\tREF\tALT\tSAMPLE\tCANCER_TYPE" | cat - {infile} > {mutation_file}""".format(
-                                                 infile=mutation_file_oncodrive+'_tmp', mutation_file=mutation_file_oncodrive)
+                                                 infile=mutation_file_oncodrive+'_header', mutation_file=mutation_file_oncodrive)
     os.system(awk_stmt_mut2)
     
-    os.remove(mutation_file_oncodrive +'_tmp')
+    os.remove(mutation_file_oncodrive +'_header')
     
     '''Prepare elements file'''
     element_file_oncodrive = merged_muts_output_file + '_oncodrive'
     
     filter_cond = 'if($6>=1)' #remove elements with one mutation
     awk_stmt_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond} {{print $1,$2,$3,$15}}}}' {infile} | sort -k1,1n -k2,3n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print $0}}' > {element_file}""".format(
-                                                fsep=fsep, filter_cond= filter_cond, infile=merged_muts_output_file, element_file=element_file_oncodrive+'_tmp')
+                                                fsep=fsep, filter_cond= filter_cond, infile=merged_muts_output_file, element_file=element_file_oncodrive+'_header')
     os.system(awk_stmt_elem)
     print(awk_stmt_elem)
     #add header
     awk_stmt_elem2 = """echo "CHROMOSOME\tSTART\tEND\tELEMENT" | cat - {infile} > {element_file}""".format(
-                                                 infile=element_file_oncodrive+'_tmp', element_file=element_file_oncodrive)
+                                                 infile=element_file_oncodrive+'_header', element_file=element_file_oncodrive)
     os.system(awk_stmt_elem2)
     
-    os.remove(element_file_oncodrive +'_tmp')
+    os.remove(element_file_oncodrive +'_header')
     
     '''Calcuate pval for each element using oncodrivefml'''
     
