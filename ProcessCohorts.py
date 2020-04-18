@@ -211,11 +211,11 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
     
     
     '''Prepare mutation file'''
+    print('Calcuate pval for each element using OncodriveFML')
     mutation_file_oncodrive = mutation_input_files + '_oncodrive'
     fsep = '\t'
     awk_stmt_mut = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{print $1,$2,$4,$5,$8,$6}}' {infile} | sort -k1,1n -k2,2n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); gsub("chr","", $1); print $0}}' > {mutation_file}""".format(
                                                 fsep=fsep,  infile=mutation_input_files, mutation_file=mutation_file_oncodrive+'_header')
-    print(awk_stmt_mut)
     os.system(awk_stmt_mut)
     
     #add header
@@ -232,7 +232,6 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
     awk_stmt_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond} {{print $1,$2,$3,$15}}}}' {infile} | sort -k1,1n -k2,3n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print $0}}' > {element_file}""".format(
                                                 fsep=fsep, filter_cond= filter_cond, infile=merged_muts_output_file, element_file=element_file_oncodrive+'_header')
     os.system(awk_stmt_elem)
-    print(awk_stmt_elem)
     
     filesize = os.path.getsize(element_file_oncodrive+'_header')
     #check if elements exist
@@ -272,11 +271,9 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
         #remove unnecessary columns
         merged_element_removed_columns = merged_element.drop(['GENE_ID','MUTS', 'MUTS_RECURRENCE', 'SAMPLES','SNP', 'MNP','INDELS', 'SYMBOL','P_VALUE_NEG', 'Q_VALUE_NEG'], axis=1)
         merged_element_removed_columns.to_csv(merged_elements_statspvalues, index=False, sep='\t', header =False)
-        sig_thresh  = 1.0
         #find significant elements in oncodrive results
         awk_stm_sig_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{if ($17<= {sig_thresh} && $17 != "") print $0,$16,$17; else if ($16<= {sig_thresh} && $17 == "") print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$16,$16,$16,$16}}' {infile} > {merged_elements_statspvaluesonlysig}""".format(
         fsep=fsep, sig_thresh=sig_thresh,infile = merged_elements_statspvalues,  merged_elements_statspvaluesonlysig=sig_elements_output_file)
-        print(awk_stm_sig_elem)
         os.system(awk_stm_sig_elem)
        
         
