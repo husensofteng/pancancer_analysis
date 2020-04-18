@@ -7,6 +7,7 @@ import os
 import sys
 import argparse
 from multiprocessing import Pool
+import pandas as pd
 
 import Utilities
 
@@ -265,9 +266,11 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
         print(oncodrive_out_file)
         #merge elements with oncodrive results
         merged_elements_statspvalues = merged_muts_output_file+"_statspvalues"    
-    
+        
         element=pd.read_csv(merged_muts_output_file, sep="\t",  header=None)
-        oncodrive_element=pd.read_csv(tmp_dir+'/'+ oncodrive_out_file, sep="\t",  header=None)
+        print(element)
+        oncodrive_element=pd.read_csv(oncodrive_out_file, sep="\t")
+        print(oncodrive_element)
         merged_element = element.merge(oncodrive_element, left_on=14, right_on='GENE_ID')
         #remove unnecessary columns
         merged_element_removed_columns = merged_element.drop(['GENE_ID','MUTS', 'MUTS_RECURRENCE', 'SAMPLES','SNP', 'MNP','INDELS', 'SYMBOL','P_VALUE_NEG', 'Q_VALUE_NEG'], axis=1)
