@@ -274,7 +274,7 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
         merged_element_removed_columns.to_csv(merged_elements_statspvalues, index=False, sep='\t', header =False)
         sig_thresh  = 1.0
         #find significant elements in oncodrive results
-        awk_stm_sig_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{if ($17<= {sig_thresh} && $17 != "") print $0; else if ($16<= {sig_thresh} && $17 == "") print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$16,$16}}' {infile} > {merged_elements_statspvaluesonlysig}""".format(
+        awk_stm_sig_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{if ($17<= {sig_thresh} && $17 != "") print $0,$16,$17; else if ($16<= {sig_thresh} && $17 == "") print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$16,$16,$16,$16}}' {infile} > {merged_elements_statspvaluesonlysig}""".format(
         fsep=fsep, sig_thresh=sig_thresh,infile = merged_element_removed_columns,  merged_elements_statspvaluesonlysig=sig_elements_output_file)
         print(awk_stm_sig_elem)
         os.system(awk_stm_sig_elem)
