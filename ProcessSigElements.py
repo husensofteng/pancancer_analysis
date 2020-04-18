@@ -211,10 +211,10 @@ def aggregate_results(regions_input_file):
             mutations_in_cohorts = []
             cohorts_info = [x.strip().split('~') for x in l[10].split(',')]
             
-            cols_dict['FDR'] = float(cohorts_info[0][18])
+            cols_dict['FDR'] = float(cohorts_info[0][16])
             for cohort_info in cohorts_info:
-                if float(cohort_info[18]) > cols_dict['FDR']:
-                    cols_dict['FDR'] = float(cohort_info[18])
+                if float(cohort_info[16]) > cols_dict['FDR']:
+                    cols_dict['FDR'] = float(cohort_info[16])
                 
                 mutations_in_cohorts.extend(cohort_info[14].split('|'))
             muts_per_cancer_type = {}
