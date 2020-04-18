@@ -71,7 +71,9 @@ def generate_cohorts_per_mut_file(cohort_value, cohort_file, mutations_input_fil
                         line = mutations_infile.readline()
         print("written lines to {}: {}".format(cohort_file + "_mutations_temp", n))
         #write the temp file to cohort_file (safe writting)
-        awk_stm = """awk 'BEGIN{FS=OFS="\t"}{print $0 >> "%s"}' %s""" %(cohort_file, cohort_file + "_mutations_temp")
+        awk_stm =r"""awk 'BEGIN{{FS=OFS="\t"}}{{ printf ("%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32)}}' {cohort_temp} > {cohort_ofile} """.format(cohort_temp = cohort_file + "_mutations_temp", cohort_ofile =cohort_file)
+
+        #awk_stm = """awk 'BEGIN{FS=OFS="\t"}{print $0 >> "%s"}' %s""" %(cohort_file, cohort_file + "_mutations_temp")
         os.system(awk_stm)
         print("written lines to {}: {}".format(cohort_file, n))
         if os.path.exists(cohort_file + "_mutations_temp"):
