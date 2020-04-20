@@ -276,7 +276,8 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
         fsep=fsep, sig_thresh=sig_thresh,infile = merged_elements_statspvalues,  merged_elements_statspvaluesonlysig=sig_elements_output_file)
         os.system(awk_stm_sig_elem)
        
-        
+    os.remove(element_file_oncodrive)   
+    os.remove(mutation_file_oncodrive)
     return sig_elements_output_file
 
 
@@ -399,7 +400,6 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     '''Combine nearby mutations accross the cohort into one element'''
         
     if elements_oncodrive: 
-        print('OncodriveFML')
         get_sig_merged_elements_oncodrive(unified_mutation_input_files, created_cohorts[cohort][0], cohort_full_name, 
                             sim_output_extension+output_extension, 
                             distance_to_merge, merged_mut_sig_threshold, 
