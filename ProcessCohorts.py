@@ -376,36 +376,56 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                 sig_tfpos_file=sig_tfpos_file,
                 filter_on_signal = True, dnase_index = 24, fantom_index = 25, 
                 num_other_tfs_index = 27)
-    
-    '''Unify the mutations that have significant scores accross the cohorts
-       Make one record for mutations that overlap multiple motifs
-    '''
-    unified_mutation_input_files = []
-    for mutations_input_file in sig_muts_per_tf_mutation_input_files:
-        unified_muts_file = mutations_input_file + output_extension + "_groupedbymut" 
-        unified_muts_file_wihtmotifinfo = unified_muts_file+"withmotifinfo"
-        if not os.path.exists(unified_muts_file_wihtmotifinfo):
-            print("Unifying: ", mutations_input_file)
-            Utilities.unify_muts(mutations_input_file, unified_muts_file, 
-                                 filter_mut_motifs=True, filter_cond=filter_cond, 
-                                 operation_on_unify=operation_on_unify)
-            Utilities.get_max_motif_in_grouped_muts(
-                annotated_mutations_grouped_file=unified_muts_file, 
-                annotated_mutations_grouped_output_file=unified_muts_file_wihtmotifinfo)
-            os.remove(unified_muts_file)
-        unified_mutation_input_files.append(unified_muts_file_wihtmotifinfo)
-    #print('Unified mutations input files: ', unified_mutation_input_files)
+   
     
     
     '''Combine nearby mutations accross the cohort into one element'''
         
     if elements_oncodrive: 
+        
+        '''Unify the observed mutations that have significant scores accross the cohorts
+           Make one record for mutations that overlap multiple motifs
+        '''
+        unified_mutation_input_files = []
+        for mutations_input_file in sig_muts_per_tf_mutation_input_files[0]:
+            unified_muts_file = mutations_input_file + output_extension + "_groupedbymut" 
+            unified_muts_file_wihtmotifinfo = unified_muts_file+"withmotifinfo"
+            if not os.path.exists(unified_muts_file_wihtmotifinfo):
+                print("Unifying: ", mutations_input_file)
+                Utilities.unify_muts(mutations_input_file, unified_muts_file, 
+                                     filter_mut_motifs=True, filter_cond=filter_cond, 
+                                     operation_on_unify=operation_on_unify)
+                Utilities.get_max_motif_in_grouped_muts(
+                    annotated_mutations_grouped_file=unified_muts_file, 
+                    annotated_mutations_grouped_output_file=unified_muts_file_wihtmotifinfo)
+                os.remove(unified_muts_file)
+            unified_mutation_input_files.append(unified_muts_file_wihtmotifinfo)
         get_sig_merged_elements_oncodrive(unified_mutation_input_files, created_cohorts[cohort][0], cohort_full_name, 
                             sim_output_extension+output_extension, 
                             distance_to_merge, merged_mut_sig_threshold, 
                             local_domain_window, chr_lengths_file, 
                             sig_elements_output_file, sig_thresh)
     else:   
+        
+         
+        '''Unify the mutations that have significant scores accross the cohorts
+           Make one record for mutations that overlap multiple motifs
+        '''
+        unified_mutation_input_files = []
+        for mutations_input_file in sig_muts_per_tf_mutation_input_files:
+            unified_muts_file = mutations_input_file + output_extension + "_groupedbymut" 
+            unified_muts_file_wihtmotifinfo = unified_muts_file+"withmotifinfo"
+            if not os.path.exists(unified_muts_file_wihtmotifinfo):
+                print("Unifying: ", mutations_input_file)
+                Utilities.unify_muts(mutations_input_file, unified_muts_file, 
+                                     filter_mut_motifs=True, filter_cond=filter_cond, 
+                                     operation_on_unify=operation_on_unify)
+                Utilities.get_max_motif_in_grouped_muts(
+                    annotated_mutations_grouped_file=unified_muts_file, 
+                    annotated_mutations_grouped_output_file=unified_muts_file_wihtmotifinfo)
+                os.remove(unified_muts_file)
+            unified_mutation_input_files.append(unified_muts_file_wihtmotifinfo)
+    #    print('Unified mutations input files: ', unified_mutation_input_files)
         '''   Evaluate the significance of each element based on: 
            - the element score (sum of the score of its mutations)
            - number of mutations in the element 
@@ -537,7 +557,7 @@ def parse_args():
     parser.add_argument('-l', '--chr_lengths_file', default='', help='')
     parser.add_argument('--background_window', action='store_const', const=True, help='Check mutation functional score significance by comparing to background window around mutation in simulated mutations, if the flag is missing it would use the whole genome as background')
     parser.add_argument('--background_window_size', type=int, default=50000, help='Background window around mutation for capturing simulated mutation to compare mutation functional score')
-    parser.add_argument('--elements_oncodrive', action='store_const', const=True, help='Identify significantly mutated elements using OncodriveFML')
+    parser.add_argument('--elements_oncodrive', action='store_const', const=True, help='Identify significantly mutated elements using OncodriveFML, if the flag is missing compare the element with the elements from the simulated mutation sets')
     parser.add_argument('--sig_thresh', type=float, default=0.05, help='Sig level threshold on mutation score level')
     parser.add_argument('--sim_sig_thresh', type=float, default=1.0, help='Sig level threshold for simulated mutations on score level')
     parser.add_argument('--merged_mut_sig_threshold', type=float, default=0.05, help='P-value threshold for simulated mutations on score level')
