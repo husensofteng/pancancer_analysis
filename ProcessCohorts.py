@@ -387,19 +387,20 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
            Make one record for mutations that overlap multiple motifs
         '''
         unified_mutation_input_files = []
-        for mutations_input_file in sig_muts_per_tf_mutation_input_files[0]:
-            unified_muts_file = mutations_input_file + output_extension + "_groupedbymut" 
-            unified_muts_file_wihtmotifinfo = unified_muts_file+"withmotifinfo"
-            if not os.path.exists(unified_muts_file_wihtmotifinfo):
-                print("Unifying: ", mutations_input_file)
-                Utilities.unify_muts(mutations_input_file, unified_muts_file, 
-                                     filter_mut_motifs=True, filter_cond=filter_cond, 
-                                     operation_on_unify=operation_on_unify)
-                Utilities.get_max_motif_in_grouped_muts(
-                    annotated_mutations_grouped_file=unified_muts_file, 
-                    annotated_mutations_grouped_output_file=unified_muts_file_wihtmotifinfo)
-                os.remove(unified_muts_file)
-            unified_mutation_input_files.append(unified_muts_file_wihtmotifinfo)
+        mutations_input_file = sig_muts_per_tf_mutation_input_files[0]
+        print(mutations_input_file)
+        unified_muts_file = mutations_input_file + output_extension + "_groupedbymut" 
+        unified_muts_file_wihtmotifinfo = unified_muts_file+"withmotifinfo"
+        if not os.path.exists(unified_muts_file_wihtmotifinfo):
+            print("Unifying: ", mutations_input_file)
+            Utilities.unify_muts(mutations_input_file, unified_muts_file, 
+                                 filter_mut_motifs=True, filter_cond=filter_cond, 
+                                 operation_on_unify=operation_on_unify)
+            Utilities.get_max_motif_in_grouped_muts(
+                annotated_mutations_grouped_file=unified_muts_file, 
+                annotated_mutations_grouped_output_file=unified_muts_file_wihtmotifinfo)
+            os.remove(unified_muts_file)
+        unified_mutation_input_files.append(unified_muts_file_wihtmotifinfo)
         get_sig_merged_elements_oncodrive(unified_mutation_input_files, created_cohorts[cohort][0], cohort_full_name, 
                             sim_output_extension+output_extension, 
                             distance_to_merge, merged_mut_sig_threshold, 
