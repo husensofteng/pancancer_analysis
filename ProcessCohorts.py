@@ -223,7 +223,7 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
                                                  infile=mutation_file_oncodrive+'_header', mutation_file=mutation_file_oncodrive)
     os.system(awk_stmt_mut2)
     
-    os.remove(mutation_file_oncodrive +'_header')
+    #os.remove(mutation_file_oncodrive +'_header')
     
     '''Prepare elements file'''
     element_file_oncodrive = merged_muts_output_file + '_oncodrive'
@@ -245,7 +245,7 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
                                                      infile=element_file_oncodrive+'_header', element_file=element_file_oncodrive)
         os.system(awk_stmt_elem2)
         
-        os.remove(element_file_oncodrive +'_header')
+        #os.remove(element_file_oncodrive +'_header')
         
         '''Calcuate pval for each element using oncodrivefml'''
         
@@ -276,8 +276,8 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
         fsep=fsep, sig_thresh=sig_thresh,infile = merged_elements_statspvalues,  merged_elements_statspvaluesonlysig=sig_elements_output_file)
         os.system(awk_stm_sig_elem)
        
-    os.remove(element_file_oncodrive)   
-    os.remove(mutation_file_oncodrive)
+    #os.remove(element_file_oncodrive)   
+    #os.remove(mutation_file_oncodrive)
     return sig_elements_output_file
 
 
@@ -386,7 +386,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
         '''Unify the observed mutations that have significant scores accross the cohorts
            Make one record for mutations that overlap multiple motifs
         '''
-        unified_mutation_input_files = []
+        
         mutations_input_file = sig_muts_per_tf_mutation_input_files[0]
         print(mutations_input_file)
         unified_muts_file = mutations_input_file + output_extension + "_groupedbymut" 
@@ -401,7 +401,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                 annotated_mutations_grouped_output_file=unified_muts_file_wihtmotifinfo)
             os.remove(unified_muts_file)
         unified_mutation_input_files = unified_muts_file_wihtmotifinfo
-        print(process_elements_test_onco)
+        print(unified_mutation_input_files)
         get_sig_merged_elements_oncodrive(unified_mutation_input_files, created_cohorts[cohort][0], cohort_full_name, 
                             sim_output_extension+output_extension, 
                             distance_to_merge, merged_mut_sig_threshold, 
