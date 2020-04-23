@@ -215,7 +215,7 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
     mutation_file_oncodrive = mutation_input_files + '_oncodrive'
     fsep = '\t'
     awk_stmt_mut = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{print $1,$2,$4,$5,$8,$6}}' {infile} | sort -k1,1n -k2,2n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); gsub("chr","", $1); print $0}}' > {mutation_file}""".format(
-                                                fsep=fsep,  infile=mutacdion_input_files, mutation_file=mutation_file_oncodrive+'_header')
+                                                fsep=fsep,  infile=mutation_input_files, mutation_file=mutation_file_oncodrive+'_header')
     os.system(awk_stmt_mut)
     
     #add header
@@ -223,7 +223,7 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
                                                  infile=mutation_file_oncodrive+'_header', mutation_file=mutation_file_oncodrive)
     os.system(awk_stmt_mut2)
     
-    #os.remove(mutation_file_oncodrive +'_header')
+    os.remove(mutation_file_oncodrive +'_header')
     
     '''Prepare elements file'''
     element_file_oncodrive = merged_muts_output_file + '_oncodrive'
@@ -245,7 +245,7 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
                                                      infile=element_file_oncodrive+'_header', element_file=element_file_oncodrive)
         os.system(awk_stmt_elem2)
         
-        #os.remove(element_file_oncodrive +'_header')
+        os.remove(element_file_oncodrive +'_header')
         
         '''Calcuate pval for each element using oncodrivefml'''
         
@@ -276,8 +276,8 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
         fsep=fsep, sig_thresh=sig_thresh,infile = merged_elements_statspvalues,  merged_elements_statspvaluesonlysig=sig_elements_output_file)
         os.system(awk_stm_sig_elem)
        
-    #os.remove(element_file_oncodrive)   
-    #os.remove(mutation_file_oncodrive)
+    os.remove(element_file_oncodrive)   
+    os.remove(mutation_file_oncodrive)
     return sig_elements_output_file
 
 
@@ -388,7 +388,6 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
         '''
         
         mutations_input_file = sig_muts_per_tf_mutation_input_files[0]
-        print(mutations_input_file)
         unified_muts_file = mutations_input_file + output_extension + "_groupedbymut" 
         unified_muts_file_wihtmotifinfo = unified_muts_file+"withmotifinfo"
         if not os.path.exists(unified_muts_file_wihtmotifinfo):
@@ -401,7 +400,6 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                 annotated_mutations_grouped_output_file=unified_muts_file_wihtmotifinfo)
             os.remove(unified_muts_file)
         unified_mutation_input_files = unified_muts_file_wihtmotifinfo
-        print(unified_mutation_input_files)
         get_sig_merged_elements_oncodrive(unified_mutation_input_files, created_cohorts[cohort][0], cohort_full_name, 
                             sim_output_extension+output_extension, 
                             distance_to_merge, merged_mut_sig_threshold, 
