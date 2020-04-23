@@ -198,7 +198,7 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
         return sig_elements_output_file
     
     "Merge the observed mutations into elements"
-    unified_observed_muts_file_wihtmotifinfo = unified_mutation_input_files[0]
+    unified_observed_muts_file_wihtmotifinfo = unified_mutation_input_files
     merged_muts_output_file = unified_observed_muts_file_wihtmotifinfo+"_mergedmuts{distance_to_merge}bp".format(
                                             distance_to_merge=distance_to_merge)
     Utilities.merge_muts(muts_input_file=unified_observed_muts_file_wihtmotifinfo, 
@@ -256,7 +256,7 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
         awk_stm_oncodrive ="""oncodrivefml -i {mutation_file} -e {element_file} -s wgs -c /proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/oncodrivefml_v2.conf -o {oncodrive_dir}""".format(mutation_file = mutation_file_oncodrive,
                                                                                                         element_file = element_file_oncodrive, oncodrive_dir = tmp_dir)
         
-        
+        print(awk_stm_oncodrive)
         os.system(awk_stm_oncodrive)
         
         #oncodrive result: tsv file
@@ -400,7 +400,8 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                 annotated_mutations_grouped_file=unified_muts_file, 
                 annotated_mutations_grouped_output_file=unified_muts_file_wihtmotifinfo)
             os.remove(unified_muts_file)
-        unified_mutation_input_files.append(unified_muts_file_wihtmotifinfo)
+        unified_mutation_input_files = unified_muts_file_wihtmotifinfo
+        print(process_elements_test_onco)
         get_sig_merged_elements_oncodrive(unified_mutation_input_files, created_cohorts[cohort][0], cohort_full_name, 
                             sim_output_extension+output_extension, 
                             distance_to_merge, merged_mut_sig_threshold, 
