@@ -715,14 +715,14 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     #list of categories for simulated_mean_sd_files
     simulated_mean_sd_cat = ["overallTFs","perChromatinCat" ]
     #simulated_mean_sd_cat = ["overallTFs", "perTF", "perChromatinCat", "perTF_perChromatinCat"]
-    print(simulated_mean_sd_cat)
+    #print(simulated_mean_sd_cat)
     
     #create a dictionery for mean, std scores for all categories
     dict_type_mean_std_scores = {}
     
     mean_f_score_index = 5
     for cat_type in simulated_mean_sd_cat:
-        print(cat_type)
+        #print(cat_type)
         simulated_mean_sd_files = tmp_dir + '/' +'*_tmp_' + cat_type
         simulated_mean_sd_outfiles = tmp_dir + '/' + cohort + '_'+ cat_type
         #merge files from the same category, sort by the line number and group by position, TF motif, chromatin cat. and line number
@@ -745,8 +745,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
-    #if os.path.exists(tmp_dir):
-    #    shutil.rmtree(tmp_dir)
+    if os.path.exists(tmp_dir):
+        shutil.rmtree(tmp_dir)
             
     return  dict_type_mean_std_scores
 
@@ -926,7 +926,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
             p_value = 1.0
             if background_window:
                 pval_type = "overallTFs"
-                print(pval_type)
+                #print(pval_type)
                 try: 
                     #check if the background exist
                     avg = float(dict_type_mean_std_scores[pval_type][str(line_index)]['mean'])
@@ -968,7 +968,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                         
             
                 pval_type = "perChromatinCat"
-                print(pval_type)
+                #print(pval_type)
                 try: 
                     #check if the background exist
                     avg = float(dict_type_mean_std_scores[pval_type][str(line_index)]['mean'])
@@ -1019,7 +1019,6 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
 
             else:
                 pval_type = "overallTFs"
-                print('NO')
                 try:
                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
                                      avg=dict_type_mean_std_scores[pval_type]['mean'], 
@@ -1102,7 +1101,6 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
     
     if background_window:
         adjusted_dict_pvals["overallTFs"] = adjust_pvales(dict_pvals["overallTFs"])
-        print(adjust_pvales(dict_pvals["overallTFs"]))
         pval_type = "perChromatinCat"
         adjusted_dict_pvals[pval_type] = {}
         for chrom_cat in dict_pvals[pval_type].keys():
@@ -1151,7 +1149,6 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
         
         
     else:
-        print('NO')
         adjusted_dict_pvals["overallTFs"] = adjust_pvales(dict_pvals["overallTFs"])
         pval_type = "perTF"
         adjusted_dict_pvals[pval_type] = {}

@@ -310,7 +310,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     '''
     
     if background_window:
-        print(background_window_size)
+        #print(background_window_size)
         dict_type_mean_std_scores = Utilities.get_simulated_mean_sd_per_TF_motif_background_window(
             cohort_full_name = cohort_full_name,
             annotated_input_file = created_cohorts[cohort][0],
@@ -566,7 +566,7 @@ def parse_args():
     parser.add_argument('--distance_to_merge', type=int, default=200, help='Window size (number of base-pairs) to merge nearby mutations within')
     parser.add_argument('--local_domain_window', type=int, default=25000, help='Window width for capturing simulated elements to compare mutation frequency ')
     parser.add_argument('--filter_on_qval', action='store_const', const=True, help='Filter on FDR (adjusted p-values), if the flag is missing it would filter on p-value')
-    parser.add_argument('--sig_category', default = 'perTF', choices=['overallTFs', 'perTF', 'perChromatinCat', 'perTF_perChromatinCat'], help='')
+    parser.add_argument('--sig_category', default = 'overallTFs', choices=['overallTFs', 'perTF', 'perChromatinCat', 'perTF_perChromatinCat'], help='')
     parser.add_argument('--num_cores', type=int, default=10, help='number of cores (cpus) to use in parallel')
     
     return parser.parse_args(sys.argv[1:])
