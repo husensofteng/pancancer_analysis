@@ -7,6 +7,7 @@ import os,sys
 import argparse
 import numpy as np
 import pandas as pd
+import subprocess
 from collections import Counter
 from pybedtools import BedTool
 from ProcessCohorts import process_cohorts
@@ -672,7 +673,8 @@ def get_features_from_gencode(gencode_input_file, gencode_output_file):
                 
     return gencode_output_file
     
-def getSigElements(generated_sig_merged_element_files, n, max_dist, window, output_dir,
+def getSigElements(generated_sig_merged_element_files, active_driver, active_driver_script_dir, active_driver_min_mut,
+                   n, max_dist, window, output_dir,
                    annotated_motifs, tracks_dir, observed_mutations_all, chr_lengths_file,
                    genes_input_file, gencode_input_file, 
                    cell_names_to_use, tissue_cell_mappings_file,
@@ -757,8 +759,10 @@ def getSigElements(generated_sig_merged_element_files, n, max_dist, window, outp
     aggregated_lines, summaries_dict = aggregate_results(combined_mut_grouped_file)
     
     num_muts_per_sample_dict = get_number_of_mutations_per_sample_list_and_write_to_file(mutations_file=observed_mutations_all, numberofmutationspersample_output_file=observed_mutations_all+"numbermutspersample.txt", index_sample_ids=8)
-    aggregated_lines = calculate_p_value_motifregions(aggregated_lines, num_muts_per_sample_dict, index_mutation_frequency=12, index_sample_ids=-1, index_elment_start_coordinate=1, index_elment_stop_coordinate=2, genome_size=3000000000.0, total_number_of_regions_tested=833999)#len(aggregated_lines)) 
     
+    aggregated_lines = calculate_p_value_motifregions(aggregated_lines, num_muts_per_sample_dict, index_mutation_frequency=12, index_sample_ids=-1, index_elment_start_coordinate=1, index_elment_stop_coordinate=2, genome_size=3000000000.0, total_number_of_regions_tested=833999)#len(aggregated_lines)) 
+      
+        
     #aggregated_lines = compute_fdr_per_element(aggregated_lines, mutations_input_file=observed_mutations_all, sample_ids_index_muts_file=8, num_muts_index = 12, index_sample_ids=-1, index_elment_start_coordinate=1, index_elment_stop_coordinate=2, genome_size=3000000000.0)
     '''
     #Get pvalue for each Element
@@ -828,6 +832,15 @@ def getSigElements(generated_sig_merged_element_files, n, max_dist, window, outp
                                       region_types_dict,
                                       aggregated_output_file)
     
+    if active_driver:
+        active_driver_output_file = aggregated_output_file + '_ActiveDriver'
+        print(['Rscript', active_driver_script_dir, aggregated_output_file,  observed_mutations_all, active_driver_min_mut, active_driver_output_file +'_tmp'])
+        subprocess.call(['Rscript', active_driver_script_dir, aggregated_output_file,  observed_mutations_all, active_driver_min_mut, active_driver_output_file +'_tmp'])
+        awk_stm_activedriver = """head {aggregated_output_file} | cat - {active_driver_output_file_tmp} > {active_driver_output_file}""".format(
+                                                 aggregated_output_file=aggregated_output_file, active_driver_output_file_tmp=active_driver_output_file +'_tmp', active_driver_output_file=active_driver_output_file)
+        os.system(awk_stm_activedriver)
+        os.remove(active_driver_output_file + '_tmp')
+        
     return aggregated_output_file
 
 def combine_sig_TFs(sig_tfs_files, tf_label='TFs', output_dir='.'):
@@ -970,7 +983,9 @@ def parse_args():
     parser.add_argument('--local_domain_window', type=int, default=25000, help='Window width for capturing simulated elements to compare mutation frequency ')
     parser.add_argument('--filter_on_qval', action='store_const', const=True, help='Filter on FDR (adjusted p-values), if the flag is missing it would filter on p-value')
     parser.add_argument('--sig_category', default = 'perTF', choices=['overallTFs', 'perTF', 'perChromatinCat', 'perTF_perChromatinCat'], help='')
-    
+    parser.add_argument('--active_driver', action='store_const', const=True, help='Significance test on the combined regulatory elements using ActiveDriverWGS, if the flag is missing it would compute pvalue of elements by comparing the observed number of mutations in the element to average proportion of mutations in the samples of this region')
+    parser.add_argument('--active_driver_script_dir', default='', help='')
+    parser.add_argument('--active_driver_min_mut', type=int, default=1, help='n')
     parser.add_argument('--n', type=int, default=0, help='n')
     parser.add_argument('--max_dist', type=int, default=500000, help='max_dist')
     parser.add_argument('--window', type=int, default=2000, help='window')
@@ -1011,7 +1026,8 @@ if __name__ == '__main__':
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
     
     aggregated_output_file = getSigElements(
-        generated_sig_merged_element_files, args.n, args.max_dist, args.window, 
+        generated_sig_merged_element_files, args.active_driver, args.active_driver_script_dir, args.active_driver_min_mut,
+        args.n, args.max_dist, args.window, 
         args.output_dir, args.observed_input_file, args.tracks_dir, 
         args.observed_mutations_all, args.chr_lengths_file, args.genes_input_file, 
         args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
