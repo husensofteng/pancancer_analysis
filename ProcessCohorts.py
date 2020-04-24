@@ -342,7 +342,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
         annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), 
         annoted_output_file_extension_onlysig="_rand{}setsTFsigQval{}".format(
             len(mutation_input_files)-1, sig_thresh),
-        background_window = False,
+        background_window = background_window,
         motif_name_index = motif_name_index, f_score_index = f_score_index, 
         motif_breaking_score_index = motif_breaking_score_index, 
         filter_on_qval=filter_on_qval, sig_cat=sig_category, 
@@ -358,6 +358,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
             dict_type_mean_std_scores=dict_type_mean_std_scores,
             annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), 
             annoted_output_file_extension_onlysig=sim_output_extension,
+            background_window = background_window,
             motif_name_index = motif_name_index, f_score_index = f_score_index, 
             motif_breaking_score_index = motif_breaking_score_index,
             filter_on_qval=filter_on_qval, sig_cat=sig_category, 
