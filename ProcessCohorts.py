@@ -236,6 +236,7 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
     filesize = os.path.getsize(element_file_oncodrive+'_header')
     #check if elements exist
     if filesize == 0:
+        os.remove(element_file_oncodrive +'_header')
         with open(sig_elements_output_file, 'w') as fp: 
             pass
     else:
