@@ -683,7 +683,6 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             with open(simulated_input_file, 'r') as simulated_ifile:
                 line = simulated_ifile.readline()
                 if line[0:3] == 'chr':
-                    print(type(line[1]))
                     simulated_ifile_temp = simulated_input_file + '_tmp'
                     awk_stmt = """cat {simulated_file} | sed 's/^...//' > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
                     os.system(awk_stmt)
