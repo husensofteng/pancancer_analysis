@@ -310,7 +310,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     '''
     
     if background_window:
-        #print(background_window_size)
+        print(background_window_size)
         dict_type_mean_std_scores = Utilities.get_simulated_mean_sd_per_TF_motif_background_window(
             cohort_full_name = cohort_full_name,
             annotated_input_file = created_cohorts[cohort][0],
