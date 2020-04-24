@@ -6,7 +6,8 @@ args = commandArgs(trailingOnly=TRUE)
 df_elem = args[1]
 df_mut = args[2]
 n_mut_ele = args[3]
-#num_cores = args[4]
+out_file = args[4]
+
 print(df_elem)
 print(n_mut_ele)
 #elements
@@ -32,13 +33,16 @@ data_elem$id <- as.character(data_elem$id)
 #mutations to test
 data_mut <- fread(df_mut)
 mut <- data_mut
-colnames(mut) <- c('chr', 'pos1', 'pos2','ref', 'alt', 'cohort','var_type', 'sample_id','patient')
+colnames(mut)[1:9] <- c('chr', 'pos1', 'pos2','ref', 'alt', 'cohort','var_type', 'sample_id','patient')
 mut_in <- mut[,c('chr', 'pos1', 'pos2','ref', 'alt', 'patient')] %>%  unique
 mut_in$chr <- gsub('23','X',mut_in$chr)
 mut_in$chr <- gsub('24','Y',mut_in$chr)
 mut_in$pos1 <- as.numeric(mut_in$pos1)
 mut_in$pos2 <- as.numeric(mut_in$pos2)
 result = ActiveDriverWGS(mutations = mut_in,
-                         elements = data_elem, mc.cores = 10)
+                         elements = data_elem, mc.cores = 3)
 
-saveRDS(result, file= paste0('ActiveDriverWGS_results_',n_mut_ele,'.RDS'))
+colnames(result)[1] = 'Position'
+result_join <- left_join(data_my,result, by= 'Position' ) %>%  dplyr::select(-c(element_muts_obs:site_enriched, fdr_site:has_site_mutations))
+colnames(result_join)[(length(result_join[1,])-1):length(result_join[1,])] <- c('ElementPval_ActiveDriver',   'ElementFDR_ActiveDriver')
+write.table(result_join, file = out_file,sep='\t', col.names = TRUE, row.names = FALSE, quote = FALSE)
