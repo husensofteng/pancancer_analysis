@@ -272,7 +272,7 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
         merged_element_removed_columns = merged_element.drop(['GENE_ID','MUTS', 'MUTS_RECURRENCE', 'SAMPLES','SNP', 'MNP','INDELS', 'SYMBOL','P_VALUE_NEG', 'Q_VALUE_NEG'], axis=1)
         merged_element_removed_columns.to_csv(merged_elements_statspvalues, index=False, sep='\t', header =False)
         #find significant elements in oncodrive results
-        awk_stm_sig_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{if ($17<= {sig_thresh} && $17 != "") print $0,$16,$17; else if ($16<= {sig_thresh} && $17 == "") print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$16,$16,$16,$16}}' {infile} > {merged_elements_statspvaluesonlysig}""".format(
+        awk_stm_sig_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{if ($17<= {sig_thresh} && $17 != "") print $0,$16,$17; else if ($16<= {sig_thresh} && $17 == "") print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$16,$16,$16}}' {infile} > {merged_elements_statspvaluesonlysig}""".format(
         fsep=fsep, sig_thresh=sig_thresh,infile = merged_elements_statspvalues,  merged_elements_statspvaluesonlysig=sig_elements_output_file)
         os.system(awk_stm_sig_elem)
        
