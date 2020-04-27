@@ -729,7 +729,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     
     mean_f_score_index = 5
     for cat_type in simulated_mean_sd_cat:
-        #print(cat_type)
+        print('Combining dictionery')
         simulated_mean_sd_files = tmp_dir + '/' +'*_tmp_' + cat_type
         simulated_mean_sd_outfiles = tmp_dir + '/' + cohort + '_'+ cat_type
         #merge files from the same category, sort by the line number and group by position, TF motif, chromatin cat. and line number
