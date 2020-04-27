@@ -623,33 +623,34 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     #divided observed mutations files into subfiles. Extend mutations with the backgroud window
     splited_file_name = tmp_dir  + '/' + cohort + '_splited'
     #lines_per_file = 10000
-    line_number = 0
-    with open(annotated_input_file, 'r') as observed_infile, open(splited_file_name, "w") as splited_ifile:
-        l = observed_infile.readline().strip().split('\t')
-        while l and len(l)>3:
-            motif_start = (int(l[1])-background_window_size)
-            motif_end = int(l[2])+background_window_size
-            motif_names = l[motif_name_index]
-            chrom_cat = l[chromatin_cat_index]
-            chr_name = l[0].replace('chr','').replace('X', '23').replace('Y','24').replace('MT','25').replace('M','25')
-            if motif_start<0:
-                motif_start = 0
-                motif_end += 0 - (int(l[1])-background_window_size)
-            if motif_end>chr_lengths[int(chr_name)]:
-                motif_end = chr_lengths[int(chr_name)]
-                motif_start -= (int(l[2])+background_window_size) - chr_lengths[int(chr_name)]
-            #if line_number % lines_per_file == 0:
-            #    if splited_file:
-            #        splited_file.close()
-            #    splited_file_name = splited_files_name + '_{}'.format(line_number)
-            #    splited_files_list.append(splited_file_name)
-            #    splited_file = open(splited_file_name, "w")
-            # save background window, motif name, chromatin cat, and number of line
-            splited_ifile.write(chr_name + '\t' + str(motif_start) + '\t' +   str(motif_end) + '\t' + str( motif_names) + '\t' +chrom_cat + '\t' + str(line_number) + '\n')
-            line_number+=1
+    if not os.path.exists(splited_file_name):
+        line_number = 0
+        with open(annotated_input_file, 'r') as observed_infile, open(splited_file_name, "w") as splited_ifile:
             l = observed_infile.readline().strip().split('\t')
-        #if splited_file:
-        #    splited_file.close()
+            while l and len(l)>3:
+                motif_start = (int(l[1])-background_window_size)
+                motif_end = int(l[2])+background_window_size
+                motif_names = l[motif_name_index]
+                chrom_cat = l[chromatin_cat_index]
+                chr_name = l[0].replace('chr','').replace('X', '23').replace('Y','24').replace('MT','25').replace('M','25')
+                if motif_start<0:
+                    motif_start = 0
+                    motif_end += 0 - (int(l[1])-background_window_size)
+                if motif_end>chr_lengths[int(chr_name)]:
+                    motif_end = chr_lengths[int(chr_name)]
+                    motif_start -= (int(l[2])+background_window_size) - chr_lengths[int(chr_name)]
+                #if line_number % lines_per_file == 0:
+                #    if splited_file:
+                #        splited_file.close()
+                #    splited_file_name = splited_files_name + '_{}'.format(line_number)
+                #    splited_files_list.append(splited_file_name)
+                #    splited_file = open(splited_file_name, "w")
+                # save background window, motif name, chromatin cat, and number of line
+                splited_ifile.write(chr_name + '\t' + str(motif_start) + '\t' +   str(motif_end) + '\t' + str( motif_names) + '\t' +chrom_cat + '\t' + str(line_number) + '\n')
+                line_number+=1
+                l = observed_infile.readline().strip().split('\t')
+            #if splited_file:
+            #    splited_file.close()
 
     #define motif breaking score and fscore for the intersected files
     new_motif_breaking_score_index = motif_breaking_score_index + 6
@@ -657,7 +658,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     #define extensions for the merged files for all categories
     simulated_input_file_tmp_overallTFs_extension ="_tmp_overallTFs"
     #simulated_input_file_tmp_perTF_extension = "_tmp_perTF"
-    simulated_input_file_tmp_perChromatinCat_extension = "_tmp_perChromatinCat"
+    #simulated_input_file_tmp_perChromatinCat_extension = "_tmp_perChromatinCat"
     #simulated_input_file_tmp_perTF_perChromatinCat_extension = "_tmp_perTF_perChromatinCat"
     simulated_files_temp = []
     # intersection the observed mutation file with the simulated file to find the background
@@ -666,6 +667,14 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
 
     for simulated_input_file in simulated_annotated_input_files:
             simulated_input_file_name = simulated_input_file.split('/')[-1]
+            
+            observed_input_file_obj = BedTool(splited_file_name)
+            simulated_input_file_tmp_overallTFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_overallTFs_extension
+            #simulated_input_file_tmp_TFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perTF_extension
+            #simulated_input_file_tmp_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perChromatinCat_extension
+            #simulated_input_file_tmp_TFs_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perTF_perChromatinCat_extension
+            
+            
             #check if mutation position is string and convert to intiger
             #remove from the simulation file rows where mut positions are string and compare number of lines
             #simulated_input_file_position = simulated_input_file + '_pos'
@@ -678,42 +687,40 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             #    os.system(awk_tmp)
             #    simulated_input_file = simulated_ifile_temp 
             #os.remove(simulated_input_file_position)
-            
-            #check if 'chr' is present
-            with open(simulated_input_file, 'r') as simulated_ifile:
-                line = simulated_ifile.readline()
-                if line[0:3] == 'chr':
-                    simulated_ifile_temp = simulated_input_file + '_tmp'
-                    awk_stmt = """cat {simulated_file} | sed 's/^...//' > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
-                    os.system(awk_stmt)
-                    simulated_files_temp = simulated_ifile_temp
-                    simulated_input_file = simulated_ifile_temp   
-            simulated_input_file_obj = BedTool(simulated_input_file)
-
-            observed_input_file_obj = BedTool(splited_file_name)
-            simulated_input_file_tmp_overallTFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_overallTFs_extension
-            #simulated_input_file_tmp_TFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perTF_extension
-            simulated_input_file_tmp_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perChromatinCat_extension
-            #simulated_input_file_tmp_TFs_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perTF_perChromatinCat_extension
-            #intedect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
-            observed_input_file_obj_inter = observed_input_file_obj.intersect(simulated_input_file_obj, wo = True).each(sum_fscore_motif_breaking_score, new_fscore_index, new_motif_breaking_score_index).saveas()
-            #group files to obtain the mean and stdev for the functional score
-            try: 
-                observed_input_file_obj_inter.groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_overallTFs)
-                #observed_input_file_obj_inter.filter(lambda x: str(x[3]) == str(x[23])).groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_TFs)
-                observed_input_file_obj_inter.filter(lambda x: str(x[4]) == str(x[28])).groupby(g=[1,2,3,4,5,6], c=(new_fscore_index+1), o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_chromatin)
-                #observed_input_file_obj_inter.filter(lambda x: (str(x[4]) == str(x[28])) & (str(x[3]) == str(x[23]))).groupby(g=[1,2,3,4,5,6], c=(new_fscore_index+1), o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_TFs_chromatin)
-            except KeyError:
-                open(simulated_input_file_tmp_overallTFs, 'a').close()
-                #open(simulated_input_file_tmp_perTF, 'a').close()
-                open(simulated_input_file_tmp_chromatin, 'a').close()
-                #open(simulated_input_file_tmp_perTF_perChromatinCat_extension, 'a').close()
+            if not os.path.exists(simulated_input_file_tmp_overallTFs):
+                #check if 'chr' is present
+                with open(simulated_input_file, 'r') as simulated_ifile:
+                    line = simulated_ifile.readline()
+                    if line[0:3] == 'chr':
+                        simulated_ifile_temp = simulated_input_file + '_tmp'
+                        awk_stmt = """cat {simulated_file} | sed 's/^...//' > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
+                        os.system(awk_stmt)
+                        simulated_files_temp = simulated_ifile_temp
+                        simulated_input_file = simulated_ifile_temp   
+                simulated_input_file_obj = BedTool(simulated_input_file)
+    
                 
+                #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
+                observed_input_file_obj_inter = observed_input_file_obj.intersect(simulated_input_file_obj, wo = True).each(sum_fscore_motif_breaking_score, new_fscore_index, new_motif_breaking_score_index).saveas()
+                #group files to obtain the mean and stdev for the functional score
+                try: 
+                    observed_input_file_obj_inter.groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_overallTFs)
+                    #observed_input_file_obj_inter.filter(lambda x: str(x[3]) == str(x[23])).groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_TFs)
+                    #observed_input_file_obj_inter.filter(lambda x: str(x[4]) == str(x[28])).groupby(g=[1,2,3,4,5,6], c=(new_fscore_index+1), o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_chromatin)
+                    #observed_input_file_obj_inter.filter(lambda x: (str(x[4]) == str(x[28])) & (str(x[3]) == str(x[23]))).groupby(g=[1,2,3,4,5,6], c=(new_fscore_index+1), o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_TFs_chromatin)
+                except KeyError:
+                    open(simulated_input_file_tmp_overallTFs, 'a').close()
+                    #open(simulated_input_file_tmp_perTF, 'a').close()
+                    #open(simulated_input_file_tmp_chromatin, 'a').close()
+                    #open(simulated_input_file_tmp_perTF_perChromatinCat_extension, 'a').close()
                     
-            if "_tmp" in simulated_input_file:
-                os.remove(simulated_input_file)
+                        
+                if "_tmp" in simulated_input_file:
+                    os.remove(simulated_input_file)
+        
+    
     #list of categories for simulated_mean_sd_files
-    simulated_mean_sd_cat = ["overallTFs","perChromatinCat" ]
+    simulated_mean_sd_cat = ["overallTFs"]
     #simulated_mean_sd_cat = ["overallTFs", "perTF", "perChromatinCat", "perTF_perChromatinCat"]
     #print(simulated_mean_sd_cat)
     
@@ -864,7 +871,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                         background_window = False,
                         motif_name_index = 17, f_score_index = 9, chromatin_index = 22,
                         motif_breaking_score_index = 10,
-                        filter_on_qval=True, sig_cat='perTF',
+                        filter_on_qval=True, sig_cat='overallTFs',
                         sig_thresh=0.05,
                         filter_on_signal = True, dnase_index = 24, fantom_index = 25, 
                         num_other_tfs_index = 27, tf_binding_index=30):
@@ -967,28 +974,28 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
 #                         dict_line_indices[pval_type] = {l[motif_name_index] :[line_index]}
                         
             
-                pval_type = "perChromatinCat"
-                #print(pval_type)
-                try: 
-                    #check if the background exist
-                    avg = float(dict_type_mean_std_scores[pval_type][str(line_index)]['mean'])
-                    sd = float(dict_type_mean_std_scores[pval_type][str(line_index)]['std'])
-                    p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
-                                         avg=avg, 
-                                         sd=sd)
-                except KeyError:
-                    #no simulated mutations in the background to compare; set p-value as 1
-                    p_value = 0.0
-                try:
-                    dict_pvals[pval_type][l[chromatin_index]].append(p_value)
-                    dict_line_indices[pval_type][l[chromatin_index]].append(line_index)
-                except KeyError:
-                    try:
-                        dict_pvals[pval_type][l[chromatin_index]] = [p_value]
-                        dict_line_indices[pval_type][l[chromatin_index]] = [line_index]
-                    except KeyError:
-                        dict_pvals[pval_type] = {l[chromatin_index] : [p_value]}
-                        dict_line_indices[pval_type] = {l[chromatin_index] :[line_index]}
+#                 pval_type = "perChromatinCat"
+#                 #print(pval_type)
+#                 try: 
+#                     #check if the background exist
+#                     avg = float(dict_type_mean_std_scores[pval_type][str(line_index)]['mean'])
+#                     sd = float(dict_type_mean_std_scores[pval_type][str(line_index)]['std'])
+#                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
+#                                          avg=avg, 
+#                                          sd=sd)
+#                 except KeyError:
+#                     #no simulated mutations in the background to compare; set p-value as 1
+#                     p_value = 0.0
+#                 try:
+#                     dict_pvals[pval_type][l[chromatin_index]].append(p_value)
+#                     dict_line_indices[pval_type][l[chromatin_index]].append(line_index)
+#                 except KeyError:
+#                     try:
+#                         dict_pvals[pval_type][l[chromatin_index]] = [p_value]
+#                         dict_line_indices[pval_type][l[chromatin_index]] = [line_index]
+#                     except KeyError:
+#                         dict_pvals[pval_type] = {l[chromatin_index] : [p_value]}
+#                         dict_line_indices[pval_type] = {l[chromatin_index] :[line_index]}
 
             
 #                 pval_type = "perTF_perChromatinCat"
@@ -1101,10 +1108,10 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
     
     if background_window:
         adjusted_dict_pvals["overallTFs"] = adjust_pvales(dict_pvals["overallTFs"])
-        pval_type = "perChromatinCat"
-        adjusted_dict_pvals[pval_type] = {}
-        for chrom_cat in dict_pvals[pval_type].keys():
-            adjusted_dict_pvals[pval_type][chrom_cat] = adjust_pvales(dict_pvals[pval_type][chrom_cat])
+#         pval_type = "perChromatinCat"
+#         adjusted_dict_pvals[pval_type] = {}
+#         for chrom_cat in dict_pvals[pval_type].keys():
+#             adjusted_dict_pvals[pval_type][chrom_cat] = adjust_pvales(dict_pvals[pval_type][chrom_cat])
         
         with open(annoted_output_file, 'w') as annoted_input_ofile, open(annoted_output_file_onlysig, 'w') as annoted_input_ofile_onlysig:
             
@@ -1119,10 +1126,10 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                 pvals[pval_type] = dict_pvals[pval_type][dict_line_indices[pval_type].index(line_index)]
                 adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][dict_line_indices[pval_type].index(line_index)]
             
-                pval_type = "perChromatinCat"
-                sub_type = sl[chromatin_index]
-                pvals[pval_type] = dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
-                adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
+#                 pval_type = "perChromatinCat"
+#                 sub_type = sl[chromatin_index]
+#                 pvals[pval_type] = dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
+#                 adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
                 
                     
                 sl[motif_breaking_score_index+1] = (json.dumps(pvals)+'@'+json.dumps(adjust_pvals)).replace(',', ';')
