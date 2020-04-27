@@ -717,7 +717,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                         
                 if "_tmp" in simulated_input_file:
                     os.remove(simulated_input_file)
-        
+                    
+    pybedtools.cleanup()   
     
     #list of categories for simulated_mean_sd_files
     simulated_mean_sd_cat = ["overallTFs"]
