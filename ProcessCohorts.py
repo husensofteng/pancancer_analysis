@@ -568,7 +568,7 @@ def parse_args():
     parser.add_argument('--filter_on_qval', action='store_const', const=True, help='Filter on FDR (adjusted p-values), if the flag is missing it would filter on p-value')
     parser.add_argument('--sig_category', default = 'overallTFs', choices=['overallTFs', 'perTF', 'perChromatinCat', 'perTF_perChromatinCat'], help='')
     parser.add_argument('--num_cores', type=int, default=10, help='number of cores (cpus) to use in parallel')
-    parser.add_argument('-tmp_dir', default='$SNIC_TMP', help='')
+    parser.add_argument('--tmp_dir', default='$SNIC_TMP', help='')
 
     
     return parser.parse_args(sys.argv[1:])

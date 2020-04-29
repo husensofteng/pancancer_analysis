@@ -1002,7 +1002,7 @@ def parse_args():
     parser.add_argument('--kegg_pathways_file', help='')
     parser.add_argument('--cosmic_genes_file', help='')
     parser.add_argument('--pcawg_drivers_file', help='')
-    parser.add_argument('-tmp_dir', default='$SNIC_TMP', help='')
+    parser.add_argument('--tmp_dir', default='$SNIC_TMP', help='')
 
     
     return parser.parse_args(sys.argv[1:])
