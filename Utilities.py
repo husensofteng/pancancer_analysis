@@ -723,7 +723,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                     #open(simulated_input_file_tmp_perTF, 'a').close()
                     #open(simulated_input_file_tmp_chromatin, 'a').close()
                     #open(simulated_input_file_tmp_perTF_perChromatinCat_extension, 'a').close()
-                print(os.listdir(tmp_dir_intersect))
+                #print(os.listdir(tmp_dir_intersect))
                 copyfile(simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local)         
                 #if "_tmp" in simulated_input_file:
                 #    os.remove(simulated_input_file)
@@ -764,8 +764,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
-    #if os.path.exists(tmp_dir_intersect):
-    #    shutil.rmtree(tmp_dir_intersect)
+    if os.path.exists(tmp_dir_intersect):
+        shutil.rmtree(tmp_dir_intersect)
             
     return  dict_type_mean_std_scores
 
