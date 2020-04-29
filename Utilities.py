@@ -631,7 +631,6 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     splited_file_name_local = tmp_dir_intersect  + '/' + cohort + '_splited'
     #lines_per_file = 10000
     if not os.path.exists(splited_file_name_local):
-        print('YES')
         line_number = 0
         with open(annotated_input_file, 'r') as observed_infile, open(splited_file_name, "w") as splited_ifile:
             l = observed_infile.readline().strip().split('\t')
@@ -659,9 +658,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                 l = observed_infile.readline().strip().split('\t')
             #if splited_file:
             #    splited_file.close()
-    print('DONE')       
     #copy file from scratch to project folder
-    print(os.listdir(tmp_dir_intersect)) 
     copyfile(splited_file_name, splited_file_name_local)      
      
     #define motif breaking score and fscore for the intersected files
@@ -712,9 +709,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                         os.system(awk_stmt)
                         simulated_files_temp = simulated_ifile_temp
                         simulated_input_file = simulated_ifile_temp   
-                simulated_input_file_obj = BedTool(simulated_input_file)
-                print('DONE2')
-                
+                simulated_input_file_obj = BedTool(simulated_input_file)                
                 #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
                 observed_input_file_obj_inter = observed_input_file_obj.intersect(simulated_input_file_obj, wo = True).each(sum_fscore_motif_breaking_score, new_fscore_index, new_motif_breaking_score_index).saveas()
                 #group files to obtain the mean and stdev for the functional score
@@ -729,13 +724,11 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                     #open(simulated_input_file_tmp_chromatin, 'a').close()
                     #open(simulated_input_file_tmp_perTF_perChromatinCat_extension, 'a').close()
                 
-                copyfile(simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local)    
-                print('DONE3')      
+                copyfile(simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local)         
                 if "_tmp" in simulated_input_file:
                     os.remove(simulated_input_file)
                     
             cleanup()   
-    print('DONE4')
     #list of categories for simulated_mean_sd_files
     simulated_mean_sd_cat = ["overallTFs"]
     #simulated_mean_sd_cat = ["overallTFs", "perTF", "perChromatinCat", "perTF_perChromatinCat"]
@@ -771,10 +764,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
-    copyfile(cohort_mean_sd_per_tf_overall_output_dict_file, simulated_mean_sd_outfiles_local)
-    
-    if os.path.exists(tmp_dir_intersect):
-        shutil.rmtree(tmp_dir_intersect)
+    #if os.path.exists(tmp_dir_intersect):
+    #    shutil.rmtree(tmp_dir_intersect)
             
     return  dict_type_mean_std_scores
 
