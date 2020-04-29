@@ -663,7 +663,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     #copy file from scratch to project folder
     print(os.listdir(tmp_dir_intersect)) 
     copyfile(splited_file_name, splited_file_name_local)      
-    print('DONE2') 
+     
     #define motif breaking score and fscore for the intersected files
     new_motif_breaking_score_index = motif_breaking_score_index + 6
     new_fscore_index = f_score_index + 6
@@ -682,6 +682,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             
             observed_input_file_obj = BedTool(splited_file_name)
             simulated_input_file_tmp_overallTFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_overallTFs_extension
+            simulated_input_file_tmp_overallTFs_local = tmp_dir_intersect +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_overallTFs_extension
+
             #simulated_input_file_tmp_TFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perTF_extension
             #simulated_input_file_tmp_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perChromatinCat_extension
             #simulated_input_file_tmp_TFs_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perTF_perChromatinCat_extension
@@ -711,7 +713,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                         simulated_files_temp = simulated_ifile_temp
                         simulated_input_file = simulated_ifile_temp   
                 simulated_input_file_obj = BedTool(simulated_input_file)
-    
+                print('DONE2')
                 
                 #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
                 observed_input_file_obj_inter = observed_input_file_obj.intersect(simulated_input_file_obj, wo = True).each(sum_fscore_motif_breaking_score, new_fscore_index, new_motif_breaking_score_index).saveas()
@@ -727,13 +729,13 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                     #open(simulated_input_file_tmp_chromatin, 'a').close()
                     #open(simulated_input_file_tmp_perTF_perChromatinCat_extension, 'a').close()
                 
-                copyfile(simulated_input_file_tmp_overallTFs, tmp_dir_intersect)    
-                        
+                copyfile(simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local)    
+                print('DONE3')      
                 if "_tmp" in simulated_input_file:
                     os.remove(simulated_input_file)
                     
             cleanup()   
-    
+    print('DONE4')
     #list of categories for simulated_mean_sd_files
     simulated_mean_sd_cat = ["overallTFs"]
     #simulated_mean_sd_cat = ["overallTFs", "perTF", "perChromatinCat", "perTF_perChromatinCat"]
@@ -747,6 +749,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         print('Combining dictionery')
         simulated_mean_sd_files = tmp_dir + '/' +'*_tmp_' + cat_type
         simulated_mean_sd_outfiles = tmp_dir + '/' + cohort + '_'+ cat_type
+        simulated_mean_sd_outfiles_local = mutations_cohorts_dir + '/' + cohort + '_'+ cat_type
+
         #merge files from the same category, sort by the line number and group by position, TF motif, chromatin cat. and line number
         awk_comm = """cat {files} | 
         sort -k6 -V | 
@@ -767,7 +771,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
-    copyfile(cohort_mean_sd_per_tf_overall_output_dict_file, mutations_cohorts_dir)
+    copyfile(cohort_mean_sd_per_tf_overall_output_dict_file, simulated_mean_sd_outfiles_local)
     
     if os.path.exists(tmp_dir):
         shutil.rmtree(tmp_dir)
