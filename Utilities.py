@@ -16,14 +16,18 @@ from statsmodels.sandbox.stats.multicomp import multipletests
 from scipy.stats import binom, hypergeom
 from scipy.stats import binom
 import shutil
+from shutil import copyfile
 #from score_motifs_tissuepertable import open_connection, close_connection
 
 #import matplotlib.backends.backend_pdf
 
 #matplotlib.style.use('ggplot')
-temp_dir = 'tmp_pybedtoos'
-if not os.path.exists(temp_dir):
-    os.mkdir(temp_dir)  
+#temp_dir = 'tmp_pybedtoos'
+#if not os.path.exists(temp_dir):
+#    os.mkdir(temp_dir)  
+
+#use scratch
+temp_dir = '$SNIC_TMP'
 set_tempdir(temp_dir)
 
 def unify_muts(annotated_mutations_input_file, annotated_mutations_grouped_file, filter_mut_motifs=True, filter_cond = "", operation_on_unify='mean'):
@@ -606,7 +610,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                                        chr_lengths_file,
                                        background_window_size = 50000,
                                        motif_name_index = 17, f_score_index = 9, 
-                                       motif_breaking_score_index = 10, chromatin_cat_index=22):
+                                       motif_breaking_score_index = 10, chromatin_cat_index=22, tmp_dir):
     
     if os.path.exists(cohort_mean_sd_per_tf_overall_output_dict_file):
         with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'r') as dict_simulated_mean_sd_per_TF_motif_ifile:
@@ -615,15 +619,17 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     
     print("Extracting avg and std per TF and overall from the simulation sets... onto: ", cohort_mean_sd_per_tf_overall_output_dict_file)
     cohort = cohort_full_name.split('/')[-1]
-    tmp_dir = mutations_cohorts_dir + '/' + cohort + '_tmp_pybedtoos'
-    if not os.path.exists(tmp_dir):
-        os.mkdir(tmp_dir) 
+    tmp_dir_intersect = mutations_cohorts_dir + '/' + cohort + '_tmp_pybedtoos'
+    if not os.path.exists(tmp_dir_intersect):
+        os.mkdir(tmp_dir_intersect) 
     
     chr_lengths = get_chr_lengths(chr_lengths_file)
     #divided observed mutations files into subfiles. Extend mutations with the backgroud window
     splited_file_name = tmp_dir  + '/' + cohort + '_splited'
+
+    splited_file_name_local = tmp_dir_intersect  + '/' + cohort + '_splited'
     #lines_per_file = 10000
-    if not os.path.exists(splited_file_name):
+    if not os.path.exists(splited_file_name_local):
         line_number = 0
         with open(annotated_input_file, 'r') as observed_infile, open(splited_file_name, "w") as splited_ifile:
             l = observed_infile.readline().strip().split('\t')
@@ -651,7 +657,9 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                 l = observed_infile.readline().strip().split('\t')
             #if splited_file:
             #    splited_file.close()
-
+            
+    #copy file from scratch to project folder
+    copyfile(splited_file_name, tmp_dir_intersect)      
     #define motif breaking score and fscore for the intersected files
     new_motif_breaking_score_index = motif_breaking_score_index + 6
     new_fscore_index = f_score_index + 6
@@ -692,7 +700,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                 with open(simulated_input_file, 'r') as simulated_ifile:
                     line = simulated_ifile.readline()
                     if line[0:3] == 'chr':
-                        simulated_ifile_temp = simulated_input_file + '_tmp'
+                        simulated_ifile_temp = tmp_dir + simulated_input_file_name + '_tmp'
+                        #simulated_ifile_temp = simulated_input_file + '_tmp'
                         awk_stmt = """cat {simulated_file} | sed 's/^...//' > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
                         os.system(awk_stmt)
                         simulated_files_temp = simulated_ifile_temp
@@ -713,7 +722,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                     #open(simulated_input_file_tmp_perTF, 'a').close()
                     #open(simulated_input_file_tmp_chromatin, 'a').close()
                     #open(simulated_input_file_tmp_perTF_perChromatinCat_extension, 'a').close()
-                    
+                
+                copyfile(simulated_input_file_tmp_overallTFs, tmp_dir_intersect)    
                         
                 if "_tmp" in simulated_input_file:
                     os.remove(simulated_input_file)
@@ -752,6 +762,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
+    
+    copyfile(cohort_mean_sd_per_tf_overall_output_dict_file, mutations_cohorts_dir)
     
     if os.path.exists(tmp_dir):
         shutil.rmtree(tmp_dir)

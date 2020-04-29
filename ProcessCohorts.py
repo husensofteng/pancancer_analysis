@@ -291,7 +291,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                filter_cond, operation_on_unify, output_extension, 
                distance_to_merge, merged_mut_sig_threshold,
                local_domain_window, chr_lengths_file,
-               sig_elements_output_file, sig_tfs_file, sig_tfpos_file):    
+               sig_elements_output_file, sig_tfs_file, sig_tfpos_file, tmp_dir):    
     
     "get the cohort name to use for output file names"
     cohort_full_name = created_cohorts[cohort][0].split('_')[0]
@@ -321,7 +321,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
             background_window_size = background_window_size, 
             motif_name_index = motif_name_index, f_score_index = f_score_index, 
             motif_breaking_score_index = motif_breaking_score_index,
-            chromatin_cat_index = chromatin_cat_index)
+            chromatin_cat_index = chromatin_cat_index, tmp_dir)
     else:
         '''As background consider whole genome
         '''
@@ -446,7 +446,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                     background_window, background_window_size, elements_oncodrive,
                     filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                     distance_to_merge, 
-                    merged_mut_sig_threshold, local_domain_window):
+                    merged_mut_sig_threshold, local_domain_window, tmp_dir):
     
     simulated_input_files = [simulated_input_dir+'/'+x for x in os.listdir(simulated_input_dir) if '_annotated.bed9' in x]
     mutation_input_files = [observed_input_file]
@@ -523,7 +523,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                     filter_cond, operation_on_unify, output_extension, 
                     distance_to_merge, merged_mut_sig_threshold,
                local_domain_window, chr_lengths_file, sig_elements_output_file, 
-               sig_tfs_file, sig_tfpos_file))#, callback=generated_sig_merged_element_files.append)
+               sig_tfs_file, sig_tfpos_file, tmp_dir))#, callback=generated_sig_merged_element_files.append)
         else:
             run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_dir, motif_name_index, 
                        f_score_index, motif_breaking_score_index, chromatin_cat_index,
@@ -533,7 +533,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                        filter_cond, operation_on_unify, output_extension, 
                        distance_to_merge, merged_mut_sig_threshold,
                        local_domain_window, chr_lengths_file, sig_elements_output_file, 
-                       sig_tfs_file, sig_tfpos_file)
+                       sig_tfs_file, sig_tfpos_file, tmp_dir)
         generated_sig_merged_element_files.append(sig_elements_output_file)
         sig_tfs_files.append(sig_tfs_file)
         sig_tfpos_files.append(sig_tfpos_file)
@@ -568,6 +568,8 @@ def parse_args():
     parser.add_argument('--filter_on_qval', action='store_const', const=True, help='Filter on FDR (adjusted p-values), if the flag is missing it would filter on p-value')
     parser.add_argument('--sig_category', default = 'overallTFs', choices=['overallTFs', 'perTF', 'perChromatinCat', 'perTF_perChromatinCat'], help='')
     parser.add_argument('--num_cores', type=int, default=10, help='number of cores (cpus) to use in parallel')
+    parser.add_argument('-tmp_dir', default='$SNIC_TMP', help='')
+
     
     return parser.parse_args(sys.argv[1:])
     
@@ -584,7 +586,7 @@ if __name__ == '__main__':
         args.background_window, args.background_window_size, args.elements_oncodrive,
         args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
-        args.local_domain_window)
+        args.local_domain_window, args.tmp_dir)
     #print("Generated Sig. Element Sets: \n", '\n'.join(generated_sig_merged_element_files))
     
     
