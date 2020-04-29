@@ -610,7 +610,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                                        chr_lengths_file,
                                        background_window_size = 50000,
                                        motif_name_index = 17, f_score_index = 9, 
-                                       motif_breaking_score_index = 10, chromatin_cat_index=22, tmp_dir):
+                                       motif_breaking_score_index = 10, chromatin_cat_index=22, tmp_dir = '$SNIC_TMP'):
     
     if os.path.exists(cohort_mean_sd_per_tf_overall_output_dict_file):
         with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'r') as dict_simulated_mean_sd_per_TF_motif_ifile:
