@@ -27,7 +27,7 @@ from shutil import copyfile
 #    os.mkdir(temp_dir)  
 
 #use scratch
-temp_dir = '$SNIC_TMP'
+temp_dir = tmp_dir
 set_tempdir(temp_dir)
 
 def unify_muts(annotated_mutations_input_file, annotated_mutations_grouped_file, filter_mut_motifs=True, filter_cond = "", operation_on_unify='mean'):
