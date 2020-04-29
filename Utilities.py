@@ -773,8 +773,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     
     copyfile(cohort_mean_sd_per_tf_overall_output_dict_file, simulated_mean_sd_outfiles_local)
     
-    if os.path.exists(tmp_dir):
-        shutil.rmtree(tmp_dir)
+    if os.path.exists(tmp_dir_intersect):
+        shutil.rmtree(tmp_dir_intersect)
             
     return  dict_type_mean_std_scores
 
