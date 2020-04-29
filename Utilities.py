@@ -619,7 +619,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     
     print("Extracting avg and std per TF and overall from the simulation sets... onto: ", cohort_mean_sd_per_tf_overall_output_dict_file)
     cohort = cohort_full_name.split('/')[-1]
-    tmp_dir_intersect = mutations_cohorts_dir + '/' + cohort + '_tmp_pybedtoos'
+    tmp_dir_intersect = mutations_cohorts_dir + '/' + cohort + '_tmp_pybedtoos/'
     if not os.path.exists(tmp_dir_intersect):
         os.mkdir(tmp_dir_intersect) 
     
