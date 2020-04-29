@@ -1002,6 +1002,8 @@ def parse_args():
     parser.add_argument('--kegg_pathways_file', help='')
     parser.add_argument('--cosmic_genes_file', help='')
     parser.add_argument('--pcawg_drivers_file', help='')
+    parser.add_argument('-tmp_dir', default='$SNIC_TMP', help='')
+
     
     return parser.parse_args(sys.argv[1:])
     
@@ -1022,7 +1024,7 @@ if __name__ == '__main__':
         args.background_window, args.background_window_size, args.elements_oncodrive,
         args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
-        args.local_domain_window)
+        args.local_domain_window, args.tmp_dir)
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
     
     aggregated_output_file = getSigElements(
