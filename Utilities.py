@@ -679,7 +679,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             
             observed_input_file_obj = BedTool(splited_file_name)
             simulated_input_file_tmp_overallTFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_overallTFs_extension
-            simulated_input_file_tmp_overallTFs_local = tmp_dir_intersect +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_overallTFs_extension
+            simulated_input_file_tmp_overallTFs_local = tmp_dir_intersect + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_overallTFs_extension
 
             #simulated_input_file_tmp_TFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perTF_extension
             #simulated_input_file_tmp_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perChromatinCat_extension
@@ -723,10 +723,10 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                     #open(simulated_input_file_tmp_perTF, 'a').close()
                     #open(simulated_input_file_tmp_chromatin, 'a').close()
                     #open(simulated_input_file_tmp_perTF_perChromatinCat_extension, 'a').close()
-                
+                print(os.listdir(tmp_dir_intersect))
                 copyfile(simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local)         
-                if "_tmp" in simulated_input_file:
-                    os.remove(simulated_input_file)
+                #if "_tmp" in simulated_input_file:
+                #    os.remove(simulated_input_file)
                     
             cleanup()   
     #list of categories for simulated_mean_sd_files
