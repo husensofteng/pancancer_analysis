@@ -661,7 +661,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             #    splited_file.close()
     print('DONE')       
     #copy file from scratch to project folder
-    copyfile(splited_file_name, tmp_dir_intersect)      
+    print(os.listdir(tmp_dir_intersect)) 
+    copyfile(splited_file_name, splited_file_name_local)      
     print('DONE2') 
     #define motif breaking score and fscore for the intersected files
     new_motif_breaking_score_index = motif_breaking_score_index + 6
