@@ -321,7 +321,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
             background_window_size = background_window_size, 
             motif_name_index = motif_name_index, f_score_index = f_score_index, 
             motif_breaking_score_index = motif_breaking_score_index,
-            chromatin_cat_index = chromatin_cat_index, tmp_dir)
+            chromatin_cat_index = chromatin_cat_index, tmp_dir = tmp_dir)
     else:
         '''As background consider whole genome
         '''
