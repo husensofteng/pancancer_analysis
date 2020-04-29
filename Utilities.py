@@ -626,6 +626,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     chr_lengths = get_chr_lengths(chr_lengths_file)
     #divided observed mutations files into subfiles. Extend mutations with the backgroud window
     splited_file_name = tmp_dir  + '/' + cohort + '_splited'
+    print(splited_file_name)
 
     splited_file_name_local = tmp_dir_intersect  + '/' + cohort + '_splited'
     #lines_per_file = 10000

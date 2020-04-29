@@ -575,10 +575,12 @@ def parse_args():
     
 if __name__ == '__main__':
     
-    temp_dir = tmp_dir
-    set_tempdir(temp_dir)
+    
 
     args = parse_args()
+    
+    temp_dir = args.tmp_dir
+    set_tempdir(temp_dir)
     
     if not os.path.exists(args.mutations_cohorts_outdir):
         os.makedirs(args.mutations_cohorts_outdir)
