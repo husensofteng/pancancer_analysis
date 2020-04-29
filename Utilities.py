@@ -658,8 +658,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                 l = observed_infile.readline().strip().split('\t')
             #if splited_file:
             #    splited_file.close()
-    #copy file from scratch to project folder
-    copyfile(splited_file_name, splited_file_name_local)      
+        #copy file from scratch to project folder
+        copyfile(splited_file_name, splited_file_name_local)      
      
     #define motif breaking score and fscore for the intersected files
     new_motif_breaking_score_index = motif_breaking_score_index + 6
