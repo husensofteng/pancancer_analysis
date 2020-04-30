@@ -626,9 +626,11 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     chr_lengths = get_chr_lengths(chr_lengths_file)
     #divided observed mutations files into subfiles. Extend mutations with the backgroud window
     splited_file_name = tmp_dir  + '/' + cohort + '_splited'
+    splited_file_name_sorted = splited_file_name + '_sorted'
     print(splited_file_name)
 
     splited_file_name_local = tmp_dir_intersect  + '/' + cohort + '_splited'
+    
     #lines_per_file = 10000
     if not os.path.exists(splited_file_name_local):
         line_number = 0
@@ -639,13 +641,15 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                 motif_end = int(l[2])+background_window_size
                 motif_names = l[motif_name_index]
                 chrom_cat = l[chromatin_cat_index]
-                chr_name = l[0].replace('chr','').replace('X', '23').replace('Y','24').replace('MT','25').replace('M','25')
+                chr_name = l[0].replace('chr','')
+                chr_name2 = chr_name.replace('X', '23').replace('Y','24').replace('MT','25').replace('M','25')
+
                 if motif_start<0:
                     motif_start = 0
                     motif_end += 0 - (int(l[1])-background_window_size)
-                if motif_end>chr_lengths[int(chr_name)]:
-                    motif_end = chr_lengths[int(chr_name)]
-                    motif_start -= (int(l[2])+background_window_size) - chr_lengths[int(chr_name)]
+                if motif_end>chr_lengths[int(chr_name2)]:
+                    motif_end = chr_lengths[int(chr_name2)]
+                    motif_start -= (int(l[2])+background_window_size) - chr_lengths[int(chr_name2)]
                 #if line_number % lines_per_file == 0:
                 #    if splited_file:
                 #        splited_file.close()
@@ -659,8 +663,13 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             #if splited_file:
             #    splited_file.close()
         #copy file from scratch to project folder
-        copyfile(splited_file_name, splited_file_name_local)      
-     
+        
+        awk_stmt_split_sort = """sort -k1,1n -k2,2n {splited_file_name} > {splited_file_name_sorted}""".format(splited_file_name = splited_file_name, splited_file_name_sorted = splited_file_name_sorted )
+        os.system(awk_stmt_split_sort)
+        copyfile(splited_file_name_sorted, splited_file_name_local)      
+        os.remove(splited_file_name)
+
+    observed_input_file_obj = BedTool(splited_file_name_sorted)
     #define motif breaking score and fscore for the intersected files
     new_motif_breaking_score_index = motif_breaking_score_index + 6
     new_fscore_index = f_score_index + 6
@@ -677,7 +686,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     for simulated_input_file in simulated_annotated_input_files:
             simulated_input_file_name = simulated_input_file.split('/')[-1]
             
-            observed_input_file_obj = BedTool(splited_file_name)
+            
             simulated_input_file_tmp_overallTFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_overallTFs_extension
             simulated_input_file_tmp_overallTFs_local = tmp_dir_intersect + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_overallTFs_extension
 
@@ -705,15 +714,19 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                     if line[0:3] == 'chr':
                         simulated_ifile_temp = tmp_dir + simulated_input_file_name + '_tmp'
                         #simulated_ifile_temp = simulated_input_file + '_tmp'
-                        awk_stmt = """cat {simulated_file} | sed 's/^...//' | sort -k1,1n -k2,2n > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
+                        awk_stmt = """cat {simulated_file} | sed 's/^...//'  > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
                         os.system(awk_stmt)
                         simulated_files_temp = simulated_ifile_temp
-                        simulated_input_file = simulated_ifile_temp   
-                simulated_input_file_obj = BedTool(simulated_input_file)                
+                        simulated_input_file = simulated_ifile_temp
+                simulated_input_file_sorted = simulated_input_file + '_sorted'
+                awk_stmt_sort = """ sort -k1,1n -k2,2n {simulated_input_file} > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file,simulated_input_file_sorted = simulated_input_file_sorted )
+                os.system(awk_stmt_sorted)
+                simulated_input_file_obj = BedTool(simulated_input_file_sorted)                
                 #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
                 print('YES')
-                observed_input_file_obj_inter = observed_input_file_obj.intersect(simulated_input_file_obj, wo = True, sorted = True).each(sum_fscore_motif_breaking_score, new_fscore_index, new_motif_breaking_score_index).saveas()
+                observed_input_file_obj_inter = observed_input_file_obj.intersect(simulated_input_file_obj, wo = True).each(sum_fscore_motif_breaking_score, new_fscore_index, new_motif_breaking_score_index).saveas()
                 #group files to obtain the mean and stdev for the functional score
+                os.remove(simulated_input_file + '_sorted')
                 print('YES2')
                 try: 
                     observed_input_file_obj_inter.groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_overallTFs)
@@ -729,7 +742,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                 copyfile(simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local)         
                 #if "_tmp" in simulated_input_file:
                 #    os.remove(simulated_input_file)
-                    
+                os.remove(simulated_input_file_sorted)
             cleanup()   
     #list of categories for simulated_mean_sd_files
     simulated_mean_sd_cat = ["overallTFs"]
