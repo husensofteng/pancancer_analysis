@@ -712,6 +712,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                 #check if 'chr' is present
                 with open(simulated_input_file, 'r') as simulated_ifile:
                     line = simulated_ifile.readline()
+                    print(line)
                     if line[0:3] == 'chr':
                         simulated_ifile_temp = tmp_dir + simulated_input_file_name + '_tmp'
                         #simulated_ifile_temp = simulated_input_file + '_tmp'
@@ -722,7 +723,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                 print(simulated_input_file)
                 simulated_input_file_sorted = simulated_input_file + '_sorted'
                 awk_stmt_sort = """sort -k1,1n -k2,2n {simulated_input_file} > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file,simulated_input_file_sorted = simulated_input_file_sorted )
-                os.system(awk_stmt_sorted)
+                os.system(awk_stmt_sort)
                 simulated_input_file_obj = BedTool(simulated_input_file_sorted)                
                 #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
                 print('YES')
