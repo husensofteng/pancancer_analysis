@@ -711,8 +711,10 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                         simulated_input_file = simulated_ifile_temp   
                 simulated_input_file_obj = BedTool(simulated_input_file)                
                 #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
+                print('YES')
                 observed_input_file_obj_inter = observed_input_file_obj.intersect(simulated_input_file_obj, wo = True, sorted = True).each(sum_fscore_motif_breaking_score, new_fscore_index, new_motif_breaking_score_index).saveas()
                 #group files to obtain the mean and stdev for the functional score
+                print('YES2')
                 try: 
                     observed_input_file_obj_inter.groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_overallTFs)
                     #observed_input_file_obj_inter.filter(lambda x: str(x[3]) == str(x[23])).groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_TFs)
