@@ -705,13 +705,13 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                     if line[0:3] == 'chr':
                         simulated_ifile_temp = tmp_dir + simulated_input_file_name + '_tmp'
                         #simulated_ifile_temp = simulated_input_file + '_tmp'
-                        awk_stmt = """cat {simulated_file} | sed 's/^...//' > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
+                        awk_stmt = """cat {simulated_file} | sed 's/^...//' | sort -k1,1n -k2,2n > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
                         os.system(awk_stmt)
                         simulated_files_temp = simulated_ifile_temp
                         simulated_input_file = simulated_ifile_temp   
                 simulated_input_file_obj = BedTool(simulated_input_file)                
                 #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
-                observed_input_file_obj_inter = observed_input_file_obj.intersect(simulated_input_file_obj, wo = True).each(sum_fscore_motif_breaking_score, new_fscore_index, new_motif_breaking_score_index).saveas()
+                observed_input_file_obj_inter = observed_input_file_obj.intersect(simulated_input_file_obj, wo = True, sorted = True).each(sum_fscore_motif_breaking_score, new_fscore_index, new_motif_breaking_score_index).saveas()
                 #group files to obtain the mean and stdev for the functional score
                 try: 
                     observed_input_file_obj_inter.groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_overallTFs)
