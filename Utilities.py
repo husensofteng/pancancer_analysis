@@ -663,7 +663,6 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             #if splited_file:
             #    splited_file.close()
         #copy file from scratch to project folder
-        print('DONE')
         awk_stmt_split_sort = """sort -k1,1n -k2,2n {splited_file_name} > {splited_file_name_sorted}""".format(splited_file_name = splited_file_name, splited_file_name_sorted = splited_file_name_sorted )
         os.system(awk_stmt_split_sort)
         
@@ -726,11 +725,9 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                 os.system(awk_stmt_sort)
                 simulated_input_file_obj = BedTool(simulated_input_file_sorted)                
                 #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
-                print('YES')
                 observed_input_file_obj_inter = observed_input_file_obj.intersect(simulated_input_file_obj, wo = True).each(sum_fscore_motif_breaking_score, new_fscore_index, new_motif_breaking_score_index).saveas()
                 #group files to obtain the mean and stdev for the functional score
                 #os.remove(simulated_input_file + '_sorted')
-                print('YES2')
                 try: 
                     observed_input_file_obj_inter.groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_overallTFs)
                     #observed_input_file_obj_inter.filter(lambda x: str(x[3]) == str(x[23])).groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_TFs)
@@ -782,8 +779,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
-    #if os.path.exists(tmp_dir_intersect):
-    #    shutil.rmtree(tmp_dir_intersect)
+    if os.path.exists(tmp_dir_intersect):
+        shutil.rmtree(tmp_dir_intersect)
             
     return  dict_type_mean_std_scores
 
