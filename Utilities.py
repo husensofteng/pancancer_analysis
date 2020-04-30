@@ -720,7 +720,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                         simulated_files_temp = simulated_ifile_temp
                         simulated_input_file = simulated_ifile_temp
                 print(simulated_input_file)
-                simulated_input_file_sorted = simulated_input_file + '_sorted'
+                simulated_input_file_sorted = tmp_dir + simulated_input_file_name + '_sorted'
                 awk_stmt_sort = """sort -k1,1n -k2,2n {simulated_input_file} > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file,simulated_input_file_sorted = simulated_input_file_sorted )
                 os.system(awk_stmt_sort)
                 simulated_input_file_obj = BedTool(simulated_input_file_sorted)                
