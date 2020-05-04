@@ -1479,3 +1479,187 @@ def find_overlap_genesets_genelist(geneset_input_file, genelist_input_file,
         os.remove(enriched_genes_output_file)    
 
     return calculated_p_value_sig_out_file
+
+def get_simulated_mean_sd_per_TF_motif_background_window_correction(cohort_full_name, annotated_input_file, simulated_annotated_input_files, 
+                                       mutations_cohorts_dir,
+                                       cohort_mean_sd_per_tf_overall_output_dict_file, 
+                                       chr_lengths_file,
+                                       background_window_size = 50000,
+                                       motif_name_index = 17, f_score_index = 9, 
+                                       motif_breaking_score_index = 10, chromatin_cat_index=22, tmp_dir = '$SNIC_TMP'):
+    
+    
+    copyfile(cohort_mean_sd_per_tf_overall_output_dict_file, cohort_mean_sd_per_tf_overall_output_dict_file + '_copy.dict') 
+    
+    print("Extracting avg and std per TF and overall from the simulation sets... onto: ", cohort_mean_sd_per_tf_overall_output_dict_file)
+    cohort = cohort_full_name.split('/')[-1]
+    tmp_dir_intersect = mutations_cohorts_dir + '/' + cohort + '_tmp_pybedtoos/'
+    if not os.path.exists(tmp_dir_intersect):
+        os.mkdir(tmp_dir_intersect) 
+    
+    chr_lengths = get_chr_lengths(chr_lengths_file)
+    #divided observed mutations files into subfiles. Extend mutations with the backgroud window
+    splited_file_name = tmp_dir  + '/' + cohort + '_splited'
+    splited_file_name_sorted = splited_file_name + '_sorted'
+    print(splited_file_name)
+
+    splited_file_name_local = tmp_dir_intersect  + '/' + cohort + '_splited'
+    
+    #lines_per_file = 10000
+    if not os.path.exists(splited_file_name_local):
+        line_number = 0
+        with open(annotated_input_file, 'r') as observed_infile, open(splited_file_name, "w") as splited_ifile:
+            l = observed_infile.readline().strip().split('\t')
+            while l and len(l)>3:
+                motif_start = (int(l[1])-background_window_size)
+                motif_end = int(l[2])+background_window_size
+                motif_names = l[motif_name_index]
+                chrom_cat = l[chromatin_cat_index]
+                chr_name = l[0].replace('chr','')
+                chr_name2 = chr_name.replace('X', '23').replace('Y','24').replace('MT','25').replace('M','25')
+
+                if motif_start<0:
+                    motif_start = 0
+                    motif_end += 0 - (int(l[1])-background_window_size)
+                if motif_end>chr_lengths[int(chr_name2)]:
+                    motif_end = chr_lengths[int(chr_name2)]
+                    motif_start -= (int(l[2])+background_window_size) - chr_lengths[int(chr_name2)]
+                #if line_number % lines_per_file == 0:
+                #    if splited_file:
+                #        splited_file.close()
+                #    splited_file_name = splited_files_name + '_{}'.format(line_number)
+                #    splited_files_list.append(splited_file_name)
+                #    splited_file = open(splited_file_name, "w")
+                # save background window, motif name, chromatin cat, and number of line
+                splited_ifile.write(chr_name + '\t' + str(motif_start) + '\t' +   str(motif_end) + '\t' + str( motif_names) + '\t' +chrom_cat + '\t' + str(line_number) + '\n')
+                line_number+=1
+                l = observed_infile.readline().strip().split('\t')
+            #if splited_file:
+            #    splited_file.close()
+        #copy file from scratch to project folder
+        awk_stmt_split_sort = """grep -E '^X|^Y|^M' {splited_file_name} |sort -k1,1n -k2,2n > {splited_file_name_sorted}""".format(splited_file_name = splited_file_name, splited_file_name_sorted = splited_file_name_sorted )
+        os.system(awk_stmt_split_sort)
+        
+        copyfile(splited_file_name_sorted, splited_file_name_local)      
+        os.remove(splited_file_name)
+
+    observed_input_file_obj = BedTool(splited_file_name_sorted)
+    #define motif breaking score and fscore for the intersected files
+    new_motif_breaking_score_index = motif_breaking_score_index + 6
+    new_fscore_index = f_score_index + 6
+    #define extensions for the merged files for all categories
+    simulated_input_file_tmp_overallTFs_extension ="_tmp_overallTFs"
+    #simulated_input_file_tmp_perTF_extension = "_tmp_perTF"
+    #simulated_input_file_tmp_perChromatinCat_extension = "_tmp_perChromatinCat"
+    #simulated_input_file_tmp_perTF_perChromatinCat_extension = "_tmp_perTF_perChromatinCat"
+    simulated_files_temp = []
+    # intersection the observed mutation file with the simulated file to find the background
+    # group by: 1 - position for all TFs within the window
+    #2 - positions of the same TF motifs within the window in the simulated sets
+
+    for simulated_input_file in simulated_annotated_input_files:
+            simulated_input_file_name = simulated_input_file.split('/')[-1]
+            
+            
+            simulated_input_file_tmp_overallTFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_overallTFs_extension
+            simulated_input_file_tmp_overallTFs_local = tmp_dir_intersect + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_overallTFs_extension
+
+            #simulated_input_file_tmp_TFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perTF_extension
+            #simulated_input_file_tmp_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perChromatinCat_extension
+            #simulated_input_file_tmp_TFs_chromatin = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1] + simulated_input_file_tmp_perTF_perChromatinCat_extension
+            
+            
+            #check if mutation position is string and convert to intiger
+            #remove from the simulation file rows where mut positions are string and compare number of lines
+            #simulated_input_file_position = simulated_input_file + '_pos'
+            #awk_stmt_sim  = """awk 'BEGIN{{FS=OFS="\t"}} {{if ( $2 ~ "^[0-9][0-9]*$" && $3 ~ "^[0-9][0-9]*$") print $0}} ' {sim_ifile} > {sim_ofile}""".format(sim_ifile = simulated_input_file, sim_ofile =simulated_input_file_position )
+            #os.system(awk_stmt_sim)
+            #count = len(open(simulated_input_file).readlines(  ))
+            #count2 = len(open(simulated_input_file_position).readlines(  ))
+            #if(count != count2):
+            #    awk_tmp =r"""awk 'BEGIN{{FS=OFS="\t"}}{{ printf ("%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32)}}' {sim_ifile} > {sim_ofile} """.format(sim_ifile = simulated_input_file, sim_ofile =simulated_input_file+'_tmp')
+            #    os.system(awk_tmp)
+            #    simulated_input_file = simulated_ifile_temp 
+            #os.remove(simulated_input_file_position)
+            if not os.path.exists(simulated_input_file_tmp_overallTFs):
+                #check if 'chr' is present
+                with open(simulated_input_file, 'r') as simulated_ifile:
+                    line = simulated_ifile.readline()
+                    print(line)
+                    if line[0:3] == 'chr':
+                        simulated_ifile_temp = tmp_dir + simulated_input_file_name + '_tmp'
+                        #simulated_ifile_temp = simulated_input_file + '_tmp'
+                        awk_stmt = """cat {simulated_file} | sed 's/^...//'  > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
+                        os.system(awk_stmt)
+                        simulated_files_temp = simulated_ifile_temp
+                        simulated_input_file = simulated_ifile_temp
+                print(simulated_input_file)
+                simulated_input_file_sorted = tmp_dir + simulated_input_file_name + '_sorted'
+                awk_stmt_sort = """grep -E '^X|^Y|^M' {simulated_input_file} | sort -k1,1n -k2,2n  > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file,simulated_input_file_sorted = simulated_input_file_sorted )
+                os.system(awk_stmt_sort)
+                simulated_input_file_obj = BedTool(simulated_input_file_sorted)                
+                #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
+                observed_input_file_obj_inter = observed_input_file_obj.intersect(simulated_input_file_obj, wo = True).each(sum_fscore_motif_breaking_score, new_fscore_index, new_motif_breaking_score_index).saveas()
+                #group files to obtain the mean and stdev for the functional score
+                #os.remove(simulated_input_file + '_sorted')
+                try: 
+                    observed_input_file_obj_inter.groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_overallTFs)
+                    #observed_input_file_obj_inter.filter(lambda x: str(x[3]) == str(x[23])).groupby(g=[1,2,3,4,5,6], c=16, o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_TFs)
+                    #observed_input_file_obj_inter.filter(lambda x: str(x[4]) == str(x[28])).groupby(g=[1,2,3,4,5,6], c=(new_fscore_index+1), o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_chromatin)
+                    #observed_input_file_obj_inter.filter(lambda x: (str(x[4]) == str(x[28])) & (str(x[3]) == str(x[23]))).groupby(g=[1,2,3,4,5,6], c=(new_fscore_index+1), o=['mean', 'stdev', 'count']).saveas(simulated_input_file_tmp_TFs_chromatin)
+                except KeyError:
+                    open(simulated_input_file_tmp_overallTFs, 'a').close()
+                    #open(simulated_input_file_tmp_perTF, 'a').close()
+                    #open(simulated_input_file_tmp_chromatin, 'a').close()
+                    #open(simulated_input_file_tmp_perTF_perChromatinCat_extension, 'a').close()
+                #print(os.listdir(tmp_dir_intersect))
+                copyfile(simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local)         
+                #if "_tmp" in simulated_input_file:
+                #    os.remove(simulated_input_file)
+                #os.remove(simulated_input_file_sorted)
+            cleanup()   
+    #list of categories for simulated_mean_sd_files
+    simulated_mean_sd_cat = ["overallTFs"]
+    #simulated_mean_sd_cat = ["overallTFs", "perTF", "perChromatinCat", "perTF_perChromatinCat"]
+    #print(simulated_mean_sd_cat)
+    
+    #create a dictionery for mean, std scores for all categories
+    with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'r') as dict_simulated_mean_sd_per_TF_motif_ifile:
+         dict_type_mean_std_scores = json.loads(dict_simulated_mean_sd_per_TF_motif_ifile.readline())
+    
+    #dict_type_mean_std_scores = {}
+    
+    mean_f_score_index = 5
+    for cat_type in simulated_mean_sd_cat:
+        print('Combining dictionery')
+        simulated_mean_sd_files = tmp_dir + '/' +'*_tmp_' + cat_type
+        simulated_mean_sd_outfiles = tmp_dir + '/' + cohort + '_'+ cat_type
+        simulated_mean_sd_outfiles_local = mutations_cohorts_dir + '/' + cohort + '_'+ cat_type
+
+        #merge files from the same category, sort by the line number and group by position, TF motif, chromatin cat. and line number
+        awk_comm = """cat {files} | 
+        sort -k6 -V | 
+        groupBy -g 1-6 -c 7,8,9 -o mean,mean,sum > {file_out} """.format(files = simulated_mean_sd_files, file_out = simulated_mean_sd_outfiles)
+        os.system(awk_comm)
+        #save the scores per line number
+        dict_simulated_mean_sd = {}
+
+
+        with open(simulated_mean_sd_outfiles, 'r') as simulated_mean_sd_ifile:
+            l = simulated_mean_sd_ifile.readline().strip().split('\t')
+            while l and len(l)>3:  
+                dict_simulated_mean_sd[l[mean_f_score_index]] = {'mean': l[mean_f_score_index +1 ], 
+                                                       "std": l[mean_f_score_index +2 ], 
+                                                       "nummotifs": l[mean_f_score_index +3 ]}
+                l = simulated_mean_sd_ifile.readline().strip().split('\t')
+       #     #save the dictionery per category
+        dict_type_mean_std_scores[cat_type].update(dict_simulated_mean_sd)
+    print(dict_type_mean_std_scores)
+
+    with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
+            json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
+    
+    if os.path.exists(tmp_dir_intersect):
+        shutil.rmtree(tmp_dir_intersect)
+            
+    return  dict_type_mean_std_scores
