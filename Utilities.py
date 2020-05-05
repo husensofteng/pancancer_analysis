@@ -1583,6 +1583,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window_correction(cohort_full_
                 print('Yes')
                 simulated_input_file = simulated_ifile_pos_temp 
             #os.remove(simulated_input_file_position)
+            print(simulated_input_file)
             if not os.path.exists(simulated_input_file_tmp_overallTFs):
                 #check if 'chr' is present
                 with open(simulated_input_file, 'r') as simulated_ifile:
