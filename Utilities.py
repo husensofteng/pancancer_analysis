@@ -632,7 +632,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     splited_file_name_local = tmp_dir_intersect  + '/' + cohort + '_splited'
     
     #lines_per_file = 10000
-    if not os.path.exists(splited_file_name_local):
+    if not os.path.exists(splited_file_name):
         line_number = 0
         with open(annotated_input_file, 'r') as observed_infile, open(splited_file_name, "w") as splited_ifile:
             l = observed_infile.readline().strip().split('\t')
@@ -707,7 +707,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             #    os.system(awk_tmp)
             #    simulated_input_file = simulated_ifile_temp 
             #os.remove(simulated_input_file_position)
-            if not os.path.exists(simulated_input_file_tmp_overallTFs):
+            if not os.path.exists(simulated_input_file_tmp_overallTFs_local):
                 #check if 'chr' is present
                 with open(simulated_input_file, 'r') as simulated_ifile:
                     line = simulated_ifile.readline()
