@@ -632,7 +632,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     splited_file_name_local = tmp_dir_intersect  + '/' + cohort + '_splited'
     
     #lines_per_file = 10000
-    if not os.path.exists(splited_file_name):
+    if not os.path.exists(splited_file_name_local):
         line_number = 0
         with open(annotated_input_file, 'r') as observed_infile, open(splited_file_name, "w") as splited_ifile:
             l = observed_infile.readline().strip().split('\t')
@@ -667,7 +667,9 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         os.system(awk_stmt_split_sort)
         
         copyfile(splited_file_name_sorted, splited_file_name_local)      
-        os.remove(splited_file_name)
+        #os.remove(splited_file_name)
+    else:
+        copyfile(splited_file_name_local, splited_file_name_sorted)
 
     observed_input_file_obj = BedTool(splited_file_name_sorted)
     #define motif breaking score and fscore for the intersected files
