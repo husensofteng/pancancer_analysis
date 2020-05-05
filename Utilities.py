@@ -1571,16 +1571,17 @@ def get_simulated_mean_sd_per_TF_motif_background_window_correction(cohort_full_
             
             #check if mutation position is string and convert to intiger
             #remove from the simulation file rows where mut positions are string and compare number of lines
-            #simulated_input_file_position = simulated_input_file + '_pos'
-            #awk_stmt_sim  = """awk 'BEGIN{{FS=OFS="\t"}} {{if ( $2 ~ "^[0-9][0-9]*$" && $3 ~ "^[0-9][0-9]*$") print $0}} ' {sim_ifile} > {sim_ofile}""".format(sim_ifile = simulated_input_file, sim_ofile =simulated_input_file_position )
-            #os.system(awk_stmt_sim)
-            #count = len(open(simulated_input_file).readlines(  ))
-            #count2 = len(open(simulated_input_file_position).readlines(  ))
-            #if(count != count2):
-            #    awk_tmp =r"""awk 'BEGIN{{FS=OFS="\t"}}{{ printf ("%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32)}}' {sim_ifile} > {sim_ofile} """.format(sim_ifile = simulated_input_file, sim_ofile =simulated_input_file+'_tmp')
-            #    os.system(awk_tmp)
-            #    simulated_input_file = simulated_ifile_temp 
-            #os.remove(simulated_input_file_position)
+            simulated_input_file_position = simulated_input_file + '_pos'
+            simulated_ifile_temp = simulated_input_file+'_tmp'
+            awk_stmt_sim  = """awk 'BEGIN{{FS=OFS="\t"}} {{if ( $2 ~ "^[0-9][0-9]*$" && $3 ~ "^[0-9][0-9]*$") print $0}} ' {sim_ifile} > {sim_ofile}""".format(sim_ifile = simulated_input_file, sim_ofile =simulated_input_file_position )
+            os.system(awk_stmt_sim)
+            count = len(open(simulated_input_file).readlines(  ))
+            count2 = len(open(simulated_input_file_position).readlines(  ))
+            if(count != count2):
+                awk_tmp ="""awk 'BEGIN{{FS=OFS="\t"}}{{ printf ("%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32)}}' {sim_ifile} > {sim_ofile} """.format(sim_ifile = simulated_input_file, sim_ofile = simulated_ifile_temp)
+                os.system(awk_tmp)
+                simulated_input_file = simulated_ifile_temp 
+            os.remove(simulated_input_file_position)
             if not os.path.exists(simulated_input_file_tmp_overallTFs):
                 #check if 'chr' is present
                 with open(simulated_input_file, 'r') as simulated_ifile:
@@ -1654,7 +1655,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window_correction(cohort_full_
                 l = simulated_mean_sd_ifile.readline().strip().split('\t')
        #     #save the dictionery per category
         dict_type_mean_std_scores[cat_type].update(dict_simulated_mean_sd)
-    print(dict_type_mean_std_scores)
+    #print(dict_type_mean_std_scores)
 
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
