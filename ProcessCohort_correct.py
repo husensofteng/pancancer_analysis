@@ -457,7 +457,8 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
     simulated_input_files = [simulated_input_dir+'/'+x for x in os.listdir(simulated_input_dir) if '_annotated.bed9' in x]
     mutation_input_files = [observed_input_file]
     mutation_input_files.extend(simulated_input_files)
-    
+    print(mutation_input_files)
+    print(len(mutation_input_files))
     motif_name_index = 17
     f_score_index = 9
     motif_breaking_score_index = 10
