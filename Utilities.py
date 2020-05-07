@@ -270,6 +270,11 @@ def get_chr_lengths(chr_lengths_file):
                     chr_lengths[int(chr_name)] = int(sl[1])
     return chr_lengths
 
+def sum_fscore_motif_breaking_score(feature,fscore_index, motif_breaking_score_index):
+    if(feature[fscore_index] != '.'):
+        sums = float(feature[fscore_index]) + float(feature[motif_breaking_score_index])
+        feature[fscore_index] = str(sums)
+    return feature
 
 def assess_stat_elements_local_domain(observed_input_file, simulated_input_files, merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 
                                       chr_lengths_file, local_domain_window=25000, 
@@ -1583,7 +1588,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window_correction(cohort_full_
     
     #create a dictionery for mean, std scores for all categories
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'r') as dict_simulated_mean_sd_per_TF_motif_ifile:
-         dict_type_mean_std_scores = json.loads(dict_simulated_mean_sd_per_TF_motif_ifile.readline())
+        dict_type_mean_std_scores = json.loads(dict_simulated_mean_sd_per_TF_motif_ifile.readline())
     
     #dict_type_mean_std_scores = {}
     
