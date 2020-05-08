@@ -802,7 +802,7 @@ def get_sample_pathways(calculated_p_value_sig_out_file, output_file, total_numb
         
     return
 
-def getSigElements(cohorts, generated_sig_merged_element_files, active_driver, active_driver_script_dir, active_driver_min_mut,
+def getSigElements(cohorts, generated_sig_merged_element_files, active_driver, active_driver_script_dir, active_driver_min_mut, n_cores,
                    n, max_dist, window, output_dir,
                    annotated_motifs, tracks_dir, observed_mutations_all, chr_lengths_file,
                    genes_input_file, gencode_input_file, 
@@ -898,7 +898,7 @@ def getSigElements(cohorts, generated_sig_merged_element_files, active_driver, a
         #active_driver_output_file = active_driver_output_file +'_merged'
         #run activedriver
         if not os.path.exists(active_driver_output_file_local_sig):
-            subprocess.call(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file])
+            subprocess.call(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, n_cores])
             #keep onl,y significant elements
             awk_stmt_sig = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if($15 != "NA" || $15<=0.05) print $0}}' {active_driver_output_file} > {active_driver_output_file_sig} 
                             """).format(active_driver_output_file=active_driver_output_file, active_driver_output_file_sig = active_driver_output_file_sig)
@@ -1016,6 +1016,7 @@ def parse_args():
     parser.add_argument('--active_driver', action='store_const', const=True, help='Significance test on the combined regulatory elements using ActiveDriverWGS, if the flag is missing it would compute pvalue of elements by comparing the observed number of mutations in the element to average proportion of mutations in the samples of this region')
     parser.add_argument('--active_driver_script_dir', default='', help='')
     parser.add_argument('--active_driver_min_mut', default=1, help='n')
+    parser.add_argument('--n_cores', default=10, help='Number of cores to run ActiveDriverWGS')
     parser.add_argument('--n', type=int, default=0, help='n')
     parser.add_argument('--max_dist', type=int, default=500000, help='max_dist')
     parser.add_argument('--window', type=int, default=2000, help='window')
@@ -1058,7 +1059,7 @@ if __name__ == '__main__':
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
     
     aggregated_output_file = getSigElements(cohorts = 'All',
-        generated_sig_merged_element_files, args.active_driver, args.active_driver_script_dir, args.active_driver_min_mut,
+        generated_sig_merged_element_files, args.active_driver, args.active_driver_script_dir, args.active_driver_min_mut,args.n_cores,
                     args.n, args.max_dist, args.window, 
                     args.output_dir,
                     args.observed_input_file, args.tracks_dir, 
@@ -1072,7 +1073,7 @@ if __name__ == '__main__':
     ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if 'All-tumors-without-Lymphatic-system-Skin-Melanoma' in x]
     
     aggregated_output_file_ATELM = getSigElements(cohorts = 'ATELM',
-        generated_sig_merged_element_files, args.active_driver, args.active_driver_script_dir, args.active_driver_min_mut,
+        generated_sig_merged_element_files, args.active_driver, args.active_driver_script_dir, args.active_driver_min_mut, args.n_cores,
                     args.n, args.max_dist, args.window, 
                     args.output_dir,
                     args.observed_input_file, args.tracks_dir, 
