@@ -819,7 +819,11 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     
     ext = ""
     try:
-        ext = generated_sig_merged_element_files[0].split('/')[-1].split('.bed9')[1].replace('groupedbymutwithmotifinfo_','').replace('_statspvalues', '')
+        if(len(generated_sig_merged_element_files)>1):
+            ext = generated_sig_merged_element_files[0].split('/')[-1].split('.bed9')[1].replace('groupedbymutwithmotifinfo_','').replace('_statspvalues', '')
+        else:
+            ext = generated_sig_merged_element_files.split('/')[-1].split('.bed9')[1].replace('groupedbymutwithmotifinfo_','').replace('_statspvalues', '')
+
     except IndexError:
         print("error: ", generated_sig_merged_element_files)
         sys.exit()
@@ -915,9 +919,9 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
                 os.system(awk_stmt_sig)
                 print(awk_stmt_sig)
                 copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
-                with open(active_driver_output_file_local_sig) as infile:
-                    for line in infile:
-                        active_driver_output_local_sig_all_ofile.write(line)
+            with open(active_driver_output_file_local_sig) as infile:
+                for line in infile:
+                    active_driver_output_local_sig_all_ofile.write(line)
             
 
 
