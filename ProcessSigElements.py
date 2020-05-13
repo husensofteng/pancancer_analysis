@@ -1056,6 +1056,7 @@ if __name__ == '__main__':
         args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
         args.local_domain_window, args.tmp_dir)
+    
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
     
     aggregated_output_file = getSigElements(cohorts = 'All',
@@ -1073,7 +1074,7 @@ if __name__ == '__main__':
     ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if 'All-tumors-without-Lymphatic-system-Skin-Melanoma' in x]
     
     aggregated_output_file_ATELM = getSigElements(cohorts = 'ATELM',
-        generated_sig_merged_element_files, args.active_driver, args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+        ATELM_generated_sig_merged_element_files, args.active_driver, args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
                     args.n, args.max_dist, args.window, 
                     args.output_dir,
                     args.observed_input_file, args.tracks_dir, 
