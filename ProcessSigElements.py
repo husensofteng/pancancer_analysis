@@ -802,12 +802,13 @@ def get_sample_pathways(calculated_p_value_sig_out_file, output_file, total_numb
         
     return
 
-def getSigElements(cohorts='All', generated_sig_merged_element_files, active_driver, active_driver_script_dir, active_driver_min_mut, n_cores,
+def getSigElements(generated_sig_merged_element_files, active_driver, active_driver_script_dir, active_driver_min_mut, n_cores,
                    n, max_dist, window, output_dir,
                    annotated_motifs, tracks_dir, observed_mutations_all, chr_lengths_file,
                    genes_input_file, gencode_input_file, 
                    cell_names_to_use, tissue_cell_mappings_file,
-                   cosmic_genes_file, kegg_pathways_file, pcawg_drivers_file, tmp_dir, mutations_cohorts_outdir
+                   cosmic_genes_file, kegg_pathways_file, pcawg_drivers_file, tmp_dir, mutations_cohorts_outdir,
+                   cohorts='All'
                    ):
     
     upstream=True
@@ -1060,7 +1061,6 @@ if __name__ == '__main__':
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
     
     aggregated_output_file = getSigElements(
-                    cohorts = 'All',
                     generated_sig_merged_element_files, args.active_driver, args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
                     args.n, args.max_dist, args.window, 
                     args.output_dir,
@@ -1069,13 +1069,12 @@ if __name__ == '__main__':
                     args.genes_input_file, 
                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
-                    args.tmp_dir, args.mutations_cohorts_outdir)
+                    args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'All')
     
     #Genes and patwhways for ATELM cohort
     ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if 'All-tumors-without-Lymphatic-system-Skin-Melanoma' in x]
     
     aggregated_output_file_ATELM = getSigElements(
-                    cohorts = 'ATELM',
                     ATELM_generated_sig_merged_element_files, args.active_driver, args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
                     args.n, args.max_dist, args.window, 
                     args.output_dir,
@@ -1084,7 +1083,7 @@ if __name__ == '__main__':
                     args.genes_input_file, 
                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
-                    args.tmp_dir, args.mutations_cohorts_outdir)
+                    args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'ATELM')
     combine_sig_TFs(sig_tfs_files, output_dir=args.output_dir)
     combine_sig_TFs(sig_tfpos_files, tf_label='TF Positions', output_dir=args.output_dir)
     
