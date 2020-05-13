@@ -920,7 +920,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     
     awk_stm_activedriver = """cat {active_driver_output_file_sig_list} | sort -k1,1 -k2,2n  | mergeBed -i stdin -c 4,5,6,7,8,9,10,11,12,13,14,15 -o sum,collapse,sum,sum,collapse,collapse,collapse,collapse,collapse,collapse,collapse,collapse > {aggregated_output_file}""".format(
                                                 active_driver_output_file_sig_list=active_driver_output_file_local_sig_list,
-                                              aggregated_output_file=aggregated_output_file)
+                                              aggregated_output_file=aggregated_output_file_tmp)
 
     os.system(awk_stm_activedriver)
     
