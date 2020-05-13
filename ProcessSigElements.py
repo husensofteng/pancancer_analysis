@@ -816,7 +816,6 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     downstream=True
     overlapping = True
     nbp_to_extend = 200
-    print(generated_sig_merged_element_files)
     ext = ""
     try:
         ext = generated_sig_merged_element_files[0].split('/')[-1].split('.bed9')[1].replace('groupedbymutwithmotifinfo_','').replace('_statspvalues', '')
@@ -949,7 +948,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
             number_of_elements_tested-=1
             calculate_p_value_motifregions(annotated_mutations_final_output_file_scored_merged, sample_id_and_number_of_mutations_per_sample_dict, mutated_regions_pval_outfile=annotated_mutations_statcalc_output_file, index_mutation_frequency=5, index_sample_ids=4, index_elment_start_coordinate=1, index_elment_stop_coordinate=2, genome_size=3100000000.0, total_number_tested_regions=number_of_elements_tested)
     '''
-    cols_to_write = ['chr', 'start', 'end', 'Position', 'Cohorts', '#Cohorts', 'Score', 'FDR',  
+    cols_to_write = ['chr', 'start', 'end', 'Position', 'Cohorts', '#Cohorts', 'Score', 'FDR',
                      '#RegMuts', '#Samples(RegMuts)', 'Cancer-Types:#RegMuts', 'Cancer-Types:#Samples(RegMuts)',
                      '#Muts', '#Samples', 'Cancer-Types:#Muts', 'Cancer-Types:#Samples','StatsMuts', 'StatsSamples',
                      'RegMuts','Muts', 'Mutated-Moitfs', 'Max-RegMotif', 

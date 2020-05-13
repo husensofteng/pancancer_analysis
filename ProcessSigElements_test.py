@@ -816,9 +816,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     downstream=True
     overlapping = True
     nbp_to_extend = 200
-    
-    print(generated_sig_merged_element_files)
-    
+
     ext = ""
     try:
         ext = generated_sig_merged_element_files[0].split('/')[-1].split('.bed9')[1].replace('groupedbymutwithmotifinfo_','').replace('_statspvalues', '')
@@ -826,7 +824,6 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     except IndexError:
         print("error: ", generated_sig_merged_element_files)
         sys.exit()
-
 
     aggregated_output_file = output_dir+'/{cohorts}_combined{ext}_merged_intersectedmuts_grouped_aggregated{n}{up}{dw}maxdist{max_dist}kb_within{window}kb.tsv'.format(cohorts=cohorts,ext=ext, n=n, up="Up", dw="Dw", max_dist=max_dist/1000, window=window/1000)
     if os.path.exists(aggregated_output_file):
