@@ -819,10 +819,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     print(generated_sig_merged_element_files)
     ext = ""
     try:
-        if(len(generated_sig_merged_element_files)>1):
-            ext = generated_sig_merged_element_files[0].split('/')[-1].split('.bed9')[1].replace('groupedbymutwithmotifinfo_','').replace('_statspvalues', '')
-        else:
-            ext = generated_sig_merged_element_files.split('/')[-1].split('.bed9')[1].replace('groupedbymutwithmotifinfo_','').replace('_statspvalues', '')
+        ext = generated_sig_merged_element_files[0].split('/')[-1].split('.bed9')[1].replace('groupedbymutwithmotifinfo_','').replace('_statspvalues', '')
 
     except IndexError:
         print("error: ", generated_sig_merged_element_files)

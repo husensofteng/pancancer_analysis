@@ -821,10 +821,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     
     ext = ""
     try:
-        if(len(generated_sig_merged_element_files)>1):
-            ext = generated_sig_merged_element_files[0].split('/')[-1].split('.bed9')[1].replace('groupedbymutwithmotifinfo_','').replace('_statspvalues', '')
-        else:
-            ext = generated_sig_merged_element_files.split('/')[-1].split('.bed9')[1].replace('groupedbymutwithmotifinfo_','').replace('_statspvalues', '')
+        ext = generated_sig_merged_element_files[0].split('/')[-1].split('.bed9')[1].replace('groupedbymutwithmotifinfo_','').replace('_statspvalues', '')
 
     except IndexError:
         print("error: ", generated_sig_merged_element_files)
@@ -1089,7 +1086,7 @@ if __name__ == '__main__':
     ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if 'CNS-tumors' in x]
     print(ATELM_generated_sig_merged_element_files[0])
     aggregated_output_file_ATELM = getSigElements(
-                    ATELM_generated_sig_merged_element_files[0],  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+                    ATELM_generated_sig_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
                     args.n, args.max_dist, args.window, 
                     args.output_dir,
                     args.observed_input_file, args.tracks_dir, 
