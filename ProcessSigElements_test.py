@@ -817,6 +817,8 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     overlapping = True
     nbp_to_extend = 200
     
+    print(generated_sig_merged_element_files)
+    
     ext = ""
     try:
         if(len(generated_sig_merged_element_files)>1):
@@ -833,7 +835,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     if os.path.exists(aggregated_output_file):
         return aggregated_output_file
     
-    print(generated_sig_merged_element_files)
+    
     #regions_input_file = output_dir+'/combined_onlysig_merged_intersectedmuts_grouped_recurrent.col12'
     #per cohort
     #extend the elemtents to 200bp, intersect with all observed mutations, aggregate all mut information per element, run activedriver to obtain p-value of element
