@@ -911,7 +911,6 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
                 os.system(awk_stmt_sig)
                 print(awk_stmt_sig)
                 copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
-                active_driver_output_file_local_sig_list.append(active_driver_output_file_local_sig)
                 with open(active_driver_output_file_local_sig) as infile:
                     for line in infile:
                         active_driver_output_local_sig_all_ofile.write(line)
