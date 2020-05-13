@@ -46,7 +46,7 @@ mut_in$chr <- gsub('24','Y',mut_in$chr)
 mut_in$pos1 <- as.numeric(mut_in$pos1)
 mut_in$pos2 <- as.numeric(mut_in$pos2)
 result = ActiveDriverWGS(mutations = mut_in,
-                         elements = data_elem, mc.cores = n_cores)
+                         elements = data_elem, mc.cores = as.numeric(n_cores))
 
 colnames(result)[1] = 'id'
 colnames(data_my)[13] = 'id'
