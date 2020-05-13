@@ -1016,7 +1016,7 @@ def parse_args():
     parser.add_argument('--active_driver', action='store_const', const=True, help='Significance test on the combined regulatory elements using ActiveDriverWGS, if the flag is missing it would compute pvalue of elements by comparing the observed number of mutations in the element to average proportion of mutations in the samples of this region')
     parser.add_argument('--active_driver_script_dir', default='', help='')
     parser.add_argument('--active_driver_min_mut', default=1, help='n')
-    parser.add_argument('--num_cores_activedriver', default=10, help='Number of cores to run ActiveDriverWGS')
+    parser.add_argument('--num_cores_activedriver', type=int, default=10, help='Number of cores to run ActiveDriverWGS')
     parser.add_argument('--n', type=int, default=0, help='n')
     parser.add_argument('--max_dist', type=int, default=500000, help='max_dist')
     parser.add_argument('--window', type=int, default=2000, help='window')
@@ -1059,7 +1059,7 @@ if __name__ == '__main__':
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
     
     aggregated_output_file = getSigElements(cohorts = 'All',
-        generated_sig_merged_element_files, args.active_driver, args.active_driver_script_dir, args.active_driver_min_mut,args.num_cores_activedriver,
+        generated_sig_merged_element_files, args.active_driver, args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
                     args.n, args.max_dist, args.window, 
                     args.output_dir,
                     args.observed_input_file, args.tracks_dir, 
