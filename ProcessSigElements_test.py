@@ -447,8 +447,7 @@ def aggregate_results(regions_input_file):
                     
             #instead of writing the dict put them in a list to keep the columns order 
             cols_to_write = [cols_dict['chr'], cols_dict['start'], cols_dict['end'], cols_dict['Position'], 
-                             ','.join(cols_dict['Cohorts']), cols_dict['#Cohorts'], cols_dict['Score'], cols_dict['FDR'], cols_dict['ElementPval'],
-                             cols_dict['ELementFDR'],
+                             ','.join(cols_dict['Cohorts']), cols_dict['#Cohorts'], cols_dict['Score'], cols_dict['FDR'], 
                              cols_dict['#RegMuts'], cols_dict['#Samples(RegMuts)'], 
                              ','.join([x+":"+str(cols_dict['Cancer-Types:#RegMuts'][x]) for x in cols_dict['Cancer-Types:#RegMuts']]), 
                              ','.join([x+":"+str(cols_dict['Cancer-Types:#Samples(RegMuts)'][x]) for x in cols_dict['Cancer-Types:#Samples(RegMuts)']]),
@@ -456,7 +455,8 @@ def aggregate_results(regions_input_file):
                              #'Nearby-Genes(Downstream/Upstream:Distance;COSMIC;KEGG;PCAWG)'
                              ','.join(cols_dict['StatsMuts']),','.join(cols_dict['StatsSamples']),
                              ','.join(cols_dict['RegMuts']), ','.join(cols_dict['Muts']), ','.join(cols_dict['Mutated-Moitfs']), ','.join(cols_dict['Max-RegMotif']),
-                             ','.join(cols_dict['SamplesMuts'])
+                             ','.join(cols_dict['SamplesMuts'], cols_dict['ElementPval'],
+                             cols_dict['ELementFDR'],)
                              ]
             aggregated_lines.append(cols_to_write)
             
