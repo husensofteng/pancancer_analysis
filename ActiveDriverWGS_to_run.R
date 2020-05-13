@@ -45,11 +45,18 @@ mut_in$chr <- gsub('23','X',mut_in$chr)
 mut_in$chr <- gsub('24','Y',mut_in$chr)
 mut_in$pos1 <- as.numeric(mut_in$pos1)
 mut_in$pos2 <- as.numeric(mut_in$pos2)
-result = ActiveDriverWGS(mutations = mut_in,
-                         elements = data_elem, mc.cores = as.numeric(n_cores))
+if(dim(data_my_2mut)[1] >0){
+  result = ActiveDriverWGS(mutations = mut_in,
+                           elements = data_elem, mc.cores = as.numeric(n_cores))
+  colnames(result)[1] = 'id'
+  colnames(data_my)[13] = 'id'
+  result_join <- right_join(data_my,result, by= 'id' ) %>%  dplyr::select(-c(element_muts_obs:site_enriched, fdr_site:has_site_mutations))
+}else{
+  result_join = NULL
+  
+}
 
-colnames(result)[1] = 'id'
-colnames(data_my)[13] = 'id'
-result_join <- left_join(data_my,result, by= 'id' ) %>%  dplyr::select(-c(element_muts_obs:site_enriched, fdr_site:has_site_mutations))
+
+
 #colnames(result_join)[(length(result_join[1,])-1):length(result_join[1,])] <- c('ElementPval_ActiveDriver',   'ElementFDR_ActiveDriver')
 write.table(result_join, file = out_file,sep='\t', col.names = FALSE, row.names = FALSE, quote = FALSE, na = 'NA')
