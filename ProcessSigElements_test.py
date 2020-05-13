@@ -1080,9 +1080,9 @@ if __name__ == '__main__':
     
     #Genes and patwhways for ATELM cohort
     ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if 'CNS-tumors' in x]
-    
+    print(ATELM_generated_sig_merged_element_files)
     aggregated_output_file_ATELM = getSigElements(
-                    ATELM_generated_sig_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+                    ATELM_generated_sig_merged_element_files[0],  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
                     args.n, args.max_dist, args.window, 
                     args.output_dir,
                     args.observed_input_file, args.tracks_dir, 
