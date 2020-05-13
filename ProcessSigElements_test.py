@@ -455,8 +455,8 @@ def aggregate_results(regions_input_file):
                              #'Nearby-Genes(Downstream/Upstream:Distance;COSMIC;KEGG;PCAWG)'
                              ','.join(cols_dict['StatsMuts']),','.join(cols_dict['StatsSamples']),
                              ','.join(cols_dict['RegMuts']), ','.join(cols_dict['Muts']), ','.join(cols_dict['Mutated-Moitfs']), ','.join(cols_dict['Max-RegMotif']),
-                             ','.join(cols_dict['SamplesMuts'], cols_dict['ElementPval'],
-                             cols_dict['ELementFDR'],)
+                             ','.join(cols_dict['SamplesMuts']), cols_dict['ElementPval'],
+                             cols_dict['ELementFDR']
                              ]
             aggregated_lines.append(cols_to_write)
             
