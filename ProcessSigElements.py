@@ -802,7 +802,7 @@ def get_sample_pathways(calculated_p_value_sig_out_file, output_file, total_numb
         
     return
 
-def getSigElements(cohorts, generated_sig_merged_element_files, active_driver, active_driver_script_dir, active_driver_min_mut, n_cores,
+def getSigElements(cohorts='All', generated_sig_merged_element_files, active_driver, active_driver_script_dir, active_driver_min_mut, n_cores,
                    n, max_dist, window, output_dir,
                    annotated_motifs, tracks_dir, observed_mutations_all, chr_lengths_file,
                    genes_input_file, gencode_input_file, 
