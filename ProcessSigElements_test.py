@@ -1071,7 +1071,7 @@ if __name__ == '__main__':
                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'All')
     
     #Genes and patwhways for ATELM cohort
-    ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if 'All-tumors-without-Lymphatic-system-Skin-Melanoma' in x]
+    ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if 'CNS-tumors' in x]
     
     aggregated_output_file_ATELM = getSigElements(
                     ATELM_generated_sig_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
