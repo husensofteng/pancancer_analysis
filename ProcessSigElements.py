@@ -802,7 +802,7 @@ def get_sample_pathways(calculated_p_value_sig_out_file, output_file, total_numb
         
     return
 
-def getSigElements(generated_sig_merged_element_files, active_driver, active_driver_script_dir, active_driver_min_mut, n_cores,
+def getSigElements(generated_sig_merged_element_files, active_driver_script_dir, active_driver_min_mut, n_cores,
                    n, max_dist, window, output_dir,
                    annotated_motifs, tracks_dir, observed_mutations_all, chr_lengths_file,
                    genes_input_file, gencode_input_file, 
@@ -838,13 +838,13 @@ def getSigElements(generated_sig_merged_element_files, active_driver, active_dri
         
         cohort_mut_grouped_file = tmp_dir+'/'+ cohort_name +'combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
         cohort_mut_grouped_file_local = output_dir+'/'+ cohort_name +'combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
-        observed_mutations_cohort = mutations_cohorts_outdir + cohort_name + '_' + observed_mutations_all.split('/')[-1]
+        observed_mutations_cohort = mutations_cohorts_outdir + '/' + cohort_name + '_' + observed_mutations_all.split('/')[-1]
 
         if not os.path.exists(cohort_mut_grouped_file_local):
             #elements extended by 200bp
             cohort_mut_grouped_file_tmp = cohort_mut_grouped_file+'_temp'
 
-            cohort_sigregions_file_extend_elements = tmp_dir + cohort_name +'_extend_elements'
+            cohort_sigregions_file_extend_elements = tmp_dir + '/'+ cohort_name +'_extend_elements'
             #tmp file
             cohort_sigregions_file_extend_elements_tmp =  cohort_sigregions_file_extend_elements + '_tmp'      
             with open(cohort_mut_grouped_file_tmp, 'w') as regions_input_ofile:
@@ -1014,7 +1014,6 @@ def parse_args():
     parser.add_argument('--local_domain_window', type=int, default=25000, help='Window width for capturing simulated elements to compare mutation frequency ')
     parser.add_argument('--filter_on_qval', action='store_const', const=True, help='Filter on FDR (adjusted p-values), if the flag is missing it would filter on p-value')
     parser.add_argument('--sig_category', default = 'perTF', choices=['overallTFs', 'perTF', 'perChromatinCat', 'perTF_perChromatinCat'], help='')
-    parser.add_argument('--active_driver', action='store_const', const=True, help='Significance test on the combined regulatory elements using ActiveDriverWGS, if the flag is missing it would compute pvalue of elements by comparing the observed number of mutations in the element to average proportion of mutations in the samples of this region')
     parser.add_argument('--active_driver_script_dir', default='', help='')
     parser.add_argument('--active_driver_min_mut', default=1, help='n')
     parser.add_argument('--num_cores_activedriver', type=int, default=10, help='Number of cores to run ActiveDriverWGS')
@@ -1061,7 +1060,7 @@ if __name__ == '__main__':
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
     
     aggregated_output_file = getSigElements(
-                    generated_sig_merged_element_files, args.active_driver, args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+                    generated_sig_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
                     args.n, args.max_dist, args.window, 
                     args.output_dir,
                     args.observed_input_file, args.tracks_dir, 
@@ -1075,7 +1074,7 @@ if __name__ == '__main__':
     ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if 'All-tumors-without-Lymphatic-system-Skin-Melanoma' in x]
     
     aggregated_output_file_ATELM = getSigElements(
-                    ATELM_generated_sig_merged_element_files, args.active_driver, args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+                    ATELM_generated_sig_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
                     args.n, args.max_dist, args.window, 
                     args.output_dir,
                     args.observed_input_file, args.tracks_dir, 
