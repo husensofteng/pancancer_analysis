@@ -824,7 +824,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
         print("error: ", generated_sig_merged_element_files)
         sys.exit()
 
-    aggregated_output_file = output_dir+'/{cohorts}combined{ext}_merged_intersectedmuts_grouped_aggregated{n}{up}{dw}maxdist{max_dist}kb_within{window}kb.tsv'.format(cohorts=cohorts,ext=ext, n=n, up="Up", dw="Dw", max_dist=max_dist/1000, window=window/1000)
+    aggregated_output_file = output_dir+'/{cohorts}_combined{ext}_merged_intersectedmuts_grouped_aggregated{n}{up}{dw}maxdist{max_dist}kb_within{window}kb.tsv'.format(cohorts=cohorts,ext=ext, n=n, up="Up", dw="Dw", max_dist=max_dist/1000, window=window/1000)
     if os.path.exists(aggregated_output_file):
         return aggregated_output_file
     
@@ -832,97 +832,104 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     #regions_input_file = output_dir+'/combined_onlysig_merged_intersectedmuts_grouped_recurrent.col12'
     #per cohort
     #extend the elemtents to 200bp, intersect with all observed mutations, aggregate all mut information per element, run activedriver to obtain p-value of element
-    active_driver_output_file_local_sig_list = []
-    for cohort_sigregions_file in generated_sig_merged_element_files:  
-        #cohort name
-        cohort_name = cohort_sigregions_file.split('/')[-1].split('_')[0]
-        
-        cohort_mut_grouped_file = tmp_dir+'/'+ cohort_name +'combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
-        cohort_mut_grouped_file_local = output_dir+'/'+ cohort_name +'combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
-        observed_mutations_cohort = mutations_cohorts_outdir + '/' + cohort_name + '_' + annotated_motifs.split('/')[-1]
-
-        if not os.path.exists(cohort_mut_grouped_file_local):
-            #elements extended by 200bp
-            cohort_mut_grouped_file_tmp = cohort_mut_grouped_file+'_temp'
-
-            cohort_sigregions_file_extend_elements = tmp_dir + '/'+ cohort_name +'_extend_elements'
-            #tmp file
-            cohort_sigregions_file_extend_elements_tmp =  cohort_sigregions_file_extend_elements + '_tmp'      
-            with open(cohort_mut_grouped_file_tmp, 'w') as regions_input_ofile:
-
-                        with open(cohort_sigregions_file, 'r') as cohort_sigregions_ifile:
-                            l = cohort_sigregions_ifile.readline().strip().split('\t')
-                            while l and len(l)>10:
-                                regions_input_ofile.write('\t'.join(l[0:3]) + '\t' + cohort_name + '\t' + '~'.join([x.replace(',', '|') for x in l]) + '\n')
-                                l = cohort_sigregions_ifile.readline().strip().split('\t')  
-
-            cohort_file_all_merged = cohort_mut_grouped_file+'_temp_merged'
-            awk_stmt = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if(($3-$2)<{nbp_to_extend}){{s={nbp_to_extend}-($3-$2); $2=$2-int(s/2); $3=$3+int(s/2);}}; print $0}}' {cohort_mut_grouped_file_tmp} | sort -k1,1n -k2,2n -k3,3n | mergeBed -i stdin -c 4,4,5 -o count_distinct,collapse,collapse | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print "chr"$0}}' > {cohort_file_all_merged} 
-                                """).format(cohort_mut_grouped_file_tmp=cohort_mut_grouped_file_tmp, nbp_to_extend = nbp_to_extend, cohort_file_all_merged=cohort_file_all_merged)
-            os.system(awk_stmt)
-            #print(awk_stmt)
-            #intersection results
-            muts_overlapping_cohort_file_all = cohort_file_all_merged+"_muts"
-            BedTool(observed_mutations_cohort).intersect(BedTool(cohort_file_all_merged)).saveas(muts_overlapping_cohort_file_all)
-            #annotat the overlapping muts
-            muts_overlapping_cohort_file_all_annotated =  muts_overlapping_cohort_file_all+'_annotated'
-            muts_overlapping__cohort_file_all_annotated = get_annotated_muts(
-                muts_input_file=muts_overlapping_cohort_file_all, tracks_dir=tracks_dir, 
-                muts_out=muts_overlapping_cohort_file_all_annotated, 
-                cell_names_to_use=cell_names_to_use, tissue_cell_mappings_file=tissue_cell_mappings_file,
-                filter_on_dnase1_or_tf_peak=False)
-            cohort_mut_grouped_file_with_annotated_muts = cohort_mut_grouped_file + "_withannotatedmuts"
-            print("Combining results")
-            awk_stmt = ("""intersectBed -wo -loj -a {cohort_file_all_merged} -b {observed_mutations_all} | 
-                        awk 'BEGIN{{FS=OFS="\t"}}{{print $1,$2,$3,$4,$5,$10">"$11,$12,$15,$6,$7":"$8"-"$9"#"$10">"$11"#"$12"#"$13"#"$14"#"$15"#"$16}}' | 
-                        groupBy -g 1-5 -c 8,8,8,6,7,9,10 -o count,count_distinct,collapse,collapse,collapse,distinct,collapse > {cohort_mut_grouped_file_with_annotated_muts}""".format(
-                        cohort_file_all_merged=cohort_file_all_merged, observed_mutations_all=muts_overlapping_cohort_file_all_annotated, cohort_mut_grouped_file_with_annotated_muts=cohort_mut_grouped_file_with_annotated_muts))
-            os.system(awk_stmt)#awk '$7>1'
-
-            #get all mutated motifs in the extended element
-            #combined_mut_grouped_file_with_annotated_muts_with_motifs = combined_mut_grouped_file + "_withannotatedmuts_motifs"
-            awk_stmt = ("""intersectBed -wo -loj -a {cohort_mut_grouped_file_with_annotated_muts} -b {annotated_motifs} | 
-                        awk 'BEGIN{{FS=OFS="\t"}}{{print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,{motif_cols}}}' | 
-                        groupBy -g 1-12 -c 13 -o collapse > {cohort_mut_grouped_file_with_annotated_muts_with_motifs}""".format(
-                        cohort_mut_grouped_file_with_annotated_muts=cohort_mut_grouped_file_with_annotated_muts, annotated_motifs=annotated_motifs, 
-                        cohort_mut_grouped_file_with_annotated_muts_with_motifs=cohort_mut_grouped_file,
-                        motif_cols = '"#"'.join(["$"+str(x) for x in range(13,45)])))#motif cols are starting from col12 and end in col44
-            os.system(awk_stmt)
-            copyfile(cohort_mut_grouped_file, cohort_mut_grouped_file_local)
-        else: 
-            copyfile(cohort_mut_grouped_file_local, cohort_mut_grouped_file)
-        #activedriver results file
-        active_driver_output_file = cohort_mut_grouped_file + '_ActiveDriver'
-        active_driver_output_file_sig = active_driver_output_file + '_sig'
-        active_driver_output_file_local_sig = cohort_mut_grouped_file_local + '_ActiveDriver_sig'
-
-        #temporary file to keep the activedriver rsults
-        #active_driver_output_file = active_driver_output_file +'_merged'
-        #run activedriver
-        if not os.path.exists(active_driver_output_file_local_sig):
-            subprocess.call(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, n_cores])
-            #keep onl,y significant elements
-            awk_stmt_sig = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if($15 != "NA" || $15<=0.05) print $0}}' {active_driver_output_file} > {active_driver_output_file_sig} 
-                            """).format(active_driver_output_file=active_driver_output_file, active_driver_output_file_sig = active_driver_output_file_sig)
-            os.system(awk_stmt_sig)
-            copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
-            active_driver_output_file_local_sig_list.append(active_driver_output_file_local_sig)
+    active_driver_output_local_sig_all_tmp = aggregated_output_file + '_tmp'
+    with open(active_driver_output_local_sig_all_tmp, 'w') as active_driver_output_local_sig_all_ofile:
+        for cohort_sigregions_file in generated_sig_merged_element_files:  
+            #cohort name
+            cohort_name = cohort_sigregions_file.split('/')[-1].split('_')[0]
+            
+            cohort_mut_grouped_file = tmp_dir+'/'+ cohort_name +'_combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
+            cohort_mut_grouped_file_local = output_dir+'/'+ cohort_name +'_combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
+            observed_mutations_cohort = mutations_cohorts_outdir + '/' + cohort_name + '_' + annotated_motifs.split('/')[-1]
+    
+            if not os.path.exists(cohort_mut_grouped_file_local):
+                #elements extended by 200bp
+                cohort_mut_grouped_file_tmp = cohort_mut_grouped_file+'_temp'
+    
+                cohort_sigregions_file_extend_elements = tmp_dir + '/'+ cohort_name +'_extend_elements'
+                #tmp file
+                cohort_sigregions_file_extend_elements_tmp =  cohort_sigregions_file_extend_elements + '_tmp'      
+                with open(cohort_mut_grouped_file_tmp, 'w') as regions_input_ofile:
+    
+                            with open(cohort_sigregions_file, 'r') as cohort_sigregions_ifile:
+                                l = cohort_sigregions_ifile.readline().strip().split('\t')
+                                while l and len(l)>10:
+                                    regions_input_ofile.write('\t'.join(l[0:3]) + '\t' + cohort_name + '\t' + '~'.join([x.replace(',', '|') for x in l]) + '\n')
+                                    l = cohort_sigregions_ifile.readline().strip().split('\t')  
+    
+                cohort_file_all_merged = cohort_mut_grouped_file+'_temp_merged'
+                awk_stmt = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if(($3-$2)<{nbp_to_extend}){{s={nbp_to_extend}-($3-$2); $2=$2-int(s/2); $3=$3+int(s/2);}}; print $0}}' {cohort_mut_grouped_file_tmp} | sort -k1,1n -k2,2n -k3,3n | mergeBed -i stdin -c 4,4,5 -o count_distinct,collapse,collapse | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print "chr"$0}}' > {cohort_file_all_merged} 
+                                    """).format(cohort_mut_grouped_file_tmp=cohort_mut_grouped_file_tmp, nbp_to_extend = nbp_to_extend, cohort_file_all_merged=cohort_file_all_merged)
+                os.system(awk_stmt)
+                #print(awk_stmt)
+                #intersection results
+                muts_overlapping_cohort_file_all = cohort_file_all_merged+"_muts"
+                BedTool(observed_mutations_cohort).intersect(BedTool(cohort_file_all_merged)).saveas(muts_overlapping_cohort_file_all)
+                #annotat the overlapping muts
+                muts_overlapping_cohort_file_all_annotated =  muts_overlapping_cohort_file_all+'_annotated'
+                muts_overlapping__cohort_file_all_annotated = get_annotated_muts(
+                    muts_input_file=muts_overlapping_cohort_file_all, tracks_dir=tracks_dir, 
+                    muts_out=muts_overlapping_cohort_file_all_annotated, 
+                    cell_names_to_use=cell_names_to_use, tissue_cell_mappings_file=tissue_cell_mappings_file,
+                    filter_on_dnase1_or_tf_peak=False)
+                cohort_mut_grouped_file_with_annotated_muts = cohort_mut_grouped_file + "_withannotatedmuts"
+                print("Combining results")
+                awk_stmt = ("""intersectBed -wo -loj -a {cohort_file_all_merged} -b {observed_mutations_all} | 
+                            awk 'BEGIN{{FS=OFS="\t"}}{{print $1,$2,$3,$4,$5,$10">"$11,$12,$15,$6,$7":"$8"-"$9"#"$10">"$11"#"$12"#"$13"#"$14"#"$15"#"$16}}' | 
+                            groupBy -g 1-5 -c 8,8,8,6,7,9,10 -o count,count_distinct,collapse,collapse,collapse,distinct,collapse > {cohort_mut_grouped_file_with_annotated_muts}""".format(
+                            cohort_file_all_merged=cohort_file_all_merged, observed_mutations_all=muts_overlapping_cohort_file_all_annotated, cohort_mut_grouped_file_with_annotated_muts=cohort_mut_grouped_file_with_annotated_muts))
+                os.system(awk_stmt)#awk '$7>1'
+    
+                #get all mutated motifs in the extended element
+                #combined_mut_grouped_file_with_annotated_muts_with_motifs = combined_mut_grouped_file + "_withannotatedmuts_motifs"
+                awk_stmt = ("""intersectBed -wo -loj -a {cohort_mut_grouped_file_with_annotated_muts} -b {annotated_motifs} | 
+                            awk 'BEGIN{{FS=OFS="\t"}}{{print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,{motif_cols}}}' | 
+                            groupBy -g 1-12 -c 13 -o collapse > {cohort_mut_grouped_file_with_annotated_muts_with_motifs}""".format(
+                            cohort_mut_grouped_file_with_annotated_muts=cohort_mut_grouped_file_with_annotated_muts, annotated_motifs=annotated_motifs, 
+                            cohort_mut_grouped_file_with_annotated_muts_with_motifs=cohort_mut_grouped_file,
+                            motif_cols = '"#"'.join(["$"+str(x) for x in range(13,45)])))#motif cols are starting from col12 and end in col44
+                os.system(awk_stmt)
+                copyfile(cohort_mut_grouped_file, cohort_mut_grouped_file_local)
+            else: 
+                copyfile(cohort_mut_grouped_file_local, cohort_mut_grouped_file)
+            #activedriver results file
+            active_driver_output_file = cohort_mut_grouped_file + '_ActiveDriver'
+            active_driver_output_file_sig = active_driver_output_file + '_sig'
+            active_driver_output_file_local_sig = cohort_mut_grouped_file_local + '_ActiveDriver_sig'
+    
+            #temporary file to keep the activedriver rsults
+            #active_driver_output_file = active_driver_output_file +'_merged'
+            #run activedriver
+            if not os.path.exists(active_driver_output_file_local_sig):
+                print(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, n_cores])
+                subprocess.call(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, n_cores])
+                #keep onl,y significant elements
+                copyfile(active_driver_output_file, cohort_mut_grouped_file_local + '_ActiveDriver')
+    
+                awk_stmt_sig = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if($15 != "NA" || $15<=0.05) print $0}}' {active_driver_output_file} > {active_driver_output_file_sig} 
+                                """).format(active_driver_output_file=active_driver_output_file, active_driver_output_file_sig = active_driver_output_file_sig)
+                os.system(awk_stmt_sig)
+                print(awk_stmt_sig)
+                copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
+                with open(active_driver_output_file_local_sig) as infile:
+                    for line in infile:
+                        active_driver_output_local_sig_all_ofile.write(line)
             
 
 
 
     #merged all elements into one file
-    aggregated_output_file_tmp = aggregated_output_file+ '_tmp'
+    aggregated_output_file_merged = aggregated_output_file+ '_merged'
     
-    awk_stm_activedriver = """cat {active_driver_output_file_sig_list} | sort -k1,1 -k2,2n  | mergeBed -i stdin -c 4,5,6,7,8,9,10,11,12,13,14,15 -o sum,collapse,sum,sum,collapse,collapse,collapse,collapse,collapse,collapse,collapse,collapse > {aggregated_output_file}""".format(
-                                                active_driver_output_file_sig_list=active_driver_output_file_local_sig_list,
-                                              aggregated_output_file=aggregated_output_file)
+    awk_stm_activedriver = """sort -k1,1 -k2,2n {active_driver_output_local_sig_all_tmp} | mergeBed -i stdin -c 4,5,6,7,8,9,10,11,12,13,14,15 -o sum,collapse,sum,sum,collapse,collapse,collapse,collapse,collapse,collapse,collapse,collapse > {aggregated_output_file}""".format(
+                                                active_driver_output_local_sig_all_tmp=active_driver_output_local_sig_all_tmp,
+                                              aggregated_output_file=aggregated_output_file_merged)
 
     os.system(awk_stm_activedriver)
     
     print("Aggregating for final results")
     #function is sligtly different due to p-value of elements
-    aggregated_lines, summaries_dict = aggregate_results(aggregated_output_file_tmp)
+    aggregated_lines, summaries_dict = aggregate_results(aggregated_output_file_merged)
           
         
     #aggregated_lines = compute_fdr_per_element(aggregated_lines, mutations_input_file=observed_mutations_all, sample_ids_index_muts_file=8, num_muts_index = 12, index_sample_ids=-1, index_elment_start_coordinate=1, index_elment_stop_coordinate=2, genome_size=3000000000.0)
