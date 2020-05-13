@@ -447,8 +447,7 @@ def aggregate_results(regions_input_file):
                     
             #instead of writing the dict put them in a list to keep the columns order 
             cols_to_write = [cols_dict['chr'], cols_dict['start'], cols_dict['end'], cols_dict['Position'], 
-                             ','.join(cols_dict['Cohorts']), cols_dict['#Cohorts'], cols_dict['Score'], cols_dict['FDR'], cols_dict['ElementPval'],
-                             cols_dict['ELementFDR'],
+                             ','.join(cols_dict['Cohorts']), cols_dict['#Cohorts'], cols_dict['Score'], cols_dict['FDR'], 
                              cols_dict['#RegMuts'], cols_dict['#Samples(RegMuts)'], 
                              ','.join([x+":"+str(cols_dict['Cancer-Types:#RegMuts'][x]) for x in cols_dict['Cancer-Types:#RegMuts']]), 
                              ','.join([x+":"+str(cols_dict['Cancer-Types:#Samples(RegMuts)'][x]) for x in cols_dict['Cancer-Types:#Samples(RegMuts)']]),
@@ -456,7 +455,8 @@ def aggregate_results(regions_input_file):
                              #'Nearby-Genes(Downstream/Upstream:Distance;COSMIC;KEGG;PCAWG)'
                              ','.join(cols_dict['StatsMuts']),','.join(cols_dict['StatsSamples']),
                              ','.join(cols_dict['RegMuts']), ','.join(cols_dict['Muts']), ','.join(cols_dict['Mutated-Moitfs']), ','.join(cols_dict['Max-RegMotif']),
-                             ','.join(cols_dict['SamplesMuts'])
+                             ','.join(cols_dict['SamplesMuts']), cols_dict['ElementPval'],
+                             cols_dict['ELementFDR']
                              ]
             aggregated_lines.append(cols_to_write)
             
@@ -949,11 +949,11 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
             number_of_elements_tested-=1
             calculate_p_value_motifregions(annotated_mutations_final_output_file_scored_merged, sample_id_and_number_of_mutations_per_sample_dict, mutated_regions_pval_outfile=annotated_mutations_statcalc_output_file, index_mutation_frequency=5, index_sample_ids=4, index_elment_start_coordinate=1, index_elment_stop_coordinate=2, genome_size=3100000000.0, total_number_tested_regions=number_of_elements_tested)
     '''
-    cols_to_write = ['chr', 'start', 'end', 'Position', 'Cohorts', '#Cohorts', 'Score', 'FDR', 'ElementPval', 'ELementFDR', 
+    cols_to_write = ['chr', 'start', 'end', 'Position', 'Cohorts', '#Cohorts', 'Score', 'FDR',  
                      '#RegMuts', '#Samples(RegMuts)', 'Cancer-Types:#RegMuts', 'Cancer-Types:#Samples(RegMuts)',
                      '#Muts', '#Samples', 'Cancer-Types:#Muts', 'Cancer-Types:#Samples','StatsMuts', 'StatsSamples',
                      'RegMuts','Muts', 'Mutated-Moitfs', 'Max-RegMotif', 
-                     'SamplesMuts', 
+                     'SamplesMuts', 'ElementPval', 'ELementFDR',
                      'Nearby-Genes(Name::ID::O|U|Ddistance::COSMIC|KCP|PCD)',
                      'Feature_type'
                      ]
