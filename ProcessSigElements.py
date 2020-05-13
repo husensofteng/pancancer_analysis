@@ -12,6 +12,7 @@ from collections import Counter
 from pybedtools import BedTool
 from ProcessCohorts import process_cohorts
 from decimal import Decimal
+from shutil import copyfile
 
 from AnnotateMutations import get_annotated_muts
 from Utilities import get_number_of_mutations_per_sample_list_and_write_to_file, calculate_p_value_motifregions, find_overlap_genesets_genelist 
