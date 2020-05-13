@@ -919,7 +919,6 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
 
 
     #merged all elements into one file
-    print(active_driver_output_file_sig_list)
     aggregated_output_file_merged = aggregated_output_file+ '_merged'
     
     awk_stm_activedriver = """sort -k1,1 -k2,2n {active_driver_output_local_sig_all_tmp} | mergeBed -i stdin -c 4,5,6,7,8,9,10,11,12,13,14,15 -o sum,collapse,sum,sum,collapse,collapse,collapse,collapse,collapse,collapse,collapse,collapse > {aggregated_output_file}""".format(
