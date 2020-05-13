@@ -911,10 +911,10 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
                 os.system(awk_stmt_sig)
                 print(awk_stmt_sig)
                 copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
-                with open(active_driver_output_file_local_sig) as infile:
-                    for line in infile:
-                        active_driver_output_local_sig_all_ofile.write(line)
-            
+            with open(active_driver_output_file_local_sig) as infile:
+                for line in infile:
+                    active_driver_output_local_sig_all_ofile.write(line)
+        
 
 
 
@@ -1080,7 +1080,7 @@ if __name__ == '__main__':
     
     #Genes and patwhways for ATELM cohort
     ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if 'CNS-tumors' in x]
-    print(ATELM_generated_sig_merged_element_files)
+    print(ATELM_generated_sig_merged_element_files[0])
     aggregated_output_file_ATELM = getSigElements(
                     ATELM_generated_sig_merged_element_files[0],  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
                     args.n, args.max_dist, args.window, 
