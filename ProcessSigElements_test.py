@@ -1017,7 +1017,7 @@ def parse_args():
     parser.add_argument('--sig_category', default = 'perTF', choices=['overallTFs', 'perTF', 'perChromatinCat', 'perTF_perChromatinCat'], help='')
     parser.add_argument('--active_driver_script_dir', default='', help='')
     parser.add_argument('--active_driver_min_mut', default=1, help='n')
-    parser.add_argument('--num_cores_activedriver', type=int, default=10, help='Number of cores to run ActiveDriverWGS')
+    parser.add_argument('--num_cores_activedriver',  default=10, help='Number of cores to run ActiveDriverWGS')
     parser.add_argument('--n', type=int, default=0, help='n')
     parser.add_argument('--max_dist', type=int, default=500000, help='max_dist')
     parser.add_argument('--window', type=int, default=2000, help='window')
