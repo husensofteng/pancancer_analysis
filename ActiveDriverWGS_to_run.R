@@ -21,7 +21,7 @@ data_my <- read.csv(df_elem, sep = '\t', header = FALSE)
 head(data_my) %>%  print
 
 #at least 2 mutations in an element
-data_my_2mut <- data_my[which(data_my[,6] >= n_mut_ele),] 
+data_my_2mut <- data_my[which(data_my[,6] >= as.numeric(n_mut_ele)),] 
 
 #elements to test
 data_elem <- data_my_2mut[,c(1:3,13)] 
