@@ -720,10 +720,10 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     simulated_mean_sd_outfiles = tmp_dir + '/' + cohort
     
     #merge files from the same category, sort by the line number and group by position, TF motif, chromatin cat. and line number
-    #awk_comm = """cat {files} | 
-    #sort -k1,1 | 
-    #groupBy -g 1 -c 2,2,2 -o mean,stdev,count > {file_out} """.format(files = obs_scores_files, file_out = simulated_mean_sd_outfiles)
-    awk_comm = """cat {tmp_dir_intersect}/*annotated.bed9_splited  > {file_out} """.format(file_out = simulated_mean_sd_outfiles)
+    awk_comm = """cat {tmp_dir_intersect}/*annotated.bed9_splited | 
+    sort -k1,1 | 
+    groupBy -g 1 -c 2,2,2 -o mean,stdev,count > {file_out} """.format(tmp_dir_intersect = tmp_dir_intersect, file_out = simulated_mean_sd_outfiles)
+    #awk_comm = """cat {tmp_dir_intersect}/*annotated.bed9_splited  > {file_out} """.format(tmp_dir_intersect = tmp_dir_intersect, file_out = simulated_mean_sd_outfiles)
     os.system(awk_comm)
     copyfile(simulated_mean_sd_outfiles, splited_file_name_local + '_tmpGroubBY')
     
