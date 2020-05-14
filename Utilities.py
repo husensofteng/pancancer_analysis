@@ -729,21 +729,22 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     dict_simulated_mean_sd = {}
     with open(simulated_mean_sd_outfiles, 'r') as simulated_mean_sd_ifile:
         l = simulated_mean_sd_ifile.readline().strip().split('\t')
+        print(l)
         while l and len(l)>3:  
             dict_simulated_mean_sd[l[0]] = {'mean': l[1], 
                                                    "std": l[2], 
                                                    "nummotifs": l[3]}
             
             l = simulated_mean_sd_ifile.readline().strip().split('\t')
-    
+    print(dict_simulated_mean_sd)
     #save the dictionery per category
     dict_type_mean_std_scores['OverallTF'] = dict_simulated_mean_sd
     
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
-    if os.path.exists(tmp_dir_intersect):
-        shutil.rmtree(tmp_dir_intersect)
+    #if os.path.exists(tmp_dir_intersect):
+    #   shutil.rmtree(tmp_dir_intersect)
     
     return  dict_type_mean_std_scores
 
