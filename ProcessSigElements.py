@@ -1071,47 +1071,47 @@ if __name__ == '__main__':
     
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
     
-#     aggregated_output_file = getSigElements(
-#                     generated_sig_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
-#                     args.n, args.max_dist, args.window, 
-#                     args.output_dir,
-#                     args.observed_input_file, args.tracks_dir, 
-#                     args.observed_mutations_all, args.chr_lengths_file,
-#                     args.genes_input_file, 
-#                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
-#                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
-#                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'All')
-#     
-#     #Genes and patwhways for ATELM cohort
-#     ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if 'All-tumors-without-Lymphatic-system-Skin-Melanoma' in x]
-#     
-#     aggregated_output_file_ATELM = getSigElements(
-#                     ATELM_generated_sig_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
-#                     args.n, args.max_dist, args.window, 
-#                     args.output_dir,
-#                     args.observed_input_file, args.tracks_dir, 
-#                     args.observed_mutations_all, args.chr_lengths_file,
-#                     args.genes_input_file, 
-#                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
-#                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
-#                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'ATELM')
-#     combine_sig_TFs(sig_tfs_files, output_dir=args.output_dir)
-#     combine_sig_TFs(sig_tfpos_files, tf_label='TF Positions', output_dir=args.output_dir)
-#     
-#     elements_output_file = get_gene_enrichments(
-#         elements_input_file=aggregated_output_file_ATELM, 
-#         elements_output_file=aggregated_output_file_ATELM+"_GenesInclCDS.tsv", 
-#         skip_exon_elements=False)
-#     
-#     calculated_p_value_sig_out_file = find_overlap_genesets_genelist(
-#         args.kegg_pathways_file, elements_output_file, 
-#         elements_output_file+'_pathways.tsv', 
-#         total_number_of_genes_in_the_universe=20278, 
-#         min_number_of_genes_be_enriched_for_geneset_to_be_reported = 10, 
-#         index_gene_name=0, index_gene_names_start=3, 
-#         keywords_to_filter_out_with=[], only_keep_the_sig_file = False, 
-#         min_number_of_genes_in_geneset_to_consider_the_geneset = 10, 
-#         header_line = False, sample_ids_given=True)
+    aggregated_output_file = getSigElements(
+                    generated_sig_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+                    args.n, args.max_dist, args.window, 
+                    args.output_dir,
+                    args.observed_input_file, args.tracks_dir, 
+                    args.observed_mutations_all, args.chr_lengths_file,
+                    args.genes_input_file, 
+                    args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
+                    args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
+                    args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'All')
+     
+    #Genes and patwhways for ATELM cohort
+    ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if 'All-tumors-without-Lymphatic-system-Skin-Melanoma' in x]
+     
+    aggregated_output_file_ATELM = getSigElements(
+                    ATELM_generated_sig_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+                    args.n, args.max_dist, args.window, 
+                    args.output_dir,
+                    args.observed_input_file, args.tracks_dir, 
+                    args.observed_mutations_all, args.chr_lengths_file,
+                    args.genes_input_file, 
+                    args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
+                    args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
+                    args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'ATELM')
+    combine_sig_TFs(sig_tfs_files, output_dir=args.output_dir)
+    combine_sig_TFs(sig_tfpos_files, tf_label='TF Positions', output_dir=args.output_dir)
+     
+    elements_output_file = get_gene_enrichments(
+        elements_input_file=aggregated_output_file_ATELM, 
+        elements_output_file=aggregated_output_file_ATELM+"_GenesInclCDS.tsv", 
+        skip_exon_elements=False)
+     
+    calculated_p_value_sig_out_file = find_overlap_genesets_genelist(
+        args.kegg_pathways_file, elements_output_file, 
+        elements_output_file+'_pathways.tsv', 
+        total_number_of_genes_in_the_universe=20278, 
+        min_number_of_genes_be_enriched_for_geneset_to_be_reported = 10, 
+        index_gene_name=0, index_gene_names_start=3, 
+        keywords_to_filter_out_with=[], only_keep_the_sig_file = False, 
+        min_number_of_genes_in_geneset_to_consider_the_geneset = 10, 
+        header_line = False, sample_ids_given=True)
     
     #produce a list of all genes including exon elements
     #get_gene_enrichments(elements_input_file=aggregated_output_file, elements_output_file=aggregated_output_file+"_GenesInclExons.tsv", skip_exon_elements=False)
