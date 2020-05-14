@@ -630,9 +630,11 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
         simulated_input_file_sorted = tmp_dir + simulated_input_file_name + '_sorted'
         awk_stmt_sort = """sort -k1,1n -k2,2n {simulated_input_file} > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file,simulated_input_file_sorted = simulated_input_file_sorted )
         os.system(awk_stmt_sort)
-        simulated_input_file_obj = BedTool(simulated_input_file_sorted)                
+        simulated_input_file_obj = BedTool(simulated_input_file_sorted) 
+        print(simulated_input_file_obj)               
         #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
         observed_input_file_obj.intersect(simulated_input_file_obj, wo = True).saveas(simulated_input_file_tmp_overallTFs)
+        copyfile(simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local+'_tmp')
         window_id_fscroe_file = """awk 'BEGIN{FS=OFS="\t"}{if($16=="."){print $5,$15} else{print $5,$15+$16}}'""" + ">{}".format(simulated_input_file_tmp_overallTFs_local)
         os.system(window_id_fscroe_file)
         
