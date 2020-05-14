@@ -680,17 +680,17 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                 motif_end = int(l[2])+background_window_size
                 motif_names = l[motif_name_index]
                 chrom_cat = l[chromatin_cat_index]
-                chr_name = l[0].replace('chr','')
-                chr_name2 = chr_name.replace('X', '23').replace('Y','24').replace('MT','25').replace('M','25')
+                chr_name = l[0].replace('chr','').replace('X', '23').replace('Y','24').replace('MT','25').replace('M','25')
+                #chr_name2 = chr_name.replace('X', '23').replace('Y','24').replace('MT','25').replace('M','25')
 
                 if motif_start<0:
                     motif_start = 0
                     motif_end += 0 - (int(l[1])-background_window_size)
-                if motif_end>chr_lengths[int(chr_name2)]:
-                    motif_end = chr_lengths[int(chr_name2)]
-                    motif_start -= (int(l[2])+background_window_size) - chr_lengths[int(chr_name2)]
+                if motif_end>chr_lengths[int(chr_name)]:
+                    motif_end = chr_lengths[int(chr_name)]
+                    motif_start -= (int(l[2])+background_window_size) - chr_lengths[int(chr_name)]
                 # save background window, motif name, chromatin cat, and number of line
-                splited_ifile.write(chr_name2 + '\t' + str(motif_start) + '\t' +   str(motif_end) + '\t' + str( motif_names) + '\t' +chrom_cat + '\t' + str(line_number) + '\n')
+                splited_ifile.write(chr_name + '\t' + str(motif_start) + '\t' +   str(motif_end) + '\t' + str( motif_names) + '\t' +chrom_cat + '\t' + str(line_number) + '\n')
                 line_number+=1
                 l = observed_infile.readline().strip().split('\t')
             #if splited_file:
