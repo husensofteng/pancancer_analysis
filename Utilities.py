@@ -613,7 +613,6 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
     
     simulated_input_file_tmp_overallTFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1]
     simulated_input_file_tmp_overallTFs_local = tmp_dir_intersect + simulated_input_file_name + '_' + splited_file_name.split('_')[-1]
-    print('Yes')
     if not os.path.exists(simulated_input_file_tmp_overallTFs_local):
         #check if 'chr' is present
         with open(simulated_input_file, 'r') as simulated_ifile:
@@ -626,7 +625,6 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
                 os.system(awk_stmt)
                 simulated_input_file = simulated_ifile_temp
                 
-        print(simulated_input_file)
         simulated_input_file_sorted = tmp_dir + simulated_input_file_name + '_sorted'
         awk_stmt_sort = """sort -k1,1n -k2,2n {simulated_input_file} > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file,simulated_input_file_sorted = simulated_input_file_sorted )
         os.system(awk_stmt_sort)
@@ -634,9 +632,7 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
         #print(simulated_input_file_obj)               
         #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
         observed_input_file_obj.intersect(simulated_input_file_obj, wo = True).saveas(simulated_input_file_tmp_overallTFs)
-        copyfile(simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local+'_tmp')
         window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($16==".") print $6,$16; else print $6,$16+$17}}' {simulated_input_file_tmp_overallTFs} > {simulated_input_file_tmp_overallTFs_local}""".format(simulated_input_file_tmp_overallTFs=simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local=simulated_input_file_tmp_overallTFs_local)
-        print(window_id_fscroe_file)
         os.system(window_id_fscroe_file)
         
     cleanup()   
@@ -667,7 +663,6 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     #divided observed mutations files into subfiles. Extend mutations with the backgroud window
     splited_file_name = tmp_dir  + '/' + cohort + '_splited'
     splited_file_name_sorted = splited_file_name + '_sorted'
-    print(splited_file_name)
     
     splited_file_name_local = tmp_dir_intersect  + '/' + cohort + '_splited'
     
@@ -725,7 +720,6 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     groupBy -g 1 -c 2,2,2 -o mean,stdev,count > {file_out} """.format(tmp_dir_intersect = tmp_dir_intersect, file_out = simulated_mean_sd_outfiles)
     #awk_comm = """cat {tmp_dir_intersect}/*annotated.bed9_splited  > {file_out} """.format(tmp_dir_intersect = tmp_dir_intersect, file_out = simulated_mean_sd_outfiles)
     os.system(awk_comm)
-    copyfile(simulated_mean_sd_outfiles, splited_file_name_local + '_tmpGroubBY')
     
     #save the scores per line number
     dict_simulated_mean_sd = {}
@@ -745,8 +739,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
-    #if os.path.exists(tmp_dir_intersect):
-    #   shutil.rmtree(tmp_dir_intersect)
+    if os.path.exists(tmp_dir_intersect):
+       shutil.rmtree(tmp_dir_intersect)
     
     return  dict_type_mean_std_scores
 
