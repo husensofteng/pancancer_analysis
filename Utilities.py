@@ -615,23 +615,26 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
     simulated_input_file_tmp_overallTFs_local = tmp_dir_intersect + simulated_input_file_name + '_' + splited_file_name.split('_')[-1]
     if not os.path.exists(simulated_input_file_tmp_overallTFs_local):
         #check if 'chr' is present
-        with open(simulated_input_file, 'r') as simulated_ifile:
-            line = simulated_ifile.readline()
-            print(line)
-            if line[0:3] == 'chr':
-                simulated_ifile_temp = tmp_dir + simulated_input_file_name + '_tmp'
-                #simulated_ifile_temp = simulated_input_file + '_tmp'
-                awk_stmt = """cat {simulated_file} | sed 's/^...//'  > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
-                os.system(awk_stmt)
-                simulated_input_file = simulated_ifile_temp
-                
+#         with open(simulated_input_file, 'r') as simulated_ifile:
+#             line = simulated_ifile.readline()
+#             print(line)
+#             #if line[0:3] == 'chr':
+#             simulated_ifile_temp = tmp_dir + simulated_input_file_name + '_tmp'
+#             #simulated_ifile_temp = simulated_input_file + '_tmp'
+#             awk_stmt = """awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); gsub("chr","", $1); print $0}}' {simulated_file} > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
+#             os.system(awk_stmt)
+#             simulated_input_file = simulated_ifile_temp
+#         
+        awk_stmt = """awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); gsub("chr","", $1); print $0}}' {simulated_file} > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
+        os.system(awk_stmt)
+        simulated_input_file = simulated_ifile_temp        
         simulated_input_file_sorted = tmp_dir + simulated_input_file_name + '_sorted'
         awk_stmt_sort = """sort -k1,1n -k2,2n {simulated_input_file} > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file,simulated_input_file_sorted = simulated_input_file_sorted )
         os.system(awk_stmt_sort)
         simulated_input_file_obj = BedTool(simulated_input_file_sorted) 
         #print(simulated_input_file_obj)               
         #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
-        observed_input_file_obj.intersect(simulated_input_file_obj, wo = True).saveas(simulated_input_file_tmp_overallTFs)
+        observed_input_file_obj.intersect(simulated_input_file_obj, wo = True, sorted = True).saveas(simulated_input_file_tmp_overallTFs)
         window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($16==".") print $6,$16; else print $6,$16+$17}}' {simulated_input_file_tmp_overallTFs} > {simulated_input_file_tmp_overallTFs_local}""".format(simulated_input_file_tmp_overallTFs=simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local=simulated_input_file_tmp_overallTFs_local)
         os.system(window_id_fscroe_file)
         
@@ -686,7 +689,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                     motif_end = chr_lengths[int(chr_name2)]
                     motif_start -= (int(l[2])+background_window_size) - chr_lengths[int(chr_name2)]
                 # save background window, motif name, chromatin cat, and number of line
-                splited_ifile.write(chr_name + '\t' + str(motif_start) + '\t' +   str(motif_end) + '\t' + str( motif_names) + '\t' +chrom_cat + '\t' + str(line_number) + '\n')
+                splited_ifile.write(chr_name2 + '\t' + str(motif_start) + '\t' +   str(motif_end) + '\t' + str( motif_names) + '\t' +chrom_cat + '\t' + str(line_number) + '\n')
                 line_number+=1
                 l = observed_infile.readline().strip().split('\t')
             #if splited_file:
