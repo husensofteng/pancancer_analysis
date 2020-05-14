@@ -613,7 +613,7 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
     
     simulated_input_file_tmp_overallTFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1]
     simulated_input_file_tmp_overallTFs_local = tmp_dir_intersect + simulated_input_file_name + '_' + splited_file_name.split('_')[-1]
-    
+    print('Yes')
     if not os.path.exists(simulated_input_file_tmp_overallTFs_local):
         #check if 'chr' is present
         with open(simulated_input_file, 'r') as simulated_ifile:
@@ -703,6 +703,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         copyfile(splited_file_name_local, splited_file_name_sorted)
 
     observed_input_file_obj = BedTool(splited_file_name_sorted)
+    print(observed_input_file_obj)
     
     obs_scores_files = []
     p = Pool(18)
