@@ -626,7 +626,7 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
 #             simulated_input_file = simulated_ifile_temp
 
         simulated_ifile_temp = tmp_dir + simulated_input_file_name + '_tmp'  
-        awk_stmt = """awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); gsub("chr","", $1); print $0}}' {simulated_file} > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
+        awk_stmt = """awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); print $0}}' {simulated_file} > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
         os.system(awk_stmt)
         simulated_input_file = simulated_ifile_temp        
         simulated_input_file_sorted = tmp_dir + simulated_input_file_name + '_sorted'
