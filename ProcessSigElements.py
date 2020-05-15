@@ -1082,6 +1082,8 @@ if __name__ == '__main__':
                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'All')
      
+     
+    print("Generating genes and patwhways for ATELM cohort")
     #Genes and patwhways for ATELM cohort
     ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if 'All-tumors-without-Lymphatic-system-Skin-Melanoma' in x]
      
