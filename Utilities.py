@@ -618,14 +618,14 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
         simulated_input_file_position = tmp_dir + simulated_input_file_name + '_pos'
         
         simulated_ifile_pos_temp = simulated_input_file_position + '_tmp'
-        awk_stmt_sim  = """awk 'BEGIN{{FS=OFS="\t"}} {{if ( $2 ~ "^[0-9][0-9]*$" && $3 ~ "^[0-9][0-9]*$") print $0}} ' {sim_ifile} > {sim_ofile}""".format(sim_ifile = simulated_input_file, sim_ofile =simulated_input_file_position )
+        awk_stmt_sim  = """awk 'BEGIN{{FS=OFS="\t"}} {{if ( $2 ~ "^[0-9][0-9]*$" && $3 ~ "^[0-9][0-9]*$") print $0}} ' {sim_ifile} > {sim_ofile}""".format(sim_ifile = simulated_input_file, sim_ofile = simulated_ifile_pos_temp )
         os.system(awk_stmt_sim)
         count = len(open(simulated_input_file).readlines(  ))
-        count2 = len(open(simulated_input_file_position).readlines(  ))
+        count2 = len(open(simulated_ifile_pos_temp).readlines(  ))
         if(count != count2):
-            awk_tmp =r"""awk 'BEGIN{{FS=OFS="\t"}}{{ printf ("%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32)}}' {sim_ifile} > {sim_ofile} """.format(sim_ifile = simulated_input_file, sim_ofile = simulated_input_file)
+            awk_tmp =r"""awk 'BEGIN{{FS=OFS="\t"}}{{ printf ("%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32)}}' {sim_ifile} > {sim_ofile} """.format(sim_ifile = simulated_input_file, sim_ofile = simulated_input_file_position)
             os.system(awk_tmp)
-           # simulated_input_file = simulated_ifile_pos_temp 
+            simulated_input_file = simulated_input_file_position 
         #check if 'chr' is present
 #         with open(simulated_input_file, 'r') as simulated_ifile:
 #             line = simulated_ifile.readline()
