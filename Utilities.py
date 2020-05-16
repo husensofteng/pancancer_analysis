@@ -656,7 +656,8 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
         if os.path.exists(simulated_input_file_position):
             os.remove(simulated_input_file_position)
     print('Ready')    
-    
+    cleanup()  
+    print('cleanup')
     
     return simulated_input_file_tmp_overallTFs_local
 
@@ -764,8 +765,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     if os.path.exists(tmp_dir_intersect):
        shutil.rmtree(tmp_dir_intersect)
        
-    cleanup()  
-    print('cleanup')
+    
     
     return  dict_type_mean_std_scores
 
