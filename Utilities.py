@@ -650,8 +650,8 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
         observed_input_file_obj.intersect(simulated_input_file_obj, wo = True, sorted =True).saveas(simulated_input_file_tmp_overallTFs)
         window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($16==".") print $6,$16; else print $6,$16+$17}}' {simulated_input_file_tmp_overallTFs} > {simulated_input_file_tmp_overallTFs_local}""".format(simulated_input_file_tmp_overallTFs=simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local=simulated_input_file_tmp_overallTFs_local)
         os.system(window_id_fscroe_file)
-        
-    cleanup()   
+    print('Ready')    
+    
     
     return simulated_input_file_tmp_overallTFs_local
 
@@ -724,6 +724,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         [observed_input_file_obj], [tmp_dir], [tmp_dir_intersect], 
         [splited_file_name], simulated_annotated_input_files))
     
+    cleanup()  
+    print('cleanup') 
     #create a dictionery for mean, std scores for all categories
     dict_type_mean_std_scores = {}
     
