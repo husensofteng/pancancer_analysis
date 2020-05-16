@@ -653,6 +653,7 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
         
         os.remove(simulated_input_file_tmp_overallTFs)
         os.remove(simulated_input_file_sorted)
+        os.remove(simulated_ifile_pos_temp)
         if os.path.exists(simulated_input_file_position):
             os.remove(simulated_input_file_position)
     print('Ready')    
