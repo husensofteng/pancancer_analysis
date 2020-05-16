@@ -724,8 +724,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         [observed_input_file_obj], [tmp_dir], [tmp_dir_intersect], 
         [splited_file_name], simulated_annotated_input_files))
     
-    cleanup()  
-    print('cleanup') 
+     
     #create a dictionery for mean, std scores for all categories
     dict_type_mean_std_scores = {}
     
@@ -759,6 +758,9 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     
     if os.path.exists(tmp_dir_intersect):
        shutil.rmtree(tmp_dir_intersect)
+       
+    cleanup()  
+    print('cleanup')
     
     return  dict_type_mean_std_scores
 
