@@ -645,6 +645,7 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
         awk_stmt_sort = """sort -k1,1n -k2,2n {simulated_input_file} > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file,simulated_input_file_sorted = simulated_input_file_sorted )
         os.system(awk_stmt_sort)
         simulated_input_file_obj = BedTool(simulated_input_file_sorted) 
+        print('YES')
         #print(simulated_input_file_obj)               
         #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
         observed_input_file_obj.intersect(simulated_input_file_obj, wo = True, sorted =True).saveas(simulated_input_file_tmp_overallTFs)
@@ -731,7 +732,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         [observed_input_file_obj], [tmp_dir], [tmp_dir_intersect], 
         [splited_file_name], simulated_annotated_input_files))
     
-     
+    print(obs_scores_files)
     #create a dictionery for mean, std scores for all categories
     dict_type_mean_std_scores = {}
     
