@@ -641,9 +641,9 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
         simulated_ifile_temp = tmp_dir + simulated_input_file_name + '_tmp'  
         awk_stmt = """awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); print $0}}' {simulated_file} > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
         os.system(awk_stmt)
-        simulated_input_file = simulated_ifile_temp        
+        simulated_input_file_tmp = simulated_ifile_temp        
         simulated_input_file_sorted = tmp_dir + simulated_input_file_name + '_sorted'
-        awk_stmt_sort = """sort -k1,1n -k2,2n {simulated_input_file} > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file,simulated_input_file_sorted = simulated_input_file_sorted )
+        awk_stmt_sort = """sort -k1,1n -k2,2n {simulated_input_file} > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file_tmp, simulated_input_file_sorted = simulated_input_file_sorted )
         os.system(awk_stmt_sort)
         simulated_input_file_obj = BedTool(simulated_input_file_sorted) 
         print('YES')
