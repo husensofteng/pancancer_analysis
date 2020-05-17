@@ -627,16 +627,7 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
             awk_tmp =r"""awk 'BEGIN{{FS=OFS="\t"}}{{ printf ("%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32)}}' {sim_ifile} > {sim_ofile} """.format(sim_ifile = simulated_input_file, sim_ofile = simulated_input_file_position)
             os.system(awk_tmp)
             simulated_input_file = simulated_input_file_position 
-        #check if 'chr' is present
-#         with open(simulated_input_file, 'r') as simulated_ifile:
-#             line = simulated_ifile.readline()
-#             print(line)
-#             #if line[0:3] == 'chr':
-#             simulated_ifile_temp = tmp_dir + simulated_input_file_name + '_tmp'
-#             #simulated_ifile_temp = simulated_input_file + '_tmp'
-#             awk_stmt = """awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); gsub("chr","", $1); print $0}}' {simulated_file} > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
-#             os.system(awk_stmt)
-#             simulated_input_file = simulated_ifile_temp
+
 
         simulated_ifile_temp = tmp_dir + simulated_input_file_name + '_tmp'  
         awk_stmt = """awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); print $0}}' {simulated_file} > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
