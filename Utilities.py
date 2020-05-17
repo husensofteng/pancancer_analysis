@@ -726,7 +726,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     observed_input_file_obj = BedTool(splited_file_name_sorted)
     
     obs_scores_files = []
-    p = Pool(18)
+    p = Pool(10)
     obs_scores_files = p.starmap(get_scores_per_window, product(
         [observed_input_file_obj], [tmp_dir], [tmp_dir_intersect], 
         [splited_file_name], simulated_annotated_input_files))
