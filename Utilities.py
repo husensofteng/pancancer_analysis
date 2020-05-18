@@ -756,14 +756,14 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     dict_simulated_mean_sd = {}
     with open(simulated_mean_sd_outfiles, 'r') as simulated_mean_sd_ifile:
         l = simulated_mean_sd_ifile.readline().strip().split('\t')
-        print(l)
+        #print(l)
         while l and len(l)>3:  
             dict_simulated_mean_sd[l[0]] = {'mean': l[1], 
                                                    "std": l[2], 
                                                    "nummotifs": l[3]}
             
             l = simulated_mean_sd_ifile.readline().strip().split('\t')
-    print(dict_simulated_mean_sd)
+    #print(dict_simulated_mean_sd)
     #save the dictionery per category
     dict_type_mean_std_scores['overallTFs'] = dict_simulated_mean_sd
     
@@ -1573,7 +1573,6 @@ def get_simulated_mean_sd_per_TF_motif_background_window_correction(cohort_full_
             if(count != count2):
                 awk_tmp =r"""awk 'BEGIN{{FS=OFS="\t"}}{{ printf ("%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32)}}' {sim_ifile} > {sim_ofile} """.format(sim_ifile = simulated_input_file, sim_ofile = simulated_ifile_pos_temp)
                 os.system(awk_tmp)
-                print('Yes')
                 simulated_input_file = simulated_ifile_pos_temp 
             #os.remove(simulated_input_file_position)
             print(simulated_input_file)
