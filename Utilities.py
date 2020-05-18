@@ -621,6 +621,7 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
         simulated_input_file_position = tmp_dir + simulated_input_file_name + '_pos'
         
         simulated_ifile_pos_temp = simulated_input_file_position + '_tmp'
+        #check if 'chr' is present
         awk_stmt_sim  = """awk 'BEGIN{{FS=OFS="\t"}} {{if ( $2 ~ "^[0-9][0-9]*$" && $3 ~ "^[0-9][0-9]*$") print $0}} ' {sim_ifile} > {sim_ofile}""".format(sim_ifile = simulated_input_file, sim_ofile = simulated_ifile_pos_temp )
         os.system(awk_stmt_sim)
         count = len(open(simulated_input_file).readlines(  ))
@@ -663,8 +664,8 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
         os.remove(simulated_input_file_tmp_overallTFs)
         os.remove(simulated_input_file_sorted)
         os.remove(simulated_ifile_pos_temp)
-        if os.path.exists(simulated_input_file_position):
-           os.remove(simulated_input_file_position)
+        #if os.path.exists(simulated_input_file_position):
+        #   os.remove(simulated_input_file_position)
     print('Ready')    
     cleanup()  
     print('cleanup')
@@ -735,7 +736,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     observed_input_file_obj = BedTool(splited_file_name_sorted)
     
     obs_scores_files = []
-    p = Pool(18)
+    p = Pool(10)
     obs_scores_files = p.starmap(get_scores_per_window, product(
         [observed_input_file_obj], [tmp_dir], [tmp_dir_intersect], 
         [splited_file_name], simulated_annotated_input_files))
