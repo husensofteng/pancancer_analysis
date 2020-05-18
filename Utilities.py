@@ -228,7 +228,10 @@ def assess_stat_muts(muts_input_file, simulated_input_file, observed_output_file
             #observed_onlysig_outfile.write(l.strip() + '\t' + str(p_value) + '\n')
         return observed_output_file, observed_onlysig_output_file, n_sig
 
-def merge_muts(muts_input_file, merged_muts_output_file, filter_mut_motifs=False, filter_col_index=15, filter_value=0.05, mut_score_index=9, motifs_col_index =10, ref_alt_col_index=11, mutpos_col_index=12, motifname_col_index=13, motif_col_index=14, distance_to_merge=20):
+def merge_muts(muts_input_file, merged_muts_output_ext, filter_mut_motifs=False, filter_col_index=15, filter_value=0.05, mut_score_index=9, motifs_col_index =10, ref_alt_col_index=11, mutpos_col_index=12, motifname_col_index=13, motif_col_index=14, distance_to_merge=20):
+    
+    
+    merged_muts_output_file = muts_input_file + merged_muts_output_ext
     
     fsep = '\t'
     vsep = '#'
