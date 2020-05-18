@@ -179,7 +179,7 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
     #merged_muts_output_file = unified_observed_muts_file_wihtmotifinfo+"_mergedmuts{distance_to_merge}bp".format(
     #                                        distance_to_merge=distance_to_merge)
     merged_muts_output_file= Utilities.merge_muts(muts_input_file=unified_observed_muts_file_wihtmotifinfo, 
-                         merged_muts_output_ext, 
+                         merged_muts_output_ext=merged_muts_output_ext, 
                          filter_mut_motifs=False, filter_col_index=15, 
                          filter_value=merged_mut_sig_threshold, mut_score_index=9, 
                          motifs_col_index =10, ref_alt_col_index=11, mutpos_col_index=12, 
