@@ -663,8 +663,8 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
         os.remove(simulated_input_file_tmp_overallTFs)
         os.remove(simulated_input_file_sorted)
         os.remove(simulated_ifile_pos_temp)
-        #if os.path.exists(simulated_input_file_position):
-        #   os.remove(simulated_input_file_position)
+        if os.path.exists(simulated_input_file_position):
+           os.remove(simulated_input_file_position)
     print('Ready')    
     cleanup()  
     print('cleanup')
@@ -774,8 +774,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
-    #if os.path.exists(tmp_dir_intersect):
-    #   shutil.rmtree(tmp_dir_intersect)
+    if os.path.exists(tmp_dir_intersect):
+       shutil.rmtree(tmp_dir_intersect)
        
     cleanup() 
     
