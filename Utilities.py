@@ -30,7 +30,7 @@ from itertools import product
 
 #use scratch
 #temp_dir = tmp_dir
-set_tempdir('$SNIC_TMP')
+
 
 def unify_muts(annotated_mutations_input_file, annotated_mutations_grouped_file, filter_mut_motifs=True, filter_cond = "", operation_on_unify='mean'):
     
@@ -612,6 +612,8 @@ def process_input_file(observed_input_file, simulated_input_files,
 def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
                           splited_file_name, simulated_input_file):
     
+    
+
     simulated_input_file_name = simulated_input_file.split('/')[-1]
     
     simulated_input_file_tmp_overallTFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1]
@@ -680,6 +682,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                                        background_window_size = 50000,
                                        motif_name_index = 17, f_score_index = 9, 
                                        motif_breaking_score_index = 10, chromatin_cat_index=22, tmp_dir = '$SNIC_TMP'):
+    set_tempdir(tmp_dir)
     
     if os.path.exists(cohort_mean_sd_per_tf_overall_output_dict_file):
         with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'r') as dict_simulated_mean_sd_per_TF_motif_ifile:
