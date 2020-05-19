@@ -655,7 +655,8 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
         print('YES')
         #print(simulated_input_file_obj)               
         #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
-        simulated_input_file_obj.intersect(observed_input_file_obj, wo = True, sorted =True).saveas(simulated_input_file_tmp_overallTFs)
+        f = simulated_input_file_obj.intersect(observed_input_file_obj, wo = True, sorted =True).saveas(simulated_input_file_tmp_overallTFs)
+        print f.history
         window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($11==".") print $38,$10; else print $38,$10+$11}}' {simulated_input_file_tmp_overallTFs} > {simulated_input_file_tmp_overallTFs_local}""".format(simulated_input_file_tmp_overallTFs=simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local=simulated_input_file_tmp_overallTFs_local)
         #observed_input_file_obj.intersect(simulated_input_file_obj, wo = True, sorted =True).saveas(simulated_input_file_tmp_overallTFs)
         #window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($16==".") print $6,$16; else print $6,$16+$17}}' {simulated_input_file_tmp_overallTFs} > {simulated_input_file_tmp_overallTFs_local}""".format(simulated_input_file_tmp_overallTFs=simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local=simulated_input_file_tmp_overallTFs_local)
@@ -683,7 +684,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                                        motif_name_index = 17, f_score_index = 9, 
                                        motif_breaking_score_index = 10, chromatin_cat_index=22, tmp_dir = '$SNIC_TMP'):
     set_tempdir(tmp_dir)
-    
+
     if os.path.exists(cohort_mean_sd_per_tf_overall_output_dict_file):
         with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'r') as dict_simulated_mean_sd_per_TF_motif_ifile:
             dict_type_mean_std_scores = json.loads(dict_simulated_mean_sd_per_TF_motif_ifile.readline())
@@ -739,7 +740,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     observed_input_file_obj = BedTool(splited_file_name_sorted)
     
     obs_scores_files = []
-    p = Pool(18)
+    p = Pool(10)
     obs_scores_files = p.starmap(get_scores_per_window, product(
         [observed_input_file_obj], [tmp_dir], [tmp_dir_intersect], 
         [splited_file_name], simulated_annotated_input_files))

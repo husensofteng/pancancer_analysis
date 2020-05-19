@@ -131,41 +131,41 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
                             sim_sig_thresh):
     
     combined_simulated_muts_merged_output_file = cohort_full_name + output_extension + '_unified_combined' + '_merged{distance_to_merge}bp'.format(distance_to_merge=distance_to_merge) + '_combined'
-    merged_muts_output_ext = "_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)
-#    "Merge the simluated mutations into elements"
-    merged_simulated_element_files = []
-    for unified_muts_file_wihtmotifinfo in unified_mutation_input_files[1:]:
-        merged_muts_output_file = unified_muts_file_wihtmotifinfo+"_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)
-        Utilities.merge_muts(muts_input_file=unified_muts_file_wihtmotifinfo, 
-                              merged_muts_output_ext=merged_muts_output_ext, 
-                              filter_mut_motifs=False, filter_col_index=16, 
-                              filter_value=0.05, mut_score_index=9, 
-                              motifs_col_index =10, ref_alt_col_index=11, 
-                              mutpos_col_index=12, motifname_col_index=13, 
-                              motif_col_index=14, distance_to_merge=distance_to_merge)
-        merged_simulated_element_files.append(merged_muts_output_file)
+#     merged_muts_output_ext = "_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)
+# #    "Merge the simluated mutations into elements"
+#     merged_simulated_element_files = []
+#     for unified_muts_file_wihtmotifinfo in unified_mutation_input_files[1:]:
+#         merged_muts_output_file = unified_muts_file_wihtmotifinfo+"_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)
+#         Utilities.merge_muts(muts_input_file=unified_muts_file_wihtmotifinfo, 
+#                               merged_muts_output_ext=merged_muts_output_ext, 
+#                               filter_mut_motifs=False, filter_col_index=16, 
+#                               filter_value=0.05, mut_score_index=9, 
+#                               motifs_col_index =10, ref_alt_col_index=11, 
+#                               mutpos_col_index=12, motifname_col_index=13, 
+#                               motif_col_index=14, distance_to_merge=distance_to_merge)
+#         merged_simulated_element_files.append(merged_muts_output_file)
      
     
-    # merged_simulated_element_files = []
-    # merged_muts_output_ext = "_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)
-    # filter_mut_motifs=False
-    # filter_col_index=16
-    # filter_value=0.05
-    # mut_score_index=9
-    # motifs_col_index =10
-    # ref_alt_col_index=11 
-    # mutpos_col_index=12
-    # motifname_col_index=13 
-    # motif_col_index=14
-    # distance_to_merge=distance_to_merge
+    merged_simulated_element_files = []
+    merged_muts_output_ext = "_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)
+    filter_mut_motifs=False
+    filter_col_index=16
+    filter_value=0.05
+    mut_score_index=9
+    motifs_col_index =10
+    ref_alt_col_index=11 
+    mutpos_col_index=12
+    motifname_col_index=13 
+    motif_col_index=14
+    distance_to_merge=distance_to_merge
 
-    # pm = Pool(18)
-    # merged_simulated_element_files = pm.starmap(Utilities.merge_muts, product(
-    #     unified_mutation_input_files[1:], [merged_muts_output_ext], [filter_mut_motifs], 
-    #     [filter_col_index], [filter_value], [mut_score_index], [motifs_col_index], [ref_alt_col_index], [mutpos_col_index], 
-    #     [motifname_col_index], [motif_col_index], [distance_to_merge]))
-    # pm.close()
-    # pm.join()
+    pm = Pool(10)
+    merged_simulated_element_files = pm.starmap(Utilities.merge_muts, product(
+        unified_mutation_input_files[1:], [merged_muts_output_ext], [filter_mut_motifs], 
+        [filter_col_index], [filter_value], [mut_score_index], [motifs_col_index], [ref_alt_col_index], [mutpos_col_index], 
+        [motifname_col_index], [motif_col_index], [distance_to_merge]))
+    pm.close()
+    pm.join()
     
         
     if not os.path.exists(combined_simulated_muts_merged_output_file):
