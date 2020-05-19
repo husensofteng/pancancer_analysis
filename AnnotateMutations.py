@@ -9,10 +9,10 @@ import os, sys, shutil
 from pybedtools import BedTool, set_tempdir
 from collections import Counter
 
-temp_dir = 'tmp_pybedtoos'
-if not os.path.exists(temp_dir):
-    os.mkdir(temp_dir)  
-set_tempdir(temp_dir)
+#temp_dir = 'tmp_pybedtoos'
+#if not os.path.exists(temp_dir):
+#    os.mkdir(temp_dir)  
+#set_tempdir(temp_dir)
 
 def get_muts_tracks_info(muts_input_file, tracks_dir, muts_dir_out, split_muts_file_by_chr=True):
     

@@ -21,7 +21,7 @@ import math
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from psycopg2.extras import DictCursor
 from pybedtools import BedTool, set_tempdir
-set_tempdir('tmp_pybedtoos')#'/data2/tmp/')
+#set_tempdir('tmp_pybedtoos')#'/data2/tmp/')
 
 def get_params(params_list):
     params = {}
