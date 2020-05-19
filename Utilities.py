@@ -30,7 +30,7 @@ from itertools import product
 
 #use scratch
 #temp_dir = tmp_dir
-#set_tempdir(temp_dir)
+set_tempdir('$SNIC_TMP')
 
 def unify_muts(annotated_mutations_input_file, annotated_mutations_grouped_file, filter_mut_motifs=True, filter_cond = "", operation_on_unify='mean'):
     
