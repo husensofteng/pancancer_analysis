@@ -769,7 +769,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     obs_scores_files = []
     p = Pool(n_cores_fscore)
     obs_scores_files = p.starmap(get_scores_per_window, product(
-        [observed_input_file], [tmp_dir], [tmp_dir_intersect], 
+        [splited_file_name_sorted], [tmp_dir], [tmp_dir_intersect], 
         [splited_file_name],  simulated_annotated_input_files))
     p.close()
     p.join()
