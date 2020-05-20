@@ -659,7 +659,7 @@ def get_scores_per_window(observed_input_file, tmp_dir, tmp_dir_intersect,
 
     #find and 
     observed_input_file_over = observed_input_file + '_' +simulated_input_file_name + '_over'
-    awk_stmt_genome =  """awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {simulated_input_file_sorted} {observed_input_file}> {simulated_input_file_sorted_over}""".format( simulated_input_file_sorted= simulated_input_file_sorted, observed_input_file=observed_input_file, observed_input_file_over = observed_input_file_over  )
+    awk_stmt_genome =  """awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {simulated_input_file_sorted} {observed_input_file}> {observed_input_file_over}""".format( simulated_input_file_sorted= simulated_input_file_sorted, observed_input_file=observed_input_file, observed_input_file_over = observed_input_file_over  )
     print(awk_stmt_genome)
     os.system(awk_stmt_genome)
     
