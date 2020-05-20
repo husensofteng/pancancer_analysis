@@ -769,11 +769,12 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
 
     copyfile(simulated_mean_sd_outfiles_tmp, simulated_mean_sd_outfiles_tmp_local)
     
+    dict_fscore = {}
     with open(simulated_mean_sd_outfiles_tmp, 'r') as simulated_mean_sd_tmp_infile:
-        keys = simulated_mean_sd_tmp_infile.readline().split()[0]
-        values = simulated_mean_sd_tmp_infile.readline().split()[1]
-    #dictionery of lines and fscores
-    dict_fscore = dict(zip(keys, values))
+        for line in simulated_mean_sd_tmp_infile:
+            (key, val) = line.split()
+            dict_fscore[int(key)] = val
+            
     print(dict_fscore)
     print('dict')
     dict_simulated_mean_sd = {}
