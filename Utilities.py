@@ -779,13 +779,13 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     print('dict')
     dict_simulated_mean_sd = {}
     for line_nr in dict_fscore.keys():
-        fscore = float(dict_fscore[line_nr])
-        tf_mean = np.mean(fscore)
-        tf_std = np.std(fscore)
-        num_motifs = len(fscore)
+        tf_mean = np.mean(float(dict_fscore[line_nr]))
+        tf_std = np.std(float(dict_fscore[line_nr]))
+        num_motifs = len(dict_fscore[line_nr])
         dict_simulated_mean_sd[line_nr] = {'mean': tf_mean, 
                                                    "std": tf_std, 
                                                    "nummotifs": num_motifs}
+        print(dict_simulated_mean_sd[line_nr])
       
     
     #groupBy -g 1 -c 2,2,2 -o mean,stdev,count > {file_out} """.format(tmp_dir_intersect = tmp_dir_intersect, file_out = simulated_mean_sd_outfiles)
