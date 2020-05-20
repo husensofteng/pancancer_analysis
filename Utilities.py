@@ -664,7 +664,7 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
     os.system(awk_stmt_genome)
     copyfile(genome_local_sim, tmp_dir_intersect + '/' + simulated_input_file_name + 'genome_local') 
     #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
-    f = simulated_input_file_obj.intersect(observed_input_file_obj, wo = True, sorted =True, g=genome_local_sim).saveas(simulated_input_file_tmp_overallTFs)
+    f = simulated_input_file_obj.intersect(observed_input_file_obj, wo = True, sorted =True, g=BedTool(genome_local_sim)).saveas(simulated_input_file_tmp_overallTFs)
     #print(f.history)
     window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($11==".") print $38,$10; else print $38,$10+$11}}' {simulated_input_file_tmp_overallTFs} > {simulated_input_file_tmp_overallTFs_local}""".format(simulated_input_file_tmp_overallTFs=simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local=simulated_input_file_tmp_overallTFs_local)
     #observed_input_file_obj.intersect(simulated_input_file_obj, wo = True, sorted =True).saveas(simulated_input_file_tmp_overallTFs)
