@@ -686,7 +686,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                                        chr_lengths_file,
                                        background_window_size = 50000,
                                        motif_name_index = 17, f_score_index = 9, 
-                                       motif_breaking_score_index = 10, chromatin_cat_index=22, tmp_dir = '$SNIC_TMP'):
+                                       motif_breaking_score_index = 10, chromatin_cat_index=22, tmp_dir = '$SNIC_TMP', n_cores_fscore=10):
     set_tempdir(tmp_dir)
 
     if os.path.exists(cohort_mean_sd_per_tf_overall_output_dict_file):
@@ -744,7 +744,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     observed_input_file_obj = BedTool(splited_file_name_sorted)
     
     obs_scores_files = []
-    p = Pool(10)
+    p = Pool(n_cores_fscore)
     obs_scores_files = p.starmap(get_scores_per_window, product(
         [observed_input_file_obj], [tmp_dir], [tmp_dir_intersect], 
         [splited_file_name], simulated_annotated_input_files))
@@ -814,8 +814,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
-    #if os.path.exists(tmp_dir_intersect):
-    #   shutil.rmtree(tmp_dir_intersect)
+    if os.path.exists(tmp_dir_intersect):
+       shutil.rmtree(tmp_dir_intersect)
        
     cleanup() 
     
