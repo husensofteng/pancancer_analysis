@@ -1712,7 +1712,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window_correction(cohort_full_
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
-    if os.path.exists(tmp_dir_intersect):
-        shutil.rmtree(tmp_dir_intersect)
+    #if os.path.exists(tmp_dir_intersect):
+    #    shutil.rmtree(tmp_dir_intersect)
             
     return  dict_type_mean_std_scores

@@ -1016,6 +1016,8 @@ def parse_args():
     parser.add_argument('-m', '--observed_input_file', default='', help='')
     parser.add_argument('-s', '--simulated_input_dir', default='', help='')
     parser.add_argument('-l', '--chr_lengths_file', default='', help='')
+    parser.add_argument('--chr_order_file', default='', help='')
+
     parser.add_argument('--background_window', action='store_const', const=True, help='Check mutation functional score significance by comparing to background window around mutation in simulated mutations, if the flag is missing it would use the whole genome as background')
     parser.add_argument('--background_window_size', type=int, default=50000, help='Background window around mutation for capturing simulated mutation to compare mutation functional score')
     parser.add_argument('--elements_oncodrive', action='store_const', const=True, help='Identify significantly mutated elements using OncodriveFML if the flag is missing compare the element with the elements from the simulated mutation sets')
@@ -1068,7 +1070,7 @@ if __name__ == '__main__':
         args.background_window, args.background_window_size, args.elements_oncodrive,
         args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
-        args.local_domain_window, args.tmp_dir, args.n_cores_fscore)
+        args.local_domain_window, args.tmp_dir, args.n_cores_fscore, args.chr_order_file)
     
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
     
