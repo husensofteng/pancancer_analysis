@@ -662,7 +662,7 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
     genome_local_sim = genome_local +'_' + simulated_input_file_name
     awk_stmt_genome = """awk -F'\t' 'NR==FNR{c[$1]++;next};c[$1] > 0' {simulated_input_file_sorted} {genome_local} > {genome_local_sim}""".format(splited_file_name_sorted=splited_file_name_sorted, genome_local= genome_local, genome_local_sim=genome_local_sim )
     os.system(awk_stmt_genome)
-                    
+    copyfile(genome_local_sim, tmp_dir_intersect + '/' + simulated_input_file_name + 'genome_local') 
     #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
     f = simulated_input_file_obj.intersect(observed_input_file_obj, wo = True, sorted =True, g=genome_local_sim).saveas(simulated_input_file_tmp_overallTFs)
     #print(f.history)
@@ -678,6 +678,7 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
     os.remove(simulated_ifile_pos_temp)
     if os.path.exists(simulated_input_file_position):
        os.remove(simulated_input_file_position)
+    os.remove(genome_local_sim)
     print('Ready')    
     cleanup()  
     print('cleanup')
@@ -751,7 +752,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     genome_local = splited_file_name_sorted + '_chr'
     awk_stmt_genome = """awk -F'\t' 'NR==FNR{c[$1]++;next};c[$1] > 0' {splited_file_name_sorted} {chr_order_file} > {genome_local}""".format(splited_file_name_sorted=splited_file_name_sorted,chr_order_file=chr_order_file,genome_local=genome_local )
     os.system(awk_stmt_genome)
-    
+    copyfile(genome_local, tmp_dir_intersect + '/genome_local') 
+
     
     observed_input_file_obj = BedTool(splited_file_name_sorted)
     
