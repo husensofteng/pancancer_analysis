@@ -772,8 +772,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     dict_fscore = {}
     with open(simulated_mean_sd_outfiles_tmp, 'r') as simulated_mean_sd_tmp_infile:
         for line in simulated_mean_sd_tmp_infile:
-            (key, val) = line.split()
-            dict_fscore[int(key)] = val
+            (key, val) = line.split('\t')
+            dict_fscore[key] = val
             
     print(dict_fscore)
     print('dict')
@@ -810,8 +810,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
-    if os.path.exists(tmp_dir_intersect):
-       shutil.rmtree(tmp_dir_intersect)
+    #if os.path.exists(tmp_dir_intersect):
+    #   shutil.rmtree(tmp_dir_intersect)
        
     cleanup() 
     
