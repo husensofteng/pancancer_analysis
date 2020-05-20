@@ -322,7 +322,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                filter_cond, operation_on_unify, output_extension, 
                distance_to_merge, merged_mut_sig_threshold,
                local_domain_window, chr_lengths_file,
-               sig_elements_output_file, sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore):    
+               sig_elements_output_file, sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore, chr_order_file):    
     
     "get the cohort name to use for output file names"
     cohort_full_name = created_cohorts[cohort][0].split('_')[0]
@@ -352,7 +352,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
             background_window_size = background_window_size, 
             motif_name_index = motif_name_index, f_score_index = f_score_index, 
             motif_breaking_score_index = motif_breaking_score_index,
-            chromatin_cat_index = chromatin_cat_index, tmp_dir = tmp_dir, n_cores_fscore=n_cores_fscore)
+            chromatin_cat_index = chromatin_cat_index, tmp_dir = tmp_dir, n_cores_fscore=n_cores_fscore, chr_order_file=chr_order_file)
     else:
         '''As background consider whole genome
         '''
@@ -477,7 +477,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                     background_window, background_window_size, elements_oncodrive,
                     filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                     distance_to_merge, 
-                    merged_mut_sig_threshold, local_domain_window, tmp_dir, n_cores_fscore):
+                    merged_mut_sig_threshold, local_domain_window, tmp_dir, n_cores_fscore, chr_order_file):
     
     simulated_input_files = [simulated_input_dir+'/'+x for x in os.listdir(simulated_input_dir) if '_annotated.bed9' in x]
     mutation_input_files = [observed_input_file]
@@ -555,7 +555,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                     filter_cond, operation_on_unify, output_extension, 
                     distance_to_merge, merged_mut_sig_threshold,
                local_domain_window, chr_lengths_file, sig_elements_output_file, 
-               sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore))#, callback=generated_sig_merged_element_files.append)
+               sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore, chr_order_file))#, callback=generated_sig_merged_element_files.append)
         else:
             run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_dir, motif_name_index, 
                        f_score_index, motif_breaking_score_index, chromatin_cat_index,
@@ -565,7 +565,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                        filter_cond, operation_on_unify, output_extension, 
                        distance_to_merge, merged_mut_sig_threshold,
                        local_domain_window, chr_lengths_file, sig_elements_output_file, 
-                       sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore)
+                       sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore, chr_order_file)
         generated_sig_merged_element_files.append(sig_elements_output_file)
         sig_tfs_files.append(sig_tfs_file)
         sig_tfpos_files.append(sig_tfpos_file)
@@ -589,6 +589,8 @@ def parse_args():
     parser.add_argument('-m', '--observed_input_file', default='', help='')
     parser.add_argument('-s', '--simulated_input_dir', default='', help='')
     parser.add_argument('-l', '--chr_lengths_file', default='', help='')
+    parser.add_argument('--chr_order_file', default='', help='')
+
     parser.add_argument('--background_window', action='store_const', const=True, help='Check mutation functional score significance by comparing to background window around mutation in simulated mutations, if the flag is missing it would use the whole genome as background')
     parser.add_argument('--background_window_size', type=int, default=50000, help='Background window around mutation for capturing simulated mutation to compare mutation functional score')
     parser.add_argument('--elements_oncodrive', action='store_const', const=True, help='Identify significantly mutated elements using OncodriveFML, if the flag is missing compare the element with the elements from the simulated mutation sets')
@@ -625,7 +627,7 @@ if __name__ == '__main__':
         args.background_window, args.background_window_size, args.elements_oncodrive,
         args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
-        args.local_domain_window, args.tmp_dir, args.n_cores_fscore)
+        args.local_domain_window, args.tmp_dir, args.n_cores_fscore, args.chr_order_file)
     #print("Generated Sig. Element Sets: \n", '\n'.join(generated_sig_merged_element_files))
     
     

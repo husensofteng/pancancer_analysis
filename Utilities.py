@@ -610,7 +610,7 @@ def process_input_file(observed_input_file, simulated_input_files,
     return merged_elements_statspvaluesonlysig
 
 def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
-                          splited_file_name, simulated_input_file):
+                          splited_file_name, genome_local, simulated_input_file):
     
     
 
@@ -656,10 +656,15 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
     awk_stmt_sort = """sort -k1,1n -k2,2n {simulated_input_file} > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file_tmp, simulated_input_file_sorted = simulated_input_file_sorted )
     os.system(awk_stmt_sort)
     simulated_input_file_obj = BedTool(simulated_input_file_sorted) 
-    print('YES')
-    #print(simulated_input_file_obj)               
+
+  
+    #find and 
+    genome_local_sim = genome_local +'_' + simulated_input_file_name
+    awk_stmt_genome = """awk -F'\t' 'NR==FNR{c[$1]++;next};c[$1] > 0' {simulated_input_file_sorted} {genome_local} > {genome_local_sim}""".format(splited_file_name_sorted=splited_file_name_sorted, genome_local= genome_local, genome_local_sim=genome_local_sim )
+    os.system(awk_stmt_genome)
+                    
     #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
-    f = simulated_input_file_obj.intersect(observed_input_file_obj, wo = True, sorted =True).saveas(simulated_input_file_tmp_overallTFs)
+    f = simulated_input_file_obj.intersect(observed_input_file_obj, wo = True, sorted =True, g=genome_local_sim).saveas(simulated_input_file_tmp_overallTFs)
     #print(f.history)
     window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($11==".") print $38,$10; else print $38,$10+$11}}' {simulated_input_file_tmp_overallTFs} > {simulated_input_file_tmp_overallTFs_local}""".format(simulated_input_file_tmp_overallTFs=simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local=simulated_input_file_tmp_overallTFs_local)
     #observed_input_file_obj.intersect(simulated_input_file_obj, wo = True, sorted =True).saveas(simulated_input_file_tmp_overallTFs)
@@ -671,8 +676,8 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
     os.remove(simulated_input_file_tmp_overallTFs)
     os.remove(simulated_input_file_sorted)
     os.remove(simulated_ifile_pos_temp)
-    #if os.path.exists(simulated_input_file_position):
-    #   os.remove(simulated_input_file_position)
+    if os.path.exists(simulated_input_file_position):
+       os.remove(simulated_input_file_position)
     print('Ready')    
     cleanup()  
     print('cleanup')
@@ -686,7 +691,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                                        chr_lengths_file,
                                        background_window_size = 50000,
                                        motif_name_index = 17, f_score_index = 9, 
-                                       motif_breaking_score_index = 10, chromatin_cat_index=22, tmp_dir = '$SNIC_TMP', n_cores_fscore=10):
+                                       motif_breaking_score_index = 10, chromatin_cat_index=22, tmp_dir = '$SNIC_TMP', n_cores_fscore=10, chr_order_file='chr_order.txt'):
     set_tempdir(tmp_dir)
 
     if os.path.exists(cohort_mean_sd_per_tf_overall_output_dict_file):
@@ -741,13 +746,20 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     else:
         copyfile(splited_file_name_local, splited_file_name_sorted)
 
+
+    #prepare the genome file
+    genome_local = splited_file_name_sorted + '_chr'
+    awk_stmt_genome = """awk -F'\t' 'NR==FNR{c[$1]++;next};c[$1] > 0' {splited_file_name_sorted} {chr_order_file} > {genome_local}""".format(splited_file_name_sorted=splited_file_name_sorted,chr_order_file=chr_order_file,genome_local=genome_local )
+    os.system(awk_stmt_genome)
+    
+    
     observed_input_file_obj = BedTool(splited_file_name_sorted)
     
     obs_scores_files = []
     p = Pool(n_cores_fscore)
     obs_scores_files = p.starmap(get_scores_per_window, product(
         [observed_input_file_obj], [tmp_dir], [tmp_dir_intersect], 
-        [splited_file_name], simulated_annotated_input_files))
+        [splited_file_name], [genome_local], simulated_annotated_input_files))
     p.close()
     p.join()
     

@@ -808,34 +808,73 @@ def get_info_from_sigelements(elements_input_file):
             print(c,r)
         c+=1
 
+
+
+def parse_args():
+    '''Parse command line arguments'''
+    
+    parser = argparse.ArgumentParser(description='Plot ATELM cohort')
+    parser.add_argument('-e', '--elements_input_file', default='', help='')
+    parser.add_argument('--sig_tfs_file', default='', help='')
+    parser.add_argument('--sig_tfpos_file', default='', help='')
+    parser.add_argument('--ATELM_input_file', default='',  help='')
+    parser.add_argument('--output_dir', default='', help='')
+    
+
+    
+    return parser.parse_args(sys.argv[1:])
+
+
 if __name__ == '__main__':
     
+    args = parse_args()
+    
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
+    
+    
+    print("Generated significant elements")
+#     generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
+#         args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
+#         args.simulated_input_dir, args.chr_lengths_file, args.num_cores, 
+#         args.background_window, args.background_window_size, args.elements_oncodrive,
+#         args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
+#         args.distance_to_merge, args.merged_mut_sig_threshold,
+#         args.local_domain_window, args.tmp_dir)
+#     
     sns.set_style("white", {"axes.linewidth": ".5"})
-    #generated_sig_merged_element_files = process_cohorts()
-    #sig_elements_file = getSigElements(generated_sig_merged_element_files)
-    elements_input_file = 'analysis/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
-    sig_tfs_file = 'analysis/combined_rand103setsTFsigQval0.05_sigTFs_0.05.tsv'
-    sig_tfpos_file = 'analysis/combined_rand103setsTFsigQval0.05_sigTFpos_0.05.tsv'
-    input_file = 'analysis/All-tumors-without-Lymphatic-system-Skin-Melanoma_observed_annotated_agreement_22May2017.bed9_rand103setsTFsigQval0.05'
     
-    output_file_ext="analysis/Fig_"
-    read_sig_elements_file(elements_input_file, output_file_ext)
+#     elements_input_file = 'analysis/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
+#     sig_tfs_file = 'analysis/combined_rand103setsTFsigQval0.05_sigTFs_0.05.tsv'
+#     sig_tfpos_file = 'analysis/combined_rand103setsTFsigQval0.05_sigTFpos_0.05.tsv'
+#     #ATELM_input_file
+#     input_file = 'analysis/All-tumors-without-Lymphatic-system-Skin-Melanoma_observed_annotated_agreement_22May2017.bed9_rand103setsTFsigQval0.05'
+#     
+
+    output_file_ext= args.output_dir +  '/Fig_'
+    read_sig_elements_file(args.elements_input_file, output_file_ext)
     
-    output_file_ext = 'analysis/sigTFs_'
-    read_sig_tfs(sig_tfs_file, output_file_ext, key_name='TFs', threshold_to_include_element=500, fdr_log10neg_threshold=3)
-    plot_sig_tfs(sig_tfs_file, output_file_ext=output_file_ext+'_lmplot', key_name='TFs', threshold_to_include_element=100, fdr_log10neg_threshold=2, 
+    output_file_ext = args.output_dir + '/sigTFs_'
+    read_sig_tfs(args.sig_tfs_file, output_file_ext, key_name='TFs', threshold_to_include_element=500, fdr_log10neg_threshold=3)
+    
+    output_file_ext_sig_tfs = output_file_ext + '_lmplot',
+    #check how the cohorts are analyzes, we only use ATELM in the final results
+    #if needed re-write the code
+    plot_sig_tfs(args.sig_tfs_file, output_file_ext_sig_tfs, key_name='TFs', threshold_to_include_element=100, fdr_log10neg_threshold=2, 
                  cohorts=['All-tumors-without-Lymphatic-system-Skin-Melanoma'], num_labels_to_write=10)
     
-    output_file_ext = 'analysis/sigTFpos_'
+    output_file_ext = args.output_dir + '/sigTFpos_'
     read_sig_tfs(sig_tfpos_file, output_file_ext, key_name='TF Positions', threshold_to_include_element=100, fdr_log10neg_threshold=3)
     
-    plot_sig_tfs(sig_tfpos_file, output_file_ext=output_file_ext+"_lmplot", key_name='TF Positions', threshold_to_include_element=100, fdr_log10neg_threshold=2, 
+    output_file_ext_sig_tfs = output_file_ext + '_lmplot',
+    plot_sig_tfs(sig_tfpos_file, output_file_ext_sig_tfs, key_name='TF Positions', threshold_to_include_element=100, fdr_log10neg_threshold=2, 
                  cohorts=['All-tumors-without-Lymphatic-system-Skin-Melanoma'], num_labels_to_write=10)
     #plot_mutation_rate_per_cancer_type(output_files_mutation_rate="analysis/mutationratepersamplepercancertype", observed_mutation_file='mutations_files/observed.bed9')
     
-    output_file_ext = 'analysis/FuncMotifsAllTumorsNoLymphSKin_'
-    plot_motifs(input_file, output_file_ext=output_file_ext+"_motifsheatmap")
-    plot_motifs(input_file, x_label='TF-Motifs', y_label='Chromatin States', output_file_ext=output_file_ext+"_motifsheatmap", threshold_to_include_element = 1000)
+    output_file_ext = args.output_dir + '/FuncMotifsAllTumorsNoLymphSKin_'
+    plot_motifs(args.ATELM_input_file, output_file_ext=output_file_ext+"_motifsheatmap")
+    
+    plot_motifs(args.ATELM_input_file, x_label='TF-Motifs', y_label='Chromatin States', output_file_ext=output_file_ext+"_motifsheatmap", threshold_to_include_element = 1000)
     
     '''
     #Heat-Maps for:
