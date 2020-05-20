@@ -783,8 +783,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     print('dict')
     dict_simulated_mean_sd = {}
     for key in dict_fscore.keys():
-        tf_mean = np.mean(float(dict_fscore[key]))
-        tf_std = np.std(float(dict_fscore[key]))
+        tf_mean = np.mean(dict_fscore[key])
+        tf_std = np.std(dict_fscore[key])
         num_motifs = len(dict_fscore[key])
         dict_simulated_mean_sd[key] = {'mean': tf_mean, 
                                                    "std": tf_std, 
