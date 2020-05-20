@@ -609,8 +609,8 @@ def process_input_file(observed_input_file, simulated_input_files,
     
     return merged_elements_statspvaluesonlysig
 
-def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
-                          splited_file_name, genome_local, simulated_input_file):
+def get_scores_per_window(observed_input_file, tmp_dir, tmp_dir_intersect,
+                          splited_file_name, simulated_input_file):
     
     
 
@@ -653,23 +653,24 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
     os.system(awk_stmt)
     simulated_input_file_tmp = simulated_ifile_temp        
     simulated_input_file_sorted = tmp_dir + simulated_input_file_name + '_sorted'
+    
     awk_stmt_sort = """sort -k1,1n -k2,2n {simulated_input_file} > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file_tmp, simulated_input_file_sorted = simulated_input_file_sorted )
     os.system(awk_stmt_sort)
-    simulated_input_file_obj = BedTool(simulated_input_file_sorted) 
 
-    copyfile(simulated_input_file_sorted, simulated_input_file_tmp_overallTFs_local+'_local')
     #find and 
-    genome_local_sim = genome_local +'_' + simulated_input_file_name
-    awk_stmt_genome =  """awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {simulated_input_file_sorted} {genome_local} > {genome_local_sim}""".format(simulated_input_file_sorted=simulated_input_file_sorted, genome_local= genome_local, genome_local_sim=genome_local_sim )
+    observed_input_file_over = observed_input_file + '_over'
+    awk_stmt_genome =  """awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {simulated_input_file_sorted} {observed_input_file}> {simulated_input_file_sorted_over}""".format( simulated_input_file_sorted= simulated_input_file_sorted, observed_input_file=observed_input_file, simulated_input_file_sorted_over=simulated_input_file_sorted_over )
     print(awk_stmt_genome)
     os.system(awk_stmt_genome)
     
-    copyfile(genome_local_sim, tmp_dir_intersect + '/' + simulated_input_file_name + 'genome_local') 
+    observed_input_file_obj = BedTool(observed_input_file_over)
+    simulated_input_file_obj = BedTool(simulated_input_file_sorted) 
+
     #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
-    f = simulated_input_file_obj.intersect(observed_input_file_obj, wo = True, sorted =True, g=BedTool(genome_local_sim)).saveas(simulated_input_file_tmp_overallTFs)
-    #bedtools intersect -a a.versionsorted.bam -b b.versionsorted.bed \
+    f = simulated_input_file_obj.intersect(observed_input_file_obj, wo = True, sorted =True).saveas(simulated_input_file_tmp_overallTFs)
+    #awk_stmt_genome =  """bedtools intersect -a {simulated_input_file_sorted} -b b.versionsorted.bed \
    # -sorted \
-   # -g hg19.versionsorted.genome
+   # -g hg19.versionsorted.genome""".format(simulated_input_file_sorted=simulated_input_file_sorted,
     
     
     #print(f.history)
@@ -756,20 +757,20 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
 
 
     #prepare the genome file
-    genome_local = splited_file_name_sorted + '_chr'
-    awk_stmt_genome =  """awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {splited_file_name_sorted} {chr_order_file} > {genome_local}""".format(splited_file_name_sorted=splited_file_name_sorted,chr_order_file=chr_order_file,genome_local=genome_local )
-    print(awk_stmt_genome)
-    os.system(awk_stmt_genome)
-    copyfile(genome_local, tmp_dir_intersect + '/genome_local') 
+    #genome_local = splited_file_name_sorted + '_chr'
+    #awk_stmt_genome =  """awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {splited_file_name_sorted} {chr_order_file} > {genome_local}""".format(splited_file_name_sorted=splited_file_name_sorted,chr_order_file=chr_order_file,genome_local=genome_local )
+    #print(awk_stmt_genome)
+    #os.system(awk_stmt_genome)
+    #copyfile(genome_local, tmp_dir_intersect + '/genome_local') 
 
     
-    observed_input_file_obj = BedTool(splited_file_name_sorted)
+    #observed_input_file_obj = BedTool(splited_file_name_sorted)
     
     obs_scores_files = []
     p = Pool(n_cores_fscore)
     obs_scores_files = p.starmap(get_scores_per_window, product(
-        [observed_input_file_obj], [tmp_dir], [tmp_dir_intersect], 
-        [splited_file_name], [genome_local], simulated_annotated_input_files))
+        [observed_input_file], [tmp_dir], [tmp_dir_intersect], 
+        [splited_file_name],  simulated_annotated_input_files))
     p.close()
     p.join()
     
