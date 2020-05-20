@@ -660,18 +660,14 @@ def get_scores_per_window(observed_input_file, tmp_dir, tmp_dir_intersect,
     #find and 
     observed_input_file_over = observed_input_file + '_' +simulated_input_file_name + '_over'
     awk_stmt_genome =  """awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {simulated_input_file_sorted} {observed_input_file}> {observed_input_file_over}""".format( simulated_input_file_sorted= simulated_input_file_sorted, observed_input_file=observed_input_file, observed_input_file_over = observed_input_file_over  )
-    print(awk_stmt_genome)
     os.system(awk_stmt_genome)
     
     observed_input_file_obj = BedTool(observed_input_file_over)
     simulated_input_file_obj = BedTool(simulated_input_file_sorted) 
-
+    print('Intersect')
     #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
     f = simulated_input_file_obj.intersect(observed_input_file_obj, wo = True, sorted =True).saveas(simulated_input_file_tmp_overallTFs)
-    #awk_stmt_genome =  """bedtools intersect -a {simulated_input_file_sorted} -b b.versionsorted.bed \
-   # -sorted \
-   # -g hg19.versionsorted.genome""".format(simulated_input_file_sorted=simulated_input_file_sorted,
-    
+
     
     #print(f.history)
     window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($11==".") print $38,$10; else print $38,$10+$11}}' {simulated_input_file_tmp_overallTFs} > {simulated_input_file_tmp_overallTFs_local}""".format(simulated_input_file_tmp_overallTFs=simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local=simulated_input_file_tmp_overallTFs_local)
@@ -837,8 +833,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
-    if os.path.exists(tmp_dir_intersect):
-       shutil.rmtree(tmp_dir_intersect)
+    #if os.path.exists(tmp_dir_intersect):
+    #  shutil.rmtree(tmp_dir_intersect)
        
     cleanup() 
     
