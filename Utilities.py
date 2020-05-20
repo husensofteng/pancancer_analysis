@@ -660,7 +660,7 @@ def get_scores_per_window(observed_input_file_obj, tmp_dir, tmp_dir_intersect,
   
     #find and 
     genome_local_sim = genome_local +'_' + simulated_input_file_name
-    awk_stmt_genome = """awk 'NR==FNR{a[$1];next;} ($1) in a' {simulated_input_file_sorted} {genome_local} > {genome_local_sim}""".format(splited_file_name_sorted=splited_file_name_sorted, genome_local= genome_local, genome_local_sim=genome_local_sim )
+    awk_stmt_genome = """awk -F'\t' 'NR==FNR{a[$1];next;} ($1) in a' {simulated_input_file_sorted} {genome_local} > {genome_local_sim}""".format(splited_file_name_sorted=splited_file_name_sorted, genome_local= genome_local, genome_local_sim=genome_local_sim )
     os.system(awk_stmt_genome)
     copyfile(genome_local_sim, tmp_dir_intersect + '/' + simulated_input_file_name + 'genome_local') 
     #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
@@ -750,7 +750,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
 
     #prepare the genome file
     genome_local = splited_file_name_sorted + '_chr'
-    awk_stmt_genome =  """awk 'NR==FNR{a[$1];next;} ($1) in a' {splited_file_name_sorted} {chr_order_file} > {genome_local}""".format(splited_file_name_sorted=splited_file_name_sorted,chr_order_file=chr_order_file,genome_local=genome_local )
+    awk_stmt_genome =  """awk -F'\t' 'NR==FNR{a[$1];next;} ($1) in a' {splited_file_name_sorted} {chr_order_file} > {genome_local}""".format(splited_file_name_sorted=splited_file_name_sorted,chr_order_file=chr_order_file,genome_local=genome_local )
+    print(awk_stmt_genome)
     os.system(awk_stmt_genome)
     copyfile(genome_local, tmp_dir_intersect + '/genome_local') 
 
