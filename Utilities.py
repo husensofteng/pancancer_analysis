@@ -757,25 +757,50 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     
     print('Combining the scores')
     simulated_mean_sd_outfiles = tmp_dir + '/' + cohort
-    
+    simulated_mean_sd_outfiles_tmp = simulated_mean_sd_outfiles + '_tmp'
+
     #merge files from the same category, sort by the line number and group by position, TF motif, chromatin cat. and line number
     awk_comm = """cat {tmp_dir_intersect}/*annotated.bed9_splited | 
-    sort -k1,1 | 
-    groupBy -g 1 -c 2,2,2 -o mean,stdev,count > {file_out} """.format(tmp_dir_intersect = tmp_dir_intersect, file_out = simulated_mean_sd_outfiles)
-    #awk_comm = """cat {tmp_dir_intersect}/*annotated.bed9_splited  > {file_out} """.format(tmp_dir_intersect = tmp_dir_intersect, file_out = simulated_mean_sd_outfiles)
+    sort -k1,1 > {file_out} """.format(tmp_dir_intersect = tmp_dir_intersect, file_out = simulated_mean_sd_outfiles_tmp)
     os.system(awk_comm)
+    print('cat!')
     
-    #save the scores per line number
+    simulated_mean_sd_outfiles_tmp_local = tmp_dir_intersect  + '/' + cohort + '_tmp'
+
+    copyfile(simulated_mean_sd_outfiles_tmp, simulated_mean_sd_outfiles_tmp_local)
+    
+    with open(simulated_mean_sd_outfiles_tmp, 'r') as simulated_mean_sd_tmp_infile:
+        keys = simulated_mean_sd_tmp_infile.readline().split()
+        values = simulated_mean_sd_tmp_infile.readline().split()
+    #dictionery of lines and fscores
+    dict_fscore = dict(zip(keys, values))
+    
+    print('dict')
     dict_simulated_mean_sd = {}
-    with open(simulated_mean_sd_outfiles, 'r') as simulated_mean_sd_ifile:
-        l = simulated_mean_sd_ifile.readline().strip().split('\t')
-        #print(l)
-        while l and len(l)>3:  
-            dict_simulated_mean_sd[l[0]] = {'mean': l[1], 
-                                                   "std": l[2], 
-                                                   "nummotifs": l[3]}
-            
-            l = simulated_mean_sd_ifile.readline().strip().split('\t')
+    for line_nr in dict_fscore.keys():
+        tf_mean = np.mean(dict_fscore[line_nr])
+        tf_std = np.std(dict_fscore[line_nr])
+        num_motifs = len(dict_fscore[line_nr])
+        dict_simulated_mean_sd[line_nr] = {'mean': tf_mean, 
+                                                   "std": tf_std, 
+                                                   "nummotifs": num_motifs}
+      
+    
+    #groupBy -g 1 -c 2,2,2 -o mean,stdev,count > {file_out} """.format(tmp_dir_intersect = tmp_dir_intersect, file_out = simulated_mean_sd_outfiles)
+    #awk_comm = """cat {tmp_dir_intersect}/*annotated.bed9_splited  > {file_out} """.format(tmp_dir_intersect = tmp_dir_intersect, file_out = simulated_mean_sd_outfiles)
+    #os.system(awk_comm)
+    
+#     #save the scores per line number
+#     dict_simulated_mean_sd = {}
+#     with open(simulated_mean_sd_outfiles, 'r') as simulated_mean_sd_ifile:
+#         l = simulated_mean_sd_ifile.readline().strip().split('\t')
+#         #print(l)
+#         while l and len(l)>3:  
+#             dict_simulated_mean_sd[l[0]] = {'mean': l[1], 
+#                                                    "std": l[2], 
+#                                                    "nummotifs": l[3]}
+#             
+#             l = simulated_mean_sd_ifile.readline().strip().split('\t')
     #print(dict_simulated_mean_sd)
     #save the dictionery per category
     dict_type_mean_std_scores['overallTFs'] = dict_simulated_mean_sd
