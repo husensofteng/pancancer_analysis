@@ -774,7 +774,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                 dict_fscore[l[0]] = [float(l[1])]
             l = simulated_mean_sd_tmp_infile.readline().strip().split('\t')
     
-    print(dict_fscore)
+
+    
     print('dict')
     dict_simulated_mean_sd = {}
     for key in dict_fscore.keys():
@@ -788,6 +789,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     
 
     #save the dictionery per category
+    dict_type_mean_std_scores = {}
     dict_type_mean_std_scores['overallTFs'] = dict_simulated_mean_sd
     
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
