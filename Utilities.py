@@ -678,7 +678,7 @@ def get_scores_per_window(observed_input_file, tmp_dir, tmp_dir_intersect,
     return simulated_input_file_tmp_overallTFs_local
 
 def get_scores_per_window_per_chr(observed_input_files, tmp_dir, tmp_dir_intersect,
-                          splited_file_name, simulated_input_file):
+                          splited_file_name, simulated_input_file,cohort):
     
     print('PER CHR')
 
@@ -719,7 +719,7 @@ def get_scores_per_window_per_chr(observed_input_files, tmp_dir, tmp_dir_interse
     if not os.path.exists(tmp_dir_chr_sim):
         os.mkdir(tmp_dir_chr_sim)
     #split files by chromosome
-    awk_split_per_chr = """awk '{{print $0 >> {tmp_dir_chr_sim}$1."bed"}}' {simulated_input_file_sorted}""".format(tmp_dir_chr_sim=tmp_dir_chr_sim, simulated_input_file_sorted=simulated_input_file_sorted)
+    awk_split_per_chr = """ cat {simulated_input_file_sorted} | awk -v tmp_dir={tmp_dir_chr_sim} '{{print $0 > tmp_dir$1".bed"}}'""".format(tmp_dir_chr_sim=tmp_dir_chr_sim, simulated_input_file_sorted=simulated_input_file_sorted)
     os.system(awk_split_per_chr)
     simulated_input_file_sorted_per_chr = [tmp_dir_chr_sim+'/'+x for x in os.listdir(tmp_dir_chr_sim) if '.bed' in x]
     print(simulated_input_file_sorted_per_chr)
@@ -843,7 +843,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         p = Pool(n_cores_fscore)
         obs_scores_files = p.starmap(get_scores_per_window_per_chr, product(
             splited_file_name_sorted_per_chr, [tmp_dir], [tmp_dir_intersect], 
-            [splited_file_name],  simulated_annotated_input_files))
+            [splited_file_name],  simulated_annotated_input_files, [cohort]))
         p.close()
         p.join()
         print(obs_scores_files)
