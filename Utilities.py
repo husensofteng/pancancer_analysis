@@ -715,10 +715,13 @@ def get_scores_per_window_per_chr(observed_input_files, tmp_dir, tmp_dir_interse
     awk_stmt_sort = """sort -k1,1n -k2,2n {simulated_input_file} > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file_tmp, simulated_input_file_sorted = simulated_input_file_sorted )
     os.system(awk_stmt_sort)
     
+    tmp_dir_chr_sim = tmp_dir + '/' + cohort + '_tmp_perchr_sim/'
+    if not os.path.exists(tmp_dir_chr_sim):
+        os.mkdir(tmp_dir_chr_sim)
     #split files by chromosome
-    awk_split_per_chr = """awk '{{print $0 >> {simulated_input_file_sorted}"_per_chr_sim_"$1}}' {simulated_input_file_sorted}""".format(simulated_input_file_sorted=simulated_input_file_sorted)
+    awk_split_per_chr = """awk '{{print $0 >> {tmp_dir_chr_sim}$1."bed"}}' {simulated_input_file_sorted}""".format(tmp_dir_chr_sim=tmp_dir_chr_sim, simulated_input_file_sorted=simulated_input_file_sorted)
     os.system(awk_split_per_chr)
-    simulated_input_file_sorted_per_chr = [tmp_dir+'/'+x for x in os.listdir(tmp_dir) if '_per_chr_sim' in x]
+    simulated_input_file_sorted_per_chr = [tmp_dir_chr_sim+'/'+x for x in os.listdir(tmp_dir_chr_sim) if '.bed' in x]
     print(simulated_input_file_sorted_per_chr)
     #matcg the files
 
@@ -729,7 +732,7 @@ def get_scores_per_window_per_chr(observed_input_files, tmp_dir, tmp_dir_interse
    # os.system(awk_stmt_genome)
     for sim_input_file in simulated_input_file_sorted_per_chr:
         chr_nr = sim_input_file.split('_')[-1]
-        match_obs_file = [s for s in observed_input_files if "_per_chr_"+ chr_nr+".bed" in s]
+        match_obs_file = [s for s in tmp_dir_chr_sim if chr_nr+".bed" in s]
         print(match_obs_file)
         print(sim_input_file)
         observed_input_file_obj = BedTool(match_obs_file )
@@ -825,9 +828,15 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
 
     per_chr = True
     if per_chr:
-        awk_split_per_chr = """awk '{{print $0 >> {splited_file_name_sorted}"_per_chr"$1".bed"}}' {splited_file_name_sorted}""".format(splited_file_name_sorted=splited_file_name_sorted)
+        print('PPPE')
+        tmp_dir_chr = tmp_dir + '/' + cohort + '_tmp_perchr/'
+        if not os.path.exists(tmp_dir_chr):
+            os.mkdir(tmp_dir_chr)
+            
+        awk_split_per_chr = """awk '{{print $0 >> {tmp_dir_chr}$1".bed"}}' {splited_file_name_sorted}""".format(tmp_dir_chr=tmp_dir_chr, splited_file_name_sorted=splited_file_name_sorted)
+        print(awk_split_per_chr)
         os.system(awk_split_per_chr)
-        splited_file_name_sorted_per_chr = [tmp_dir+'/'+x for x in os.listdir(tmp_dir) if '_per_chr' in x]
+        splited_file_name_sorted_per_chr = [tmp_dir_chr+'/'+x for x in os.listdir(tmp_dir_chr) if '.bed' in x]
         print(splited_file_name_sorted_per_chr )
         
         obs_scores_files = []
@@ -837,7 +846,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             [splited_file_name],  simulated_annotated_input_files))
         p.close()
         p.join()
-    
+        print(obs_scores_files)
         
     else: 
         
