@@ -680,7 +680,7 @@ def get_scores_per_window(observed_input_file, tmp_dir, tmp_dir_intersect,
 def get_scores_per_window_per_chr(observed_input_files, tmp_dir, tmp_dir_intersect,
                           splited_file_name, simulated_input_file):
     
-    
+    print('PER CHR')
 
     simulated_input_file_name = simulated_input_file.split('/')[-1]
     
@@ -729,7 +729,7 @@ def get_scores_per_window_per_chr(observed_input_files, tmp_dir, tmp_dir_interse
    # os.system(awk_stmt_genome)
     for sim_input_file in simulated_input_file_sorted_per_chr:
         chr_nr = sim_input_file.split('_')[-1]
-        match_obs_file = [s for s in observed_input_files if "_per_chr_"+chr_nr+".bed" in s]
+        match_obs_file = [s for s in observed_input_files if "_per_chr_"+ chr_nr+".bed" in s]
         print(match_obs_file)
         print(sim_input_file)
         observed_input_file_obj = BedTool(match_obs_file )
@@ -747,6 +747,7 @@ def get_scores_per_window_per_chr(observed_input_files, tmp_dir, tmp_dir_interse
         os.system(window_id_fscroe_file)
     
         os.remove(simulated_input_file_tmp_overallTFs_chr)
+        cleanup()
     
     awk_comm = """cat {tmp_dir_intersect}/sim*annotated.bed9_splited_chr* > {simulated_input_file_tmp_overallTFs_local} """.format(tmp_dir_intersect = tmp_dir_intersect, simulated_input_file_tmp_overallTFs_local=simulated_input_file_tmp_overallTFs_local)
     os.system(awk_comm)
@@ -755,7 +756,7 @@ def get_scores_per_window_per_chr(observed_input_files, tmp_dir, tmp_dir_interse
     os.remove(simulated_ifile_pos_temp)
     if os.path.exists(simulated_input_file_position):
        os.remove(simulated_input_file_position)
-    os.remove(observed_input_file_over)    
+    #os.remove(observed_input_file_over)    
     cleanup()  
     print('cleanup')
     
