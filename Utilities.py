@@ -826,7 +826,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         copyfile(splited_file_name_local, splited_file_name_sorted)
 
 
-    per_chr = True
+    per_chr = False
     if per_chr:
         print('PPPE')
         tmp_dir_chr = tmp_dir + '/' + cohort + '_tmp_perchr/'
