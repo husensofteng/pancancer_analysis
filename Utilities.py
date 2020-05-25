@@ -677,7 +677,7 @@ def get_scores_per_window(observed_input_file, tmp_dir, tmp_dir_intersect,
     
     return simulated_input_file_tmp_overallTFs_local
 
-def get_scores_per_window_per_chr(observed_input_files, tmp_dir, tmp_dir_intersect,
+def get_scores_per_window_per_chr(observed_input_files, tmp_dir, tmp_dir_intersect, tmp_dir_perchr,
                           splited_file_name, simulated_input_file,cohort):
     
     print('PER CHR')
@@ -732,7 +732,7 @@ def get_scores_per_window_per_chr(observed_input_files, tmp_dir, tmp_dir_interse
    # os.system(awk_stmt_genome)
     for sim_input_file in simulated_input_file_sorted_per_chr:
         chr_nr = sim_input_file.split('_')[-1]
-        match_obs_file = [s for s in tmp_dir_chr_sim if chr_nr+".bed" in s]
+        match_obs_file = [s for s in tmp_dir_perchr if chr_nr+".bed" in s]
         print(match_obs_file)
         print(sim_input_file)
         observed_input_file_obj = BedTool(match_obs_file )
@@ -842,7 +842,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         obs_scores_files = []
         p = Pool(n_cores_fscore)
         obs_scores_files = p.starmap(get_scores_per_window_per_chr, product(
-            splited_file_name_sorted_per_chr, [tmp_dir], [tmp_dir_intersect], 
+            splited_file_name_sorted_per_chr, [tmp_dir], [tmp_dir_intersect], [tmp_dir_perchr],
             [splited_file_name],  simulated_annotated_input_files, [cohort]))
         p.close()
         p.join()
