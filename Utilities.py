@@ -899,8 +899,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
     #remnove local folder with the intersected files
-    if os.path.exists(tmp_dir_intersect):
-      shutil.rmtree(tmp_dir_intersect)
+    #if os.path.exists(tmp_dir_intersect):
+    #  shutil.rmtree(tmp_dir_intersect)
        
     cleanup() 
     
