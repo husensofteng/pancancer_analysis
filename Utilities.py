@@ -833,10 +833,10 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         if not os.path.exists(tmp_dir_chr):
             os.mkdir(tmp_dir_chr)
             
-        awk_split_per_chr = """awk '{{print $0 >> {tmp_dir_chr}$1".bed"}}' {splited_file_name_sorted}""".format(tmp_dir_chr=tmp_dir_chr, splited_file_name_sorted=splited_file_name_sorted)
+        awk_split_per_chr = """awk '{{print $0 >> $1".bed"}}' {splited_file_name_sorted} | mv {{}} {tmp_dir_chr}""".format( splited_file_name_sorted=splited_file_name_sorted, tmp_dir_chr=tmp_dir_chr)
         print(awk_split_per_chr)
         os.system(awk_split_per_chr)
-        splited_file_name_sorted_per_chr = [tmp_dir_chr+'/'+x for x in os.listdir(tmp_dir_chr) if '.bed' in x]
+        splited_file_name_sorted_per_chr = [tmp_dir_chr+'/'+x for x in os.listdir(tmp_dir_chr)]
         print(splited_file_name_sorted_per_chr )
         
         obs_scores_files = []
