@@ -677,93 +677,7 @@ def get_scores_per_window(observed_input_file, tmp_dir, tmp_dir_intersect,
     
     return simulated_input_file_tmp_overallTFs_local
 
-def get_scores_per_window_per_chr(observed_input_files, tmp_dir, tmp_dir_intersect, tmp_dir_perchr,
-                          splited_file_name, simulated_input_file,cohort):
-    
-    print('PER CHR')
 
-    simulated_input_file_name = simulated_input_file.split('/')[-1]
-    
-    simulated_input_file_tmp_overallTFs = tmp_dir +'/' + simulated_input_file_name + '_' + splited_file_name.split('_')[-1]
-    simulated_input_file_tmp_overallTFs_local = tmp_dir_intersect + simulated_input_file_name + '_' + splited_file_name.split('_')[-1]
-    
-    if os.path.exists(simulated_input_file_tmp_overallTFs_local):
-        return  simulated_input_file_tmp_overallTFs_local
-    
-    
-    
-    simulated_input_file_position = tmp_dir + simulated_input_file_name + '_pos'
-    
-    simulated_ifile_pos_temp = simulated_input_file_position + '_tmp'
-    #check if positions colums are numbers
-    awk_stmt_sim  = """awk 'BEGIN{{FS=OFS="\t"}} {{if ( $2 ~ "^[0-9][0-9]*$" && $3 ~ "^[0-9][0-9]*$") print $0}} ' {sim_ifile} > {sim_ofile}""".format(sim_ifile = simulated_input_file, sim_ofile = simulated_ifile_pos_temp )
-    os.system(awk_stmt_sim)
-    count = len(open(simulated_input_file).readlines(  ))
-    count2 = len(open(simulated_ifile_pos_temp).readlines(  ))
-    if(count != count2):
-        awk_tmp =r"""awk 'BEGIN{{FS=OFS="\t"}}{{ printf ("%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32)}}' {sim_ifile} > {sim_ofile} """.format(sim_ifile = simulated_input_file, sim_ofile = simulated_input_file_position)
-        os.system(awk_tmp)
-        simulated_input_file = simulated_input_file_position 
-    
-    #check if 'chr' is present
-    simulated_ifile_temp = tmp_dir + simulated_input_file_name + '_tmp'  
-    awk_stmt = """awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); print $0}}' {simulated_file} > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_ifile_temp)
-    os.system(awk_stmt)
-    simulated_input_file_tmp = simulated_ifile_temp        
-    simulated_input_file_sorted = tmp_dir + simulated_input_file_name + '_sorted'
-    
-    awk_stmt_sort = """sort -k1,1n -k2,2n {simulated_input_file} > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file_tmp, simulated_input_file_sorted = simulated_input_file_sorted )
-    os.system(awk_stmt_sort)
-    
-    tmp_dir_chr_sim = tmp_dir + '/' + cohort + '_tmp_perchr_sim/'
-    if not os.path.exists(tmp_dir_chr_sim):
-        os.mkdir(tmp_dir_chr_sim)
-    #split files by chromosome
-    awk_split_per_chr = """ cat {simulated_input_file_sorted} | awk -v tmp_dir={tmp_dir_chr_sim} '{{print $0 > tmp_dir$1".bed"}}'""".format(tmp_dir_chr_sim=tmp_dir_chr_sim, simulated_input_file_sorted=simulated_input_file_sorted)
-    os.system(awk_split_per_chr)
-    simulated_input_file_sorted_per_chr = [tmp_dir_chr_sim+'/'+x for x in os.listdir(tmp_dir_chr_sim) if '.bed' in x]
-    print(simulated_input_file_sorted_per_chr)
-    #matcg the files
-
-
-   # #find non-matching chroms from the observed mutation file
-   # observed_input_file_over = observed_input_file + '_' +simulated_input_file_name + '_over'
-   # awk_stmt_genome =  """awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {simulated_input_file_sorted} {observed_input_file}> {observed_input_file_over}""".format( simulated_input_file_sorted= simulated_input_file_sorted, observed_input_file=observed_input_file, observed_input_file_over = observed_input_file_over  )
-   # os.system(awk_stmt_genome)
-    for sim_input_file in simulated_input_file_sorted_per_chr:
-        chr_nr = sim_input_file.split('_')[-1]
-        match_obs_file = [s for s in tmp_dir_perchr if chr_nr+".bed" in s]
-        print(match_obs_file)
-        print(sim_input_file)
-        observed_input_file_obj = BedTool(match_obs_file )
-        simulated_input_file_obj = BedTool(sim_input_file) 
-        print('Intersect')
-        simulated_input_file_tmp_overallTFs_chr = simulated_input_file_tmp_overallTFs+'_chr'+chr_nr
-        simulated_input_file_tmp_overallTFs_local_chr = simulated_input_file_tmp_overallTFs_local+'_chr'+chr_nr
-        #intersect the simulated file with the observed mutation file. Provide a sum of f_score and motif breaking score
-        simulated_input_file_obj.intersect(observed_input_file_obj, wo = True, sorted =True).saveas(simulated_input_file_tmp_overallTFs_chr)
-        copyfile(simulated_input_file_tmp_overallTFs_chr,simulated_input_file_tmp_overallTFs_chr+'_tmp' )
-    
-        window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($11==".") print $38,$10; else print $38,$10+$11}}' {simulated_input_file_tmp_overallTFs} > {simulated_input_file_tmp_overallTFs_local}""".format(simulated_input_file_tmp_overallTFs=simulated_input_file_tmp_overallTFs_chr, simulated_input_file_tmp_overallTFs_local=simulated_input_file_tmp_overallTFs_local_chr)
-        #observed_input_file_obj.intersect(simulated_input_file_obj, wo = True, sorted =True).saveas(simulated_input_file_tmp_overallTFs)
-        #window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($16==".") print $6,$16; else print $6,$16+$17}}' {simulated_input_file_tmp_overallTFs} > {simulated_input_file_tmp_overallTFs_local}""".format(simulated_input_file_tmp_overallTFs=simulated_input_file_tmp_overallTFs, simulated_input_file_tmp_overallTFs_local=simulated_input_file_tmp_overallTFs_local)
-        os.system(window_id_fscroe_file)
-    
-        os.remove(simulated_input_file_tmp_overallTFs_chr)
-        cleanup()
-    
-    awk_comm = """cat {tmp_dir_intersect}/sim*annotated.bed9_splited_chr* > {simulated_input_file_tmp_overallTFs_local} """.format(tmp_dir_intersect = tmp_dir_intersect, simulated_input_file_tmp_overallTFs_local=simulated_input_file_tmp_overallTFs_local)
-    os.system(awk_comm)
-       
-    os.remove(simulated_input_file_sorted)
-    os.remove(simulated_ifile_pos_temp)
-    if os.path.exists(simulated_input_file_position):
-       os.remove(simulated_input_file_position)
-    #os.remove(observed_input_file_over)    
-    cleanup()  
-    print('cleanup')
-    
-    return simulated_input_file_tmp_overallTFs_local
 
 def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annotated_input_file, 
                                                          simulated_annotated_input_files, 
@@ -826,40 +740,18 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         copyfile(splited_file_name_local, splited_file_name_sorted)
 
 
-    per_chr = False
-    if per_chr:
-        print('PPPE')
-        tmp_dir_chr = tmp_dir + '/' + cohort + '_tmp_perchr/'
-        if not os.path.exists(tmp_dir_chr):
-            os.mkdir(tmp_dir_chr)
-            
-        awk_split_per_chr = """cat {splited_file_name_sorted} | awk -v tmp_dir={tmp_dir_chr} '{{print $0 > tmp_dir$1".bed"}}' """.format( splited_file_name_sorted=splited_file_name_sorted, tmp_dir_chr=tmp_dir_chr)
-        print(awk_split_per_chr)
-        os.system(awk_split_per_chr)
-        splited_file_name_sorted_per_chr = [tmp_dir_chr+'/'+x for x in os.listdir(tmp_dir_chr)]
-        print(splited_file_name_sorted_per_chr )
-        
-        obs_scores_files = []
-        p = Pool(n_cores_fscore)
-        obs_scores_files = p.starmap(get_scores_per_window_per_chr, product(
-            splited_file_name_sorted_per_chr, [tmp_dir], [tmp_dir_intersect], [tmp_dir_chr],
-            [splited_file_name],  simulated_annotated_input_files, [cohort]))
-        p.close()
-        p.join()
-        print(obs_scores_files)
-        
-    else: 
-        
-        obs_scores_files = []
-        p = Pool(n_cores_fscore)
-        obs_scores_files = p.starmap(get_scores_per_window, product(
-            [splited_file_name_sorted], [tmp_dir], [tmp_dir_intersect], 
-            [splited_file_name],  simulated_annotated_input_files))
-        p.close()
-        p.join()
-        
-        print(obs_scores_files)
-        
+    
+    
+    obs_scores_files = []
+    p = Pool(n_cores_fscore)
+    obs_scores_files = p.starmap(get_scores_per_window, product(
+        [splited_file_name_sorted], [tmp_dir], [tmp_dir_intersect], 
+        [splited_file_name],  simulated_annotated_input_files))
+    p.close()
+    p.join()
+    
+    print(obs_scores_files)
+    
     print('Combining the scores')
     simulated_mean_sd_outfiles = tmp_dir + '/' + cohort
     simulated_mean_sd_outfiles_tmp = simulated_mean_sd_outfiles + '_tmp'
