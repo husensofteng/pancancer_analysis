@@ -130,6 +130,10 @@ def plot_barcharts(input_file, x_col_index = 17, col0_to_check = 10, col1_to_che
     
     return fig
 
+
+
+
+
 def draw_rec_sigregs(elements_input_file, title):
     sns.set_style('white', {'text.color': '.15', 'axes.linewidth': 0.5})
     fig = plt.figure(figsize=(6,4), linewidth=1.0)#design a figure with the given size
@@ -183,12 +187,39 @@ def draw_rec_sigregs(elements_input_file, title):
     return fig
 
 
+
+def parse_args():
+    '''Parse command line arguments'''
+    
+    parser = argparse.ArgumentParser(description='Plot Supp Figure')
+    parser.add_argument('--mut_input_file', default='', help='')
+    parser.add_argument('--mut_anno_input_file', default='', help='')
+    parser.add_argument('--motif_mut_input_file', default='', help='')
+    parser.add_argument('--elements_input_file', default='', help='')
+    parser.add_argument('--output_dir', default='', help='')
+    
+
+    
+    return parser.parse_args(sys.argv[1:])
+
+
 if __name__ == '__main__':
+    
+    args = parse_args()
+    
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
+    
+    
+    print("Generate SuppFig")
+
     groups_colors_dict = {'Biliary-AdenoCA':'#00CD66','Bladder-TCC':'#EEAD0E','Bone-Osteosarc':'#FFD700','Bone-Leiomyo':'#FFEC8B','Bone-Epith':'#ADAC44','Breast-AdenoCa':'#CD6090','Cervix-SCC':'#79CDCD','CNS-Medullo':'#D8BFD8','CNS-PiloAstro':'#B0B0B0','CNS-GBM':'#3D3D3D','CNS-Oligo':'#787878','ColoRect-AdenoCA':'#191970','Eso-AdenoCa':'#1E90FF','Head-SCC':'#8B2323','Kidney-RCC':'#FF4500','Kidney-ChRCC':'#B32F0B','Liver-HCC':'#006400','Lung-SCC':'#FDF5E6','Lung-AdenoCA':'#FFFFFF','Lymph-BNHL':'#698B22','Lymph-CLL':'#F4A35D','Myeloid-MPN':'#FFC100','Myeloid-AML':'#CD6600','Ovary-AdenoCA':'#008B8B','Panc-AdenoCA':'#7A378B','Panc-Endocrine':'#E066FF','Prost-AdenoCA':'#87CEFA','Skin-Melanoma':'#000000','Stomach-AdenoCA':'#BFEFFF','Thy-AdenoCA':'#9370DB','Uterus-AdenoCA':'#FF8C69','Bone-Cart':'#DDCDCD','Breast-LobularCa':'#DDCDCD','Breast-DCIS':'#DDCDCD','Lymph-NOS':'#DDCDCD','Myeloid-MDS':'#DDCDCD','Cervix-AdenoCA':'#DDCDCD'}
     sfig_num = 1
-    with PdfPages('/home/huum/projs/regMotifs/analysis_exclVEP/plots/SFigures_19.11.pdf') as pdf:
+    fig_dir = args.output_dir + "/SFigures.pdf" 
+    with PdfPages(fig_dir) as pdf:
         #Box plot for all mutations per sample per cancer type
-        df = get_mut_df(input='/home/huum/projs/regMotifs/mutations_files/obsagr22May2017_exclVEP.bed9', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
+        df = get_mut_df(input=args.mut_input_file, x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
+        #df = get_mut_df(input='/home/huum/projs/regMotifs/mutations_files/obsagr22May2017_exclVEP.bed9', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
 
         #df = get_mut_df(input='/Users/karolinasg/Documents/pcawg/analysis/obsagr22May2017_exclVEP.bed9', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
         fig = plot_boxplot(df, groups_colors_dict=groups_colors_dict, title="SFig. {n} Mutation rate across cancer types".format(n=sfig_num))
@@ -197,7 +228,8 @@ if __name__ == '__main__':
         sfig_num+=1
         print sfig_num
         #Box plot for all mutations in motifs per sample per cancer type
-        df = get_mut_df(input='/home/huum/projs/regMotifs/analysis/motifmuts_all.bed12', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
+        df = get_mut_df(input=args.motif_mut_input_file, x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
+        #df = get_mut_df(input='/home/huum/projs/regMotifs/analysis/motifmuts_all.bed12', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
 
         #df = get_mut_df(input='/Users/karolinasg/Documents/pcawg/analysis/motifmuts_all.bed12', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
         fig = plot_boxplot(df, groups_colors_dict=groups_colors_dict, title="SFig. {n} Mutation rate in TF motifs across cancer types".format(n=sfig_num))
@@ -218,7 +250,7 @@ if __name__ == '__main__':
         sfig_num+=3
         print sfig_num
         #Bar charts per TF-motif (with DHS|TFBS and without)
-        motif_muts_file = '/home/huum/projs/regMotifs/mutations_files/obsann22May2017_exclVEP.bed9' 
+        motif_muts_file = args.mut_anno_input_file
         #motif_muts_file = '/Users/karolinasg/Documents/pcawg/analysis/obsann22May2017_exclVEP.bed9' 
 
         fig = plot_barcharts(motif_muts_file, x_col_index = 17, col1_to_check = 24, col2_to_check=25, fig_width=6, fig_height=6, 
@@ -231,8 +263,8 @@ if __name__ == '__main__':
         print sfig_num
         #Box plot for CFRMs in SF-MREs per sample per cancer type
         #elements_input_file = '/Users/karolinasg/Documents/pcawg/NEW_RESULTS_removig_VEP_23_october/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
-
-        elements_input_file = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
+        elements_input_file =args.elements_input_file
+        #elements_input_file = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
         box_plot_df, heatmap_df = get_df_from_elements(elements_input_file, col_to_use='RegMuts', sep='#', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency', col_to_check='#Samples(RegMuts)', threshold=1)
         fig = plot_boxplot(box_plot_df, groups_colors_dict=groups_colors_dict, rotation=90, title="SFig. {n} CFRMs across cancer types".format(n=sfig_num))
         pdf.savefig(fig)
@@ -252,8 +284,8 @@ if __name__ == '__main__':
         sfig_num+=1
         print sfig_num
         #elements_input_file = '/Users/karolinasg/Documents/pcawg/NEW_RESULTS_removig_VEP_23_october/merged200bp_extended200bp_nofullexon_Lymph/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
-
-        elements_input_file = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_Lymph/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
+        elements_input_file =args.elements_input_file
+        #elements_input_file = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_Lymph/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
         fig = draw_rec_sigregs(elements_input_file, title='SFig. {n} SF-MREs identified from Lymphoma cohorts'.format(n=sfig_num))
         pdf.savefig(fig)
         

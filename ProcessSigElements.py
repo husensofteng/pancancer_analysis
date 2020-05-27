@@ -906,7 +906,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
                 print(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file,active_driver_output_file_local_results,  n_cores])
                 
                 try:
-                    subprocess.call(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, active_driver_output_file_local_results, n_cores])
+                    subprocess.call(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, active_driver_output_file_local_resultsn_cores])
 
                 except KeyError:
                     open(active_driver_output_file, 'a').close()
@@ -1036,7 +1036,8 @@ def parse_args():
     parser.add_argument('--max_dist', type=int, default=500000, help='max_dist')
     parser.add_argument('--window', type=int, default=2000, help='window')
     parser.add_argument('--output_dir', default='processed_sigelements_output', help='processed_sigelements_output')
-    
+    parser.add_argument('--cohort_sig_test', default = 'All-tumors-without-Lymphatic-system-Skin-Melanoma',  help='')
+
     parser.add_argument('--num_cores', type=int, default=10, help='')
     
     parser.add_argument('--observed_mutations_all', help='')
@@ -1089,7 +1090,7 @@ if __name__ == '__main__':
      
     print("Generating genes and patwhways for ATELM cohort")
     #Genes and patwhways for ATELM cohort
-    ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if 'All-tumors-without-Lymphatic-system-Skin-Melanoma' in x]
+    ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if args.cohort_sig_test in x]
      
     aggregated_output_file_ATELM = getSigElements(
                     ATELM_generated_sig_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
@@ -1103,7 +1104,9 @@ if __name__ == '__main__':
                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'ATELM')
     combine_sig_TFs(sig_tfs_files, output_dir=args.output_dir)
     combine_sig_TFs(sig_tfpos_files, tf_label='TF Positions', output_dir=args.output_dir)
-     
+    
+    
+    #aggregated_output_file_ATELM = '/proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/process_elements_6Apr_tmp/All_combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist500.0kb_within2.0kb.tsv'
     elements_output_file = get_gene_enrichments(
         elements_input_file=aggregated_output_file_ATELM, 
         elements_output_file=aggregated_output_file_ATELM+"_GenesInclCDS.tsv", 
