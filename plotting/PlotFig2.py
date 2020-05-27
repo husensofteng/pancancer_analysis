@@ -175,7 +175,7 @@ def draw_bar_chart(ax, sig_input_file, tf='CEBPB_MA0466.2', cohort='All-tumors-w
     plt_results.set_xlabel(tf.split('_')[0]+' Motif')
     
     
-def draw_fig2():
+def draw_fig2(sig_input_file, sig_input_file_pos, pwm_file, output_dir):
     fig = plt.figure(figsize=(12,8), linewidth=1.0)#design a figure with the given size
     gs = gridspec.GridSpec(4, 7, height_ratios=[4,4,2,4], width_ratios=[4,4,0.5,4,3,4,4], wspace=0.0, hspace=0.0)#create 4 rows and three columns with the given ratio for each
     #sketch
@@ -227,10 +227,37 @@ def draw_fig2():
     draw_motiflog(ax6, fig, tf_pwms[motif_name])
     '''
     #plt.savefig("/Users/karolinasg/Documents/pcawg/NEW_RESULTS_removig_VEP_23_october/plots/Fig2.pdf")#, bbox_inches='tight')
-
-    plt.savefig("/home/huum/projs/regMotifs/analysis_exclVEP/plots/Fig2.pdf")#, bbox_inches='tight')
+    plot_dir = output_dir + "Fig2.pdf"
+    plt.savefig(plot_dir)#, bbox_inches='tight')
     plt.close()
     
     return
 
-draw_fig2()
+
+
+
+def parse_args():
+    '''Parse command line arguments'''
+    
+    parser = argparse.ArgumentParser(description='Plot Figure 2')
+    parser.add_argument('--sig_input_file', default='', help='')
+    parser.add_argument('--sig_input_file_pos', default='', help='')
+    parser.add_argument('--pwm_file', default='', help='')
+    parser.add_argument('--output_dir', default='', help='')
+    
+
+    
+    return parser.parse_args(sys.argv[1:])
+
+
+if __name__ == '__main__':
+    
+    args = parse_args()
+    
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
+    
+    
+    print("Generate Fig 2")
+
+    draw_fig2(args.sig_input_file, args.sig_input_file_pos, args.pwm_file, args.output_dir)
