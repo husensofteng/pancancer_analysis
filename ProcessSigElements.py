@@ -906,7 +906,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
                 print(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file,active_driver_output_file_local_results,  n_cores])
                 
                 try:
-                    subprocess.call(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, active_driver_output_file_local_resultsn_cores])
+                    subprocess.call(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, active_driver_output_file_local_results,n_cores])
 
                 except KeyError:
                     open(active_driver_output_file, 'a').close()
@@ -1101,7 +1101,7 @@ if __name__ == '__main__':
                     args.genes_input_file, 
                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
-                    args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'ATELM')
+                    args.tmp_dir, args.mutations_cohorts_outdir, cohorts = args.cohort_sig_test)
     combine_sig_TFs(sig_tfs_files, output_dir=args.output_dir)
     combine_sig_TFs(sig_tfpos_files, tf_label='TF Positions', output_dir=args.output_dir)
     
