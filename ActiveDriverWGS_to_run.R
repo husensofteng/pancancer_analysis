@@ -11,14 +11,17 @@ df_mut = args[2]
 n_mut_ele = args[3]
 #output file
 out_file = args[4]
-#number of cores
-n_cores = args[5]
 
-print(df_elem)
-print(n_mut_ele)
+#output file results
+out_file_active = args[5]
+#number of cores
+n_cores = args[6]
+
+#print(df_elem)
+#print(n_mut_ele)
 #elements
 data_my <- read.csv(df_elem, sep = '\t', header = FALSE)
-head(data_my) %>%  print
+#head(data_my) %>%  print
 
 #at least 2 mutations in an element
 data_my_2mut <- data_my[which(data_my[,6] >= as.numeric(n_mut_ele)),] 
@@ -54,9 +57,9 @@ if(dim(data_my_2mut)[1] >0){
 }else{
   result_join = NULL
   
-}
+} 
 
-
+write.table(result, file = out_file_active, sep='\t', col.names = FALSE, row.names = FALSE, quote = FALSE, na = 'NA')
 
 #colnames(result_join)[(length(result_join[1,])-1):length(result_join[1,])] <- c('ElementPval_ActiveDriver',   'ElementFDR_ActiveDriver')
 write.table(result_join, file = out_file,sep='\t', col.names = FALSE, row.names = FALSE, quote = FALSE, na = 'NA')
