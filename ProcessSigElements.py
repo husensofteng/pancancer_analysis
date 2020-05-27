@@ -1090,23 +1090,27 @@ if __name__ == '__main__':
      
     print("Generating genes and patwhways for ATELM cohort")
     #Genes and patwhways for ATELM cohort
-    ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if args.cohort_sig_test in x]
-     
-    aggregated_output_file_ATELM = getSigElements(
-                    ATELM_generated_sig_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
-                    args.n, args.max_dist, args.window, 
-                    args.output_dir,
-                    args.observed_input_file, args.tracks_dir, 
-                    args.observed_mutations_all, args.chr_lengths_file,
-                    args.genes_input_file, 
-                    args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
-                    args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
-                    args.tmp_dir, args.mutations_cohorts_outdir, cohorts = args.cohort_sig_test)
-    combine_sig_TFs(sig_tfs_files, output_dir=args.output_dir)
-    combine_sig_TFs(sig_tfpos_files, tf_label='TF Positions', output_dir=args.output_dir)
+    if args.cohort_sig_test!='All':   
+        
+        ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if args.cohort_sig_test in x]
     
     
-    #aggregated_output_file_ATELM = '/proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/process_elements_6Apr_tmp/All_combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist500.0kb_within2.0kb.tsv'
+        aggregated_output_file_ATELM = getSigElements(
+                        ATELM_generated_sig_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+                        args.n, args.max_dist, args.window, 
+                        args.output_dir,
+                        args.observed_input_file, args.tracks_dir, 
+                        args.observed_mutations_all, args.chr_lengths_file,
+                        args.genes_input_file, 
+                        args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
+                        args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
+                        args.tmp_dir, args.mutations_cohorts_outdir, cohorts = args.cohort_sig_test)
+        combine_sig_TFs(sig_tfs_files, output_dir=args.output_dir)
+        combine_sig_TFs(sig_tfpos_files, tf_label='TF Positions', output_dir=args.output_dir)
+    else:
+        aggregated_output_file_ATELM = '/proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/process_elements_6Apr_tmp/All_combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist500.0kb_within2.0kb.tsv'
+    
+    
     elements_output_file = get_gene_enrichments(
         elements_input_file=aggregated_output_file_ATELM, 
         elements_output_file=aggregated_output_file_ATELM+"_GenesInclCDS.tsv", 
@@ -1121,6 +1125,7 @@ if __name__ == '__main__':
         keywords_to_filter_out_with=[], only_keep_the_sig_file = False, 
         min_number_of_genes_in_geneset_to_consider_the_geneset = 10, 
         header_line = False, sample_ids_given=True)
+    
     
     #produce a list of all genes including exon elements
     #get_gene_enrichments(elements_input_file=aggregated_output_file, elements_output_file=aggregated_output_file+"_GenesInclExons.tsv", skip_exon_elements=False)
