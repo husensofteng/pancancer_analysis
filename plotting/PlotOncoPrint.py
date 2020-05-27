@@ -87,12 +87,12 @@ def generate_dicts(input_file, groups_cols_file, min_num_to_include_row =50,
             l = f.readline().strip().split('\t')
     groups_ordered = []
     #print sorted(groups_cols_dict.iteritems(), key=itemgetter(1))
-    for group, group_cols in sorted(groups_cols_dict.viewitems(), key=lambda x: len(x[1]), reverse=True):
+    for group, group_cols in sorted(groups_cols_dict.items(), key=lambda x: len(x[1]), reverse=True):
         groups_ordered.append(group)
         cols.extend(group_cols)
         cols.extend(['Gap' for i in range(0,5)])
         
-    for row, row_cols in sorted(rows_cols_dict.viewitems(), key=lambda x: len(x[1])):
+    for row, row_cols in sorted(rows_cols_dict.items(), key=lambda x: len(x[1])):
         #if len(row_cols)>=min_num_to_include_row and float(rows_measures[row])<0.01:
         rows.append(row)
         
