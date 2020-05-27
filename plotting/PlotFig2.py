@@ -198,8 +198,8 @@ def draw_fig2(sig_input_file, sig_input_file_pos, pwm_file, output_dir):
     
     sns.despine(top=True, right= True)
     #draw alignment schema
-    sig_input_file = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_sigTFs_0.05.tsv'
-    sig_input_file_pos = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_sigTFpos_0.05.tsv'
+    #sig_input_file = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_sigTFs_0.05.tsv'
+    #sig_input_file_pos = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_sigTFpos_0.05.tsv'
     #sig_input_file = '/Users/karolinasg/Documents/pcawg/NEW_RESULTS_removig_VEP_23_october/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_sigTFs_0.05.tsv'
     #sig_input_file_pos = '/Users/karolinasg/Documents/pcawg/NEW_RESULTS_removig_VEP_23_october/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_sigTFpos_0.05.tsv'
     
@@ -210,7 +210,7 @@ def draw_fig2(sig_input_file, sig_input_file_pos, pwm_file, output_dir):
     draw_tfs_per_cohort(ax3, fig, sig_input_file)
     
     #pwm_file = '/Users/karolinasg/Documents/pcawg/analysis/JASPAR_CORE_2016_vertebrates.meme'
-    pwm_file = '/home/huum/projs/regMotifs/datafiles/Motifs/JASPAR_CORE_2016_vertebrates.meme'
+    #pwm_file = '/home/huum/projs/regMotifs/datafiles/Motifs/JASPAR_CORE_2016_vertebrates.meme'
 
     tf_pwms = get_freq_per_motif(pwm_file)
     
@@ -227,7 +227,7 @@ def draw_fig2(sig_input_file, sig_input_file_pos, pwm_file, output_dir):
     draw_motiflog(ax6, fig, tf_pwms[motif_name])
     '''
     #plt.savefig("/Users/karolinasg/Documents/pcawg/NEW_RESULTS_removig_VEP_23_october/plots/Fig2.pdf")#, bbox_inches='tight')
-    plot_dir = output_dir + "Fig2.pdf"
+    plot_dir = output_dir + "/Fig2.pdf"
     plt.savefig(plot_dir)#, bbox_inches='tight')
     plt.close()
     

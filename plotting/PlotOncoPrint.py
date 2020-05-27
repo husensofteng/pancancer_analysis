@@ -185,9 +185,9 @@ def plot_oncoprint(ax, input_file, groups_cols_file, x_shift=400, min_num_to_inc
     
     return
 
-def draw_pathwyas():
+def draw_pathwyas(input_file, groups_cols_file, output_dir):
     
-    input_file = "/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan_skip_exon/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv_GenesInclCDS.tsv_pathways_calculated_pval.tsv" 
+    #input_file = "/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan_skip_exon/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv_GenesInclCDS.tsv_pathways_calculated_pval.tsv" 
 #"/home/huum/projs/regMotifs/analysis/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv_GenesInclCDS.tsv_pathways_calculated_pval.tsv"
 #"../analysis/data/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb_pancan.tsv_Genes.tsv_pathways_calculated_pval_sig.tsv"
     #sort pathways by FDR
@@ -198,7 +198,7 @@ def draw_pathwyas():
     df.sort_values(by='FDR', inplace=True)
     print '/'.join(input_file.split('/')[:-1])+'/sigpathways_sorted.tsv'
     df.to_csv('/'.join(input_file.split('/')[:-1])+'/sigpathways_sorted.tsv', sep='\t')
-    groups_cols_file = "/home/huum/projs/regMotifs/cancer_types_samples.txt"
+    #groups_cols_file = "/home/huum/projs/regMotifs/cancer_types_samples.txt"
     sns.set_style('white', {'text.color': '.15'})
     rcParams['svg.fonttype'] = 'none'
     fig = plt.figure(figsize=(12.5,3.5))#design a figure with the given size
@@ -207,37 +207,69 @@ def draw_pathwyas():
     gs.tight_layout(fig, pad=0, h_pad=0.0, w_pad=0.0)
     plot_oncoprint(ax0, input_file, groups_cols_file, plot_color_legend=True, max_num_pathways_to_draw=10)
     #plt.savefig("../analysis/Fig4PancanT.pdf", bbox_inches='tight')
-    plt.savefig("/home/huum/projs/regMotifs/analysis_exclVEP/Fig4PancanT_skip_exon.svg", bbox_inches='tight')
+    fig_dir = output_dir + "/Fig4PancanT_skip_exon.svg"
+    plt.savefig(fig_dir, bbox_inches='tight')
     plt.close()     
        
-def draw_genes():
+def draw_genes(input_file,groups_cols_file, output_dir):
     
-    input_file = "/home/huum/projs/regMotifs/analysis_exclVEP/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv_GenesInclCDS.tsv"
+    #input_file = "/home/huum/projs/regMotifs/analysis_exclVEP/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv_GenesInclCDS.tsv"
 #"/home/huum/projs/regMotifs/analysis/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv_GenesInclCDS.tsv"
 #"analysis/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv_Genes.tsv"
-    groups_cols_file = "/home/huum/projs/regMotifs/cancer_types_samples.txt"
+    #groups_cols_file = "/home/huum/projs/regMotifs/cancer_types_samples.txt"
     sns.set_style('white', {'text.color': '.15'})
     rcParams['svg.fonttype'] = 'none'
     fig = plt.figure(figsize=(12,12))#design a figure with the given size
     gs = gridspec.GridSpec(1, 1, wspace=0.0, hspace=0.0)#create 2 rows and three columns with the given ratio for each
     ax0 = fig.add_subplot(gs[0, 0])
     
+    fig_dir = output_dir + "FigGenesRegMutsmin10.pdf"
+    
     plot_oncoprint(ax0, input_file, groups_cols_file, x_shift=300, min_num_to_include_row =10, rows_index = 0, cols_index_reg = 8, cols_index = 9, 
                    measures_index = None, rows_frequency_index= 3, fontsize=10, plot_color_legend=True, extra_x_shift = 20, extra_x_shift_others = 50, min_num_samples_to_write_group=10)
-    plt.savefig("/home/huum/projs/regMotifs/analysis_exclVEP/FigGenesRegMutsmin10.pdf", bbox_inches='tight')
+    plt.savefig(fig_dir, bbox_inches='tight')
     plt.clf()
     
+    fig_dir = output_dir + "FigGenesMutsmin25.pdf"
+
     fig = plt.figure(figsize=(12,6))#design a figure with the given size
     gs = gridspec.GridSpec(1, 1, wspace=0.0, hspace=0.0)#create 2 rows and three columns with the given ratio for each
     ax0 = fig.add_subplot(gs[0, 0])
     
     plot_oncoprint(ax0, input_file, groups_cols_file, x_shift=300, min_num_to_include_row =25, rows_index = 0, cols_index_reg = 8, cols_index = 9, 
                    measures_index = None, rows_frequency_index= 5, fontsize=10, plot_color_legend=True, extra_x_shift = 20, extra_x_shift_others = 50, min_num_samples_to_write_group=10)
-    plt.savefig("/home/huum/projs/regMotifs/analysis_exclVEP/FigGenesMutsmin25.pdf", bbox_inches='tight')
+    
+    plt.savefig(fig_dir, bbox_inches='tight')
     
     plt.close()
 
+
+def parse_args():
+    '''Parse command line arguments'''
+    
+    parser = argparse.ArgumentParser(description='Plot Onco Print')
+    parser.add_argument('--input_file_path', default='', help='')
+    parser.add_argument('--input_file_genes', default='', help='')
+
+    parser.add_argument('--groups_cols_file', default='', help='')
+    parser.add_argument('--output_dir', default='', help='')
+    
+
+    
+    return parser.parse_args(sys.argv[1:])
+
+
 if __name__ == '__main__':
-    draw_pathwyas()
-    draw_genes()
+    
+    args = parse_args()
+    
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
+    
+    
+    print("Onco Print")
+
+
+    draw_pathwyas(args.input_file_path, args.groups_cols_file, args.output_dir)
+    draw_genes(args.input_file_genes, args.groups_cols_file, args.output_dir)
     
