@@ -1393,8 +1393,8 @@ def calculate_pval_for_genesets(geneset_enrichement_results_input_file, index_to
     
     infile = open(geneset_enrichement_results_input_file, 'r')
     calculated_p_value_out_file  = '.'.join(geneset_enrichement_results_input_file.split('.')[0:-1]) + "_calculated_pval." + geneset_enrichement_results_input_file.split('.')[-1]
-    calculated_p_value_sig_out_file  = '.'.join(geneset_enrichement_results_input_file.split('.')[0:-1]) + "_calculated_pval_sig." + geneset_enrichement_results_input_file.split('.')[-1]
-    calculated_p_value_sig_out_file_keywords  = '.'.join(geneset_enrichement_results_input_file.split('.')[0:-1]) + "_calculated_pval_sig_keywords." + geneset_enrichement_results_input_file.split('.')[-1]
+    calculated_p_value_sig_out_file  = '.'.join(geneset_enrichement_results_input_file.split('.')[0:-1]) + "_calculated_pvalsig." + geneset_enrichement_results_input_file.split('.')[-1]
+    calculated_p_value_sig_out_file_keywords  = '.'.join(geneset_enrichement_results_input_file.split('.')[0:-1]) + "_calculated_pval_sig_kw." + geneset_enrichement_results_input_file.split('.')[-1]
     
     outfile = open(calculated_p_value_out_file, "w")
     outfile_sig = open(calculated_p_value_sig_out_file, "w")
