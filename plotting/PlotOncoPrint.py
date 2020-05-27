@@ -106,8 +106,8 @@ def plot_oncoprint(ax, input_file, groups_cols_file, x_shift=400, min_num_to_inc
                                                                                        measures_index = measures_index, rows_frequency_index= rows_frequency_index)
     #chaned the color of Lung-SCC: from #FDF5E6 to #473604  and Lung-AdenoCA: from #FFFFFF to #440447
     groups_colors_dict = {'Biliary-AdenoCA':'#00CD66','Bladder-TCC':'#EEAD0E','Bone-Osteosarc':'#FFD700','Bone-Leiomyo':'#FFEC8B','Bone-Epith':'#ADAC44','Breast-AdenoCa':'#CD6090','Cervix-SCC':'#79CDCD','CNS-Medullo':'#D8BFD8','CNS-PiloAstro':'#B0B0B0','CNS-GBM':'#3D3D3D','CNS-Oligo':'#787878','ColoRect-AdenoCA':'#191970','Eso-AdenoCa':'#1E90FF','Head-SCC':'#8B2323','Kidney-RCC':'#FF4500','Kidney-ChRCC':'#B32F0B','Liver-HCC':'#006400','Lung-SCC':'#473604','Lung-AdenoCA':'#440447','Lymph-BNHL':'#698B22','Lymph-CLL':'#F4A35D','Myeloid-MPN':'#FFC100','Myeloid-AML':'#CD6600','Ovary-AdenoCA':'#008B8B','Panc-AdenoCA':'#7A378B','Panc-Endocrine':'#E066FF','Prost-AdenoCA':'#87CEFA','Skin-Melanoma':'#000000','Stomach-AdenoCA':'#BFEFFF','Thy-AdenoCA':'#9370DB','Uterus-AdenoCA':'#FF8C69','Bone-Cart':'#DDCDCD','Breast-LobularCa':'#DDCDCD','Breast-DCIS':'#DDCDCD','Lymph-NOS':'#DDCDCD','Myeloid-MDS':'#DDCDCD','Cervix-AdenoCA':'#DDCDCD'}
-    print rows_cols_types_dict
-    print len(cols)
+    print (rows_cols_types_dict)
+    print (len(cols))
     gap = 0
     if max_num_pathways_to_draw is not None:
         if len(rows) > max_num_pathways_to_draw:
@@ -196,7 +196,7 @@ def draw_pathwyas(input_file, groups_cols_file, output_dir):
                        ['Pathways','Total Num. genes', 'Num. enriched genes', 'Num. mutated samples with CFRMs', 'Num. mutated samples', 'Enriched Genes', 'Samples', 'Genes', 'P-Value','FDR'])
     df['Enrichment size'] = df['Num. enriched genes']/df['Total Num. genes']
     df.sort_values(by='FDR', inplace=True)
-    print '/'.join(input_file.split('/')[:-1])+'/sigpathways_sorted.tsv'
+    print ('/'.join(input_file.split('/')[:-1])+'/sigpathways_sorted.tsv')
     df.to_csv('/'.join(input_file.split('/')[:-1])+'/sigpathways_sorted.tsv', sep='\t')
     #groups_cols_file = "/home/huum/projs/regMotifs/cancer_types_samples.txt"
     sns.set_style('white', {'text.color': '.15'})
