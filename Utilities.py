@@ -19,7 +19,6 @@ import shutil
 from shutil import copyfile
 from multiprocessing import Pool
 from itertools import product
-from ProcessSigElements_30Oct import observed_input_file
 #from score_motifs_tissuepertable import open_connection, close_connection
 
 #import matplotlib.backends.backend_pdf
@@ -642,7 +641,7 @@ def get_scores_per_window(observed_input_file, tmp_dir, window_size, simulated_i
     observed_input_file_obj.window(simulated_input_file_obj, w = window_size).saveas(simulated_input_file_fixed_sorted_intersected)
     
     #col 4: windowID; col14: tf-binding score; col15:fscore 
-    window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($14==".") print $4,$15; else print $4,$14+$15}}' {sim_intersected} >> {sim_scores_combined}""".format(
+    window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($14==".") print $4,$15; else print $4,$14+$15}}' {sim_intersected} > {sim_scores_combined}""".format(
         sim_intersected=simulated_input_file_fixed_sorted_intersected, sim_scores_combined=simulated_input_file_tmp_overallTFs_local)
     os.system(window_id_fscroe_file)
     
@@ -673,14 +672,11 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     
     print("Extracting avg and std per TF and overall from the simulation sets... onto: ", cohort_mean_sd_per_tf_overall_output_dict_file)
     cohort = cohort_full_name.split('/')[-1]
-    tmp_dir_intersect = mutations_cohorts_dir + '/' + cohort + '_tmp_pybedtoos/'
-    if not os.path.exists(tmp_dir_intersect):
-        os.mkdir(tmp_dir_intersect) 
     
     "replace chr, X, Y, add Line Number to use as window ID and sort by chr,start"
-    observed_input_file_sorted = tmp_dir+'/'+'.'.join(observed_input_file.split('/')[0].split('.')[0:-1])
+    observed_input_file_sorted = tmp_dir+'/'+'.'.join(annotated_input_file.split('/')[0].split('.')[0:-1])
     cmd = """awk 'BEGIN{{OFS="\t"}}{{gsub("chr","",$1); gsub("X", 23, $1); gsub("Y", 24, $1); print $1,$2,$3,NR}} {} | sort -k1,1n -k2,2n > {}""".format(
-        observed_input_file, observed_input_file_sorted)
+        annotated_input_file, observed_input_file_sorted)
     os.system(cmd)
     
     obs_scores_files = []
@@ -698,24 +694,17 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     print(obs_scores_files)
     
     print('Combining the scores')
-    simulated_mean_sd_outfiles = tmp_dir + '/' + cohort
-    simulated_mean_sd_outfiles_tmp = simulated_mean_sd_outfiles + '_tmp'
-
+    simulated_mean_sd_outfiles = tmp_dir + '/' + cohort + 'allscoress'
+    
     #merge files from the same category, sort by the line number and group by position, TF motif, chromatin cat. and line number
-    awk_comm = """cat {tmp_dir_intersect}/*annotated.bed9_splited > {file_out} """.format(tmp_dir_intersect = tmp_dir_intersect, file_out = simulated_mean_sd_outfiles_tmp)
-    os.system(awk_comm)
+    with open(simulated_mean_sd_outfiles, 'w') as sim_fn:
+        for obs_scores_file in obs_scores_files:
+            with open(obs_scores_file, 'r') as score_fn:
+                sim_fn.write(score_fn.read())
     
-        
-        
-    print('cat!')
-    
-    simulated_mean_sd_outfiles_tmp_local = tmp_dir_intersect  + '/' + cohort + '_tmp'
-
-    copyfile(simulated_mean_sd_outfiles_tmp, simulated_mean_sd_outfiles_tmp_local)
-    
-    #create a dictionery for mean, std scores for all categories
+    "create a dictionery for mean, std scores for all categories"
     dict_fscore = {}
-    with open(simulated_mean_sd_outfiles_tmp, 'r') as simulated_mean_sd_tmp_infile:
+    with open(simulated_mean_sd_outfiles, 'r') as simulated_mean_sd_tmp_infile:
         l = simulated_mean_sd_tmp_infile.readline().strip().split('\t')
         while l and len(l)> 1:
             try:
@@ -724,8 +713,6 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                 dict_fscore[l[0]] = [float(l[1])]
             l = simulated_mean_sd_tmp_infile.readline().strip().split('\t')
     
-
-    
     print('dict')
     dict_simulated_mean_sd = {}
     for key in dict_fscore.keys():
@@ -733,21 +720,15 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         tf_std = np.std(dict_fscore[key])
         num_motifs = len(dict_fscore[key])
         dict_simulated_mean_sd[key] = {'mean': tf_mean, 
-                                                   "std": tf_std, 
-                                                   "nummotifs": num_motifs}
-      
+                                       "std": tf_std, 
+                                       "nummotifs": num_motifs}
     
-
     #save the dictionery per category
     dict_type_mean_std_scores = {}
     dict_type_mean_std_scores['overallTFs'] = dict_simulated_mean_sd
     
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
-    
-    #remnove local folder with the intersected files
-    #if os.path.exists(tmp_dir_intersect):
-    #  shutil.rmtree(tmp_dir_intersect)
        
     cleanup() 
     
