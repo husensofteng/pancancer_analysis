@@ -554,10 +554,11 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                     sim_output_extension,
                     filter_cond, operation_on_unify, output_extension, 
                     distance_to_merge, merged_mut_sig_threshold,
-               local_domain_window, chr_lengths_file, sig_elements_output_file, 
-               sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore))#, callback=generated_sig_merged_element_files.append)
+                    local_domain_window, chr_lengths_file, sig_elements_output_file, 
+                    sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore))#, callback=generated_sig_merged_element_files.append)
         else:
-            run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_dir, motif_name_index, 
+            run_cohort(cohort, created_cohorts, 
+                       mutation_input_files, mutations_cohorts_dir, motif_name_index, 
                        f_score_index, motif_breaking_score_index, chromatin_cat_index,
                        background_window, background_window_size, elements_oncodrive,
                        filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
@@ -566,6 +567,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                        distance_to_merge, merged_mut_sig_threshold,
                        local_domain_window, chr_lengths_file, sig_elements_output_file, 
                        sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore)
+        
         generated_sig_merged_element_files.append(sig_elements_output_file)
         sig_tfs_files.append(sig_tfs_file)
         sig_tfpos_files.append(sig_tfpos_file)

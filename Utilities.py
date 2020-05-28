@@ -609,7 +609,7 @@ def process_input_file(observed_input_file, simulated_input_files,
     
     return merged_elements_statspvaluesonlysig
 
-def get_scores_per_window(observed_input_file, tmp_dir, window_size, simulated_input_file):
+def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_dir, window_size, simulated_input_file):
     
     simulated_input_file_tmp_overallTFs_local = tmp_dir +'/'+ observed_input_file.split('/')[-1] + '_' + simulated_input_file.split('/')[-1] + '_scoresPerWindow'
     
@@ -617,37 +617,40 @@ def get_scores_per_window(observed_input_file, tmp_dir, window_size, simulated_i
         return  simulated_input_file_tmp_overallTFs_local
     
     "remove chr, X>23,Y>24 and print in string format, check position if number"
-    simulated_input_file_fixed = tmp_dir + '/' + observed_input_file.split('/')[-1] + simulated_input_file.split('/')[-1] + '_fixed'  
-    awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); print $1, $2*1, $3*1, $4, $5, $6, $7, $8, $9, $10, $11}}' {simulated_file} > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed)
+    simulated_input_file_fixed_sorted = tmp_dir + '/' + observed_input_file.split('/')[-1] + simulated_input_file.split('/')[-1] + '_fixed_sorted'  
+    awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); print $1, $2*1, $3*1, $4, $5, $6, $7, $8, $9, $10, $11}}' {simulated_file} | sort -k1,1n -k2,2n > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed_sorted)
     #awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); printf ("%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $1, $2*1, $3*1, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32)}}' {simulated_file} > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed)
     os.system(awk_stmt)
     
-    "sort simulated bed file"
-    simulated_input_file_fixed_sorted = simulated_input_file_fixed + '_sorted'
-    awk_stmt_sort = """sort -k1,1n -k2,2n {simulated_input_file} > {simulated_input_file_sorted}""".format(simulated_input_file = simulated_input_file_fixed, simulated_input_file_sorted = simulated_input_file_fixed_sorted )
-    os.system(awk_stmt_sort)
+    sim_chrs_dir = simulated_input_file_fixed_sorted+'_chrs/'
+    if not os.path.isdir(sim_chrs_dir):
+        os.makedirs(sim_chrs_dir)
     
-    '''
-    "find non-matching chroms from the observed mutation file"
-    simulated_input_file_fixed_sorted_over = simulated_input_file_fixed_sorted + '_over'
-    awk_stmt_genome =  """awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {simulated_input_file_sorted} {observed_input_file}> {observed_input_file_over}""".format( simulated_input_file_sorted= simulated_input_file_fixed_sorted, observed_input_file=observed_input_file, observed_input_file_over = simulated_input_file_fixed_sorted_over  )
-    os.system(awk_stmt_genome)
-    '''
+    os.system("""awk '{{print $0>>"{}"$1".bed"}}' {}""".format(
+        sim_chrs_dir, simulated_input_file_fixed_sorted))
     
-    print("Intersecting ", simulated_input_file_fixed_sorted)
-    simulated_input_file_fixed_sorted_intersected = simulated_input_file_fixed_sorted+'_intersected'
-    simulated_input_file_obj = BedTool(simulated_input_file_fixed_sorted)
-    observed_input_file_obj = BedTool(observed_input_file)
-    observed_input_file_obj.window(simulated_input_file_obj, w = window_size).saveas(simulated_input_file_fixed_sorted_intersected)
+    simulated_input_file_tmp_overallTFs_local_temp = simulated_input_file_tmp_overallTFs_local + '_temp'
+    for chr_file in os.listdir(sim_chrs_dir):
+        if chr_file.endswith('.bed'):
+            sim_chr_file = sim_chrs_dir+chr_file
+            obs_chr_obj = observed_input_files_objs[chr_file.replace('.bed', '')]
+            sim_chr_obj = BedTool(sim_chr_file)
+            
+            print("Intersecting ", sim_chr_file)
+            sim_chr_file_intersected = sim_chr_file+'_intersected'
+            obs_chr_obj.window(sim_chr_obj, w = window_size).saveas(sim_chr_file_intersected)
+            
+            #col 4: windowID; col14: tf-binding score; col15:fscore 
+            window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($14==".") print $4,$15; else print $4,$14+$15}}' {sim_intersected} >> {sim_scores_combined}""".format(
+                sim_intersected=sim_chr_file_intersected, sim_scores_combined=simulated_input_file_tmp_overallTFs_local_temp)
+            os.system(window_id_fscroe_file)
+            os.remove(sim_chr_file_intersected)
     
-    #col 4: windowID; col14: tf-binding score; col15:fscore 
-    window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($14==".") print $4,$15; else print $4,$14+$15}}' {sim_intersected} > {sim_scores_combined}""".format(
-        sim_intersected=simulated_input_file_fixed_sorted_intersected, sim_scores_combined=simulated_input_file_tmp_overallTFs_local)
-    os.system(window_id_fscroe_file)
+    if os.path.isfile(simulated_input_file_tmp_overallTFs_local_temp):
+        shutil.move(simulated_input_file_tmp_overallTFs_local_temp, simulated_input_file_tmp_overallTFs_local)
     
-    os.remove(simulated_input_file_fixed)
     os.remove(simulated_input_file_fixed_sorted)
-    os.remove(simulated_input_file_fixed_sorted_intersected)
+    shutil.rmtree(sim_chrs_dir)
     
     cleanup()  
     print('cleanup')
@@ -679,17 +682,28 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         annotated_input_file, observed_input_file_sorted)
     os.system(cmd)
     
+    obs_chrs_dir = tmp_dir+cohort + '_chrs/'
+    if not os.path.isdir(obs_chrs_dir):
+        os.makedirs(obs_chrs_dir)
+    
+    observed_input_files_objs = {}    
+    os.system("""awk '{{print $0>>"{}"$1".bed"}}' {}""".format(
+        obs_chrs_dir, observed_input_file_sorted))
+    for chr_file in os.listdir(obs_chrs_dir):
+        if chr_file.endswith('.bed'):
+            observed_input_files_objs[chr_file.replace('.bed', '')] = BedTool(obs_chrs_dir+chr_file)
+    
     obs_scores_files = []
     if n_cores_fscore>1:
         p = Pool(n_cores_fscore)
         obs_scores_files = p.starmap(get_scores_per_window, product(
-            [observed_input_file_sorted], [tmp_dir], [background_window_size], 
+            [observed_input_files_objs],[observed_input_file_sorted], [tmp_dir], [background_window_size], 
             simulated_annotated_input_files))
         p.close()
         p.join()
     else:
         for simulated_annotated_input_file in simulated_annotated_input_files:
-            obs_scores_files.append(get_scores_per_window(observed_input_file_sorted, tmp_dir, 
+            obs_scores_files.append(get_scores_per_window(observed_input_files_objs, observed_input_file_sorted, tmp_dir, 
                                   background_window_size, simulated_annotated_input_file))
     print(obs_scores_files)
     
