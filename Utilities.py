@@ -618,7 +618,7 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
     
     "remove chr, X>23,Y>24 and print in string format, check position if number"
     simulated_input_file_fixed_sorted = tmp_dir + '/' + observed_input_file.split('/')[-1] + simulated_input_file.split('/')[-1] + '_fixed_sorted'  
-    awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); print $1, $2*1, $3*1, $4, $5, $6, $7, $8, $9, $10, $11}}' {simulated_file} | sort -k1,1n -k2,2n > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed_sorted)
+    awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); print $1, $2*1, $3*1, $10, $11, $18}}' {simulated_file} | sort -k1,1n -k2,2n > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed_sorted)
     #awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); printf ("%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $1, $2*1, $3*1, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32)}}' {simulated_file} > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed)
     os.system(awk_stmt)
     
@@ -640,11 +640,12 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
             sim_chr_file_intersected = sim_chr_file+'_intersected'
             obs_chr_obj.window(sim_chr_obj, w = window_size).saveas(sim_chr_file_intersected)
             
-            #col 4: windowID; col14: tf-binding score; col15:fscore 
-            window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($14==".") print $4,$15; else print $4,$14+$15}}' {sim_intersected} >> {sim_scores_combined}""".format(
+            #col 4: windowID; col18: tf-binding score; col9:fscore 
+            window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($8==".") print $4,$9; else print $4,$8+$9}}' {sim_intersected} >> {sim_scores_combined}""".format(
                 sim_intersected=sim_chr_file_intersected, sim_scores_combined=simulated_input_file_tmp_overallTFs_local_temp)
             os.system(window_id_fscroe_file)
             os.remove(sim_chr_file_intersected)
+            os.remove(sim_chr_file)
     
     if os.path.isfile(simulated_input_file_tmp_overallTFs_local_temp):
         shutil.move(simulated_input_file_tmp_overallTFs_local_temp, simulated_input_file_tmp_overallTFs_local)
@@ -667,7 +668,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
                                        background_window_size = 50000,
                                        motif_name_index = 17, f_score_index = 9, 
                                        motif_breaking_score_index = 10, chromatin_cat_index=22, tmp_dir = '$SNIC_TMP', n_cores_fscore=10):
-
+    
     if os.path.exists(cohort_mean_sd_per_tf_overall_output_dict_file):
         with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'r') as dict_simulated_mean_sd_per_TF_motif_ifile:
             dict_type_mean_std_scores = json.loads(dict_simulated_mean_sd_per_TF_motif_ifile.readline())
@@ -708,14 +709,16 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     print(obs_scores_files)
     
     print('Combining the scores')
-    simulated_mean_sd_outfiles = tmp_dir + '/' + cohort + '_allscoress'
+    simulated_mean_sd_outfiles = tmp_dir + '/' + cohort + '_allscores'
     
-    #merge files from the same category, sort by the line number and group by position, TF motif, chromatin cat. and line number
-    with open(simulated_mean_sd_outfiles, 'w') as sim_fn:
-        for obs_scores_file in obs_scores_files:
-            with open(obs_scores_file, 'r') as score_fn:
-                sim_fn.write(score_fn.read())
+    if not os.path.isfile(simulated_mean_sd_outfiles):
+        #merge files from the same category, sort by the line number and group by position, TF motif, chromatin cat. and line number
+        with open(simulated_mean_sd_outfiles, 'w') as sim_fn:
+            for obs_scores_file in obs_scores_files:
+                with open(obs_scores_file, 'r') as score_fn:
+                    sim_fn.write(score_fn.read())
     
+                
     "create a dictionery for mean, std scores for all categories"
     dict_fscore = {}
     with open(simulated_mean_sd_outfiles, 'r') as simulated_mean_sd_tmp_infile:
