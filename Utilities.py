@@ -611,7 +611,7 @@ def process_input_file(observed_input_file, simulated_input_files,
 
 def get_scores_per_window(observed_input_file, tmp_dir, window_size, simulated_input_file):
     
-    simulated_input_file_tmp_overallTFs_local = tmp_dir + observed_input_file.split('/')[-1].split('_')[0] + '_' + simulated_input_file.split('_')[-1] + '_scoresPerWindow'
+    simulated_input_file_tmp_overallTFs_local = tmp_dir +'/'+ observed_input_file.split('/')[-1] + '_' + simulated_input_file.split('/')[-1] + '_scoresPerWindow'
     
     if os.path.exists(simulated_input_file_tmp_overallTFs_local):
         return  simulated_input_file_tmp_overallTFs_local
@@ -694,7 +694,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     print(obs_scores_files)
     
     print('Combining the scores')
-    simulated_mean_sd_outfiles = tmp_dir + '/' + cohort + 'allscoress'
+    simulated_mean_sd_outfiles = tmp_dir + '/' + cohort + '_allscoress'
     
     #merge files from the same category, sort by the line number and group by position, TF motif, chromatin cat. and line number
     with open(simulated_mean_sd_outfiles, 'w') as sim_fn:
