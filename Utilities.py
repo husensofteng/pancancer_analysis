@@ -617,7 +617,7 @@ def get_scores_per_window(observed_input_file, tmp_dir, window_size, simulated_i
         return  simulated_input_file_tmp_overallTFs_local
     
     "remove chr, X>23,Y>24 and print in string format, check position if number"
-    simulated_input_file_fixed = tmp_dir + '/' + observed_input_file.split('/')[-1].split('_')[0] + simulated_input_file.split('/')[-1].split('_')[1] + '_fixed'  
+    simulated_input_file_fixed = tmp_dir + '/' + observed_input_file.split('/')[-1].split('_')[0] + simulated_input_file.split('/')[-1] + '_fixed'  
     awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); print $1, $2*1, $3*1, $4, $5, $6, $7, $8, $9, $10, $11}}' {simulated_file} > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed)
     #awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); printf ("%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $1, $2*1, $3*1, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32)}}' {simulated_file} > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed)
     os.system(awk_stmt)
@@ -674,7 +674,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     cohort = cohort_full_name.split('/')[-1]
     
     "replace chr, X, Y, add Line Number to use as window ID and sort by chr,start"
-    observed_input_file_sorted = tmp_dir+'/'+'.'.join(annotated_input_file.split('/')[0].split('.')[0:-1])
+    observed_input_file_sorted = tmp_dir+'/'+ annotated_input_file.split('/')[0] + '_fixed_sorted'
     cmd = """awk 'BEGIN{{OFS="\t"}}{{gsub("chr","",$1); gsub("X", 23, $1); gsub("Y", 24, $1); print $1,$2,$3,NR}} {} | sort -k1,1n -k2,2n > {}""".format(
         annotated_input_file, observed_input_file_sorted)
     os.system(cmd)
