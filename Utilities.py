@@ -682,13 +682,19 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     cmd = """awk 'BEGIN{{OFS="\t"}}{{gsub("chr","",$1); gsub("X", 23, $1); gsub("Y", 24, $1); print $1,$2,$3,NR}} {} | sort -k1,1n -k2,2n > {}""".format(
         observed_input_file, observed_input_file_sorted)
     os.system(cmd)
-    p = Pool(n_cores_fscore)
-    obs_scores_files = p.starmap(get_scores_per_window, product(
-        [observed_input_file_sorted], [tmp_dir], [background_window_size], 
-        simulated_annotated_input_files))
-    p.close()
-    p.join()
     
+    obs_scores_files = []
+    if n_cores_fscore>1:
+        p = Pool(n_cores_fscore)
+        obs_scores_files = p.starmap(get_scores_per_window, product(
+            [observed_input_file_sorted], [tmp_dir], [background_window_size], 
+            simulated_annotated_input_files))
+        p.close()
+        p.join()
+    else:
+        for simulated_annotated_input_file in simulated_annotated_input_files:
+            obs_scores_files.append(get_scores_per_window(observed_input_file_sorted, tmp_dir, 
+                                  background_window_size, simulated_annotated_input_file))
     print(obs_scores_files)
     
     print('Combining the scores')
@@ -713,7 +719,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         l = simulated_mean_sd_tmp_infile.readline().strip().split('\t')
         while l and len(l)> 1:
             try:
-              dict_fscore[l[0]].append(float(l[1]))
+                dict_fscore[l[0]].append(float(l[1]))
             except KeyError:
                 dict_fscore[l[0]] = [float(l[1])]
             l = simulated_mean_sd_tmp_infile.readline().strip().split('\t')
