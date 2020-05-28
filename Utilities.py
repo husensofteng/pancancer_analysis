@@ -675,7 +675,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     
     "replace chr, X, Y, add Line Number to use as window ID and sort by chr,start"
     observed_input_file_sorted = tmp_dir+'/'+ annotated_input_file.split('/')[0] + '_fixed_sorted'
-    cmd = """awk 'BEGIN{{OFS="\t"}}{{gsub("chr","",$1); gsub("X", 23, $1); gsub("Y", 24, $1); print $1,$2,$3,NR}} {} | sort -k1,1n -k2,2n > {}""".format(
+    cmd = """awk 'BEGIN{{OFS="\t"}}{{gsub("chr","",$1); gsub("X", 23, $1); gsub("Y", 24, $1); print $1,$2,$3,NR}}' {} | sort -k1,1n -k2,2n > {}""".format(
         annotated_input_file, observed_input_file_sorted)
     os.system(cmd)
     
