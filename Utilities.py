@@ -645,7 +645,7 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
             #obs_chr_obj.window(sim_chr_obj, w = window_size).saveas(sim_chr_file_intersected)
             
             #col 4: windowID; col18: tf-binding score; col9:fscore 
-            window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{print $4,$10,$11,$12}}' {sim_intersected} >> {sim_scores_combined}""".format(
+            window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if($7!=0) print $4,$5,$6,$7}}' {sim_intersected} >> {sim_scores_combined}""".format(
                 sim_intersected=sim_chr_file_intersected, sim_scores_combined=simulated_input_file_tmp_overallTFs_local_temp)
             os.system(window_id_fscroe_file)
             #os.remove(sim_chr_file_intersected)
@@ -753,53 +753,36 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
      
      
      #groupBy -g 1 -c 2,2,2 -o mean,stdev,count > {file_out} """.format(tmp_dir_intersect = tmp_dir_intersect, file_out = simulated_mean_sd_outfiles)
-    sim_muts_dir = tmp_dir+'/'+cohort + '_muts/'
+#     sim_muts_dir = tmp_dir+'/'+cohort + '_muts/'
+#     
+#     
+#     sim_input_files_objs = {}    
+#     os.system("""awk '{{print $0>>"{}"$1".bed"}}' {}""".format(
+#         sim_muts_dir, observed_input_file_sorted))
+#     for chr_file in os.listdir(obs_chrs_dir):
+#         if chr_file.endswith('.bed'):
+#             observed_input_files_objs[chr_file.replace('.bed', '')] = BedTool(obs_chrs_dir+chr_file)
     
     
-    sim_input_files_objs = {}    
-    os.system("""awk '{{print $0>>"{}"$1".bed"}}' {}""".format(
-        sim_muts_dir, observed_input_file_sorted))
-    for chr_file in os.listdir(obs_chrs_dir):
-        if chr_file.endswith('.bed'):
-            observed_input_files_objs[chr_file.replace('.bed', '')] = BedTool(obs_chrs_dir+chr_file)
-    
-    
-#     simulated_mean_sd_outfiles = tmp_dir + '/' + cohort + '_allscores'
-#     
-#     if not os.path.isfile(simulated_mean_sd_outfiles):
-#         #merge files from the same category, sort by the line number and group by position, TF motif, chromatin cat. and line number
-#         with open(simulated_mean_sd_outfiles, 'w') as sim_fn:
-#             for obs_scores_file in obs_scores_files:
-#                 with open(obs_scores_file, 'r') as score_fn:
-#                     sim_fn.write(score_fn.read())
-#     
-#                 
-#     
-#     
-#     
-#     
-#     
-#     "create a dictionery for mean, std scores for all categories"
-#     dict_fscore = {}
-#     with open(simulated_mean_sd_outfiles, 'r') as simulated_mean_sd_tmp_infile:
-#         l = simulated_mean_sd_tmp_infile.readline().strip().split('\t')
-#         while l and len(l)> 1:
-#             try:
-#                 dict_fscore[l[0]].append(float(l[1]))
-#             except KeyError:
-#                 dict_fscore[l[0]] = [float(l[1])]
-#             l = simulated_mean_sd_tmp_infile.readline().strip().split('\t')
-#     
-#     print('dict')
-#     dict_simulated_mean_sd = {}
-#     for key in dict_fscore.keys():
-#         tf_mean = np.mean(dict_fscore[key])
-#         tf_std = np.std(dict_fscore[key])
-#         num_motifs = len(dict_fscore[key])
-#         dict_simulated_mean_sd[key] = {'mean': tf_mean, 
-#                                        "std": tf_std, 
-#                                        "nummotifs": num_motifs}
-#     
+    simulated_mean_sd_outfiles = tmp_dir + '/' + cohort + '_allscores'
+     
+    if not os.path.isfile(simulated_mean_sd_outfiles):
+        #merge files from the same category, sort by the line number and group by position, TF motif, chromatin cat. and line number
+        with open(simulated_mean_sd_outfiles, 'w') as sim_fn:
+            for obs_scores_file in obs_scores_files:
+                with open(obs_scores_file, 'r') as score_fn:
+                    sim_fn.write(score_fn.read())
+     
+    "create a dictionery for mean, std scores for all categories"         
+    dict_simulated_mean_sd = {} 
+    with open(simulated_mean_sd_outfiles, 'r') as simulated_mean_sd_ifile:        
+        l = simulated_mean_sd_ifile.readline().strip().split('\t')            
+        while l and len(l)>3:              
+            dict_simulated_mean_sd[l[0]] = {'mean': l[1],          
+                                                   "std": l[2],                                                        
+                                                   "nummotifs": l[3]}
+            l = simulated_mean_sd_ifile.readline().strip().split('\t')
+     
     #save the dictionery per category
     dict_type_mean_std_scores = {}
     dict_type_mean_std_scores['overallTFs'] = dict_simulated_mean_sd
