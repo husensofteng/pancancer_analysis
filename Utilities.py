@@ -641,7 +641,7 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
             
             print("Intersecting ", sim_chr_file)
             sim_chr_file_intersected = sim_chr_file+'_intersected'
-            obs_chr_obj.map(sim_chr_obj, c=8, o=[mean, stdev, count]).saveas(sim_chr_file_intersected)
+            obs_chr_obj.map(sim_chr_obj, c=8, o=['mean', 'stdev', 'count']).saveas(sim_chr_file_intersected)
             #obs_chr_obj.window(sim_chr_obj, w = window_size).saveas(sim_chr_file_intersected)
             
             #col 4: windowID; col18: tf-binding score; col9:fscore 
