@@ -727,14 +727,16 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     
     "combine simulated files with the same chr"
     for sim_file in simulated_annotated_input_files:
-        
+        sim_file_tmp = sim_file +'_tmp'
+        os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1);if($10==".") print $1, $2*1, $3*1, $11, $18; else print $1, $2*1, $3*1, $10+$11, $18}}' {} > {}""".format(
+            sim_file, sim_file_tmp)) 
         os.system("""awk '{{print $0>>"{}"$1".bed"}}' {}""".format(
-        sim_chrs_dir, sim_file))
+        sim_chrs_dir, sim_file_tmp))
     
     sim_input_files =[]
     for sim_file in os.listdir(sim_chrs_dir):
-        sim_file_sorted = sim_file +'sorted'
-        os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1);if($10==".") print $1, $2*1, $3*1, $11, $18; else print $1, $2*1, $3*1, $10+$11, $18}}' {} | sort -k1,1n -k2,2n -k3,3n > {}""".format(
+        sim_file_sorted = sim_chrs_dir +'/' + sim_file +'sorted'
+        os.system("""sort -k1,1n -k2,2n -k3,3n {} > {}""".format(
         sim_file, sim_file_sorted))
         #if sim_file.endswith('.bedsorted'):
         sim_input_files.append(sim_file_sorted)
