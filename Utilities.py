@@ -704,7 +704,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         obs_chrs_dir, observed_input_file_sorted))
     for chr_file in os.listdir(obs_chrs_dir):
         if chr_file.endswith('.bed'):
-            observed_input_files_objs[chr_file.replace('.bed', '')] = BedTool(obs_chrs_dir+chr_file).slop(b=background_window_size,genome='hg19').saveas(chr_file+'_50tmp')
+            observed_input_files_objs[chr_file.replace('.bed', '')] = BedTool(obs_chrs_dir+chr_file).slop(b=background_window_size,genome='hg19')
     
     ext = '_scoresPerWindow'
     obs_scores_files = []
