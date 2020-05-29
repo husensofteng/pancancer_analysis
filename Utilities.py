@@ -635,7 +635,7 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
     
     simulated_input_file_tmp_overallTFs_local_temp = simulated_input_file_tmp_overallTFs_local + '_temp'
         
-    sim_chr = simulated_input_file.split('/')[-1].split('_')[0]
+    sim_chr = simulated_input_file.split('/')[-1].split('_')[0].split('.')[0]
     print(sim_chr)
     obs_chr_obj = observed_input_files_objs[sim_chr]
     sim_chr_obj = BedTool(simulated_input_file)
