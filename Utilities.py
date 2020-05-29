@@ -609,16 +609,19 @@ def process_input_file(observed_input_file, simulated_input_files,
     
     return merged_elements_statspvaluesonlysig
 
-def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_dir, window_size, simulated_input_file):
+def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_dir, window_size, ext, simulated_input_file):
     
-    simulated_input_file_tmp_overallTFs_local = tmp_dir +'/'+ observed_input_file.split('/')[-1] + '_' + simulated_input_file.split('/')[-1] + '_scoresPerWindow'
+    simulated_input_file_tmp_overallTFs_local = tmp_dir +'/'+ observed_input_file.split('/')[-1] + '_' + simulated_input_file.split('/')[-1] + ext
     
     if os.path.exists(simulated_input_file_tmp_overallTFs_local):
         return  simulated_input_file_tmp_overallTFs_local
     
     "remove chr, X>23,Y>24 and print in string format, check position if number"
     simulated_input_file_fixed_sorted = tmp_dir + '/' + observed_input_file.split('/')[-1] + simulated_input_file.split('/')[-1] + '_fixed_sorted'  
-    awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); print $1, $2*1, $3*1, $10, $11, $18}}' {simulated_file} | sort -k1,1n -k2,2n > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed_sorted)
+        
+    awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1);if($10==".") print $1, $2*1, $3*1, $11, $18; else print $1, $2*1, $3*1, $10+$11, $18}}' {simulated_file} | sort -k1,1n -k2,2n > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed_sorted)
+
+    #awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); print $1, $2*1, $3*1, $10, $11, $18}}' {simulated_file} | sort -k1,1n -k2,2n > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed_sorted)
     #awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1); printf ("%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $1, $2*1, $3*1, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32)}}' {simulated_file} > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed)
     os.system(awk_stmt)
     
@@ -638,26 +641,35 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
             
             print("Intersecting ", sim_chr_file)
             sim_chr_file_intersected = sim_chr_file+'_intersected'
-            obs_chr_obj.window(sim_chr_obj, w = window_size).saveas(sim_chr_file_intersected)
+            obs_chr_obj.map(sim_chr_obj, c=8, o=[mean, stdev, count]).saveas(sim_chr_file_intersected)
+            #obs_chr_obj.window(sim_chr_obj, w = window_size).saveas(sim_chr_file_intersected)
             
             #col 4: windowID; col18: tf-binding score; col9:fscore 
-            window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if ($8==".") print $4,$9; else print $4,$8+$9}}' {sim_intersected} >> {sim_scores_combined}""".format(
+            window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{print $4,$10,$11,$12}}' {sim_intersected} >> {sim_scores_combined}""".format(
                 sim_intersected=sim_chr_file_intersected, sim_scores_combined=simulated_input_file_tmp_overallTFs_local_temp)
             os.system(window_id_fscroe_file)
-            os.remove(sim_chr_file_intersected)
-            os.remove(sim_chr_file)
+            #os.remove(sim_chr_file_intersected)
+            #os.remove(sim_chr_file)
     
     if os.path.isfile(simulated_input_file_tmp_overallTFs_local_temp):
         shutil.move(simulated_input_file_tmp_overallTFs_local_temp, simulated_input_file_tmp_overallTFs_local)
     
-    os.remove(simulated_input_file_fixed_sorted)
-    shutil.rmtree(sim_chrs_dir)
+    #os.remove(simulated_input_file_fixed_sorted)
+    #shutil.rmtree(sim_chrs_dir)
     
     cleanup()  
     print('cleanup')
     
     return simulated_input_file_tmp_overallTFs_local
 
+# def groupby_per_mut(score_input_files_objs, tmp_dir):
+#     
+#     score_group_file = 
+#     d = score_input_files_objs.groupby(g=[1], c=2, o=['mean', 'stdev','count'])
+# 
+#     
+#     
+#     return
 
 
 def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annotated_input_file, 
@@ -683,7 +695,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         annotated_input_file, observed_input_file_sorted)
     os.system(cmd)
     
-    obs_chrs_dir = tmp_dir+'/'+cohort + '_chrs/'
+    sim_muts_dirobs_chrs_dir = tmp_dir+'/'+cohort + '_chrs/'
     if not os.path.isdir(obs_chrs_dir):
         os.makedirs(obs_chrs_dir)
     
@@ -692,54 +704,102 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         obs_chrs_dir, observed_input_file_sorted))
     for chr_file in os.listdir(obs_chrs_dir):
         if chr_file.endswith('.bed'):
-            observed_input_files_objs[chr_file.replace('.bed', '')] = BedTool(obs_chrs_dir+chr_file)
+            observed_input_files_objs[chr_file.replace('.bed', '')] = BedTool(obs_chrs_dir+chr_file).slop(b=background_window_size,g=pybedtools.chromsizes('hg19'))
     
+    ext = '_scoresPerWindow'
     obs_scores_files = []
     if n_cores_fscore>1:
         p = Pool(n_cores_fscore)
         obs_scores_files = p.starmap(get_scores_per_window, product(
-            [observed_input_files_objs],[observed_input_file_sorted], [tmp_dir], [background_window_size], 
+            [observed_input_files_objs],[observed_input_file_sorted], [tmp_dir], [background_window_size],[ext], 
             simulated_annotated_input_files))
         p.close()
         p.join()
     else:
         for simulated_annotated_input_file in simulated_annotated_input_files:
             obs_scores_files.append(get_scores_per_window(observed_input_files_objs, observed_input_file_sorted, tmp_dir, 
-                                  background_window_size, simulated_annotated_input_file))
+                                  background_window_size, ext, simulated_annotated_input_file))
     print(obs_scores_files)
     
     print('Combining the scores')
-    simulated_mean_sd_outfiles = tmp_dir + '/' + cohort + '_allscores'
     
-    if not os.path.isfile(simulated_mean_sd_outfiles):
-        #merge files from the same category, sort by the line number and group by position, TF motif, chromatin cat. and line number
-        with open(simulated_mean_sd_outfiles, 'w') as sim_fn:
-            for obs_scores_file in obs_scores_files:
-                with open(obs_scores_file, 'r') as score_fn:
-                    sim_fn.write(score_fn.read())
     
-                
-    "create a dictionery for mean, std scores for all categories"
-    dict_fscore = {}
-    with open(simulated_mean_sd_outfiles, 'r') as simulated_mean_sd_tmp_infile:
-        l = simulated_mean_sd_tmp_infile.readline().strip().split('\t')
-        while l and len(l)> 1:
-            try:
-                dict_fscore[l[0]].append(float(l[1]))
-            except KeyError:
-                dict_fscore[l[0]] = [float(l[1])]
-            l = simulated_mean_sd_tmp_infile.readline().strip().split('\t')
+#     sim_score_dir = tmp_dir+'/'+cohort + '_score/'
+# 
+#     if not os.path.isdir(sim_score_dir):
+#         os.makedirs(sim_score_dir)
+#         
+#     os.system("""cat {} |  
+#         sort -k1,1 |
+#         awk '{{print $0>>"{}"$1".bed"}}'""".format(
+#                 tmp_dir+'/*'+ext, sim_score_dir))
+#     
+#     score_input_files_objs= {}
+#     for score_file in os.listdir(sim_score_dir):
+#         if score_file.endswith('.bed'):
+#             score_input_files[score_file.replace('.bed', '')] = BedTool(sim_score_dir+score_file)
+#         
+#     obs_scores_files = []
+#     p = Pool(n_cores_fscore)
+#     obs_scores_files = p.starmap(groupby_per_mut, product(
+#         score_input_files_objs, [tmp_dir], ))
+#     p.close()
+#     p.join()
+# 
+#     print(obs_scores_files)    
+        
+        #groupBy -g 1-6 -c 7,8,9 -o mean,mean,sum
+     
+     
+     
+     #groupBy -g 1 -c 2,2,2 -o mean,stdev,count > {file_out} """.format(tmp_dir_intersect = tmp_dir_intersect, file_out = simulated_mean_sd_outfiles)
+    sim_muts_dir = tmp_dir+'/'+cohort + '_muts/'
     
-    print('dict')
-    dict_simulated_mean_sd = {}
-    for key in dict_fscore.keys():
-        tf_mean = np.mean(dict_fscore[key])
-        tf_std = np.std(dict_fscore[key])
-        num_motifs = len(dict_fscore[key])
-        dict_simulated_mean_sd[key] = {'mean': tf_mean, 
-                                       "std": tf_std, 
-                                       "nummotifs": num_motifs}
     
+    sim_input_files_objs = {}    
+    os.system("""awk '{{print $0>>"{}"$1".bed"}}' {}""".format(
+        sim_muts_dir, observed_input_file_sorted))
+    for chr_file in os.listdir(obs_chrs_dir):
+        if chr_file.endswith('.bed'):
+            observed_input_files_objs[chr_file.replace('.bed', '')] = BedTool(obs_chrs_dir+chr_file)
+    
+    
+#     simulated_mean_sd_outfiles = tmp_dir + '/' + cohort + '_allscores'
+#     
+#     if not os.path.isfile(simulated_mean_sd_outfiles):
+#         #merge files from the same category, sort by the line number and group by position, TF motif, chromatin cat. and line number
+#         with open(simulated_mean_sd_outfiles, 'w') as sim_fn:
+#             for obs_scores_file in obs_scores_files:
+#                 with open(obs_scores_file, 'r') as score_fn:
+#                     sim_fn.write(score_fn.read())
+#     
+#                 
+#     
+#     
+#     
+#     
+#     
+#     "create a dictionery for mean, std scores for all categories"
+#     dict_fscore = {}
+#     with open(simulated_mean_sd_outfiles, 'r') as simulated_mean_sd_tmp_infile:
+#         l = simulated_mean_sd_tmp_infile.readline().strip().split('\t')
+#         while l and len(l)> 1:
+#             try:
+#                 dict_fscore[l[0]].append(float(l[1]))
+#             except KeyError:
+#                 dict_fscore[l[0]] = [float(l[1])]
+#             l = simulated_mean_sd_tmp_infile.readline().strip().split('\t')
+#     
+#     print('dict')
+#     dict_simulated_mean_sd = {}
+#     for key in dict_fscore.keys():
+#         tf_mean = np.mean(dict_fscore[key])
+#         tf_std = np.std(dict_fscore[key])
+#         num_motifs = len(dict_fscore[key])
+#         dict_simulated_mean_sd[key] = {'mean': tf_mean, 
+#                                        "std": tf_std, 
+#                                        "nummotifs": num_motifs}
+#     
     #save the dictionery per category
     dict_type_mean_std_scores = {}
     dict_type_mean_std_scores['overallTFs'] = dict_simulated_mean_sd
