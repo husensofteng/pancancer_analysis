@@ -637,6 +637,7 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
         
     sim_chr = simulated_input_file.split('/')[-1].split('_')[0].split('.')[0]
     print(sim_chr)
+    print(observed_input_files_objs[sim_chr])
     obs_chr_obj = BedTool(observed_input_files_objs[sim_chr]).slop(b=window_size,genome='hg19')
     sim_chr_obj = BedTool(simulated_input_file)
     print("Intersecting ", simulated_input_file)
