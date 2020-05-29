@@ -721,7 +721,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         if chr_file.endswith('.bed'):
             observed_input_files_objs[chr_file.replace('.bed', '')] = BedTool(obs_chrs_dir+chr_file).slop(b=background_window_size,genome='hg19')
     
-    sim_chrs_dir = tmp_dir + '/'+ cohort + 'sim/'
+    sim_chrs_dir = tmp_dir + '/'+ cohort + '_sim/'
     if not os.path.isdir(sim_chrs_dir):
         os.makedirs(sim_chrs_dir)
     
@@ -737,7 +737,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     for sim_file in os.listdir(sim_chrs_dir):
         sim_file_sorted = sim_chrs_dir +'/' + sim_file +'sorted'
         os.system("""sort -k1,1n -k2,2n -k3,3n {} > {}""".format(
-        sim_file, sim_file_sorted))
+        sim_chrs_dir+ sim_file, sim_file_sorted))
         #if sim_file.endswith('.bedsorted'):
         sim_input_files.append(sim_file_sorted)
         
