@@ -695,7 +695,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         annotated_input_file, observed_input_file_sorted)
     os.system(cmd)
     
-    sim_muts_dirobs_chrs_dir = tmp_dir+'/'+cohort + '_chrs/'
+    obs_chrs_dir = tmp_dir+'/'+cohort + '_chrs/'
     if not os.path.isdir(obs_chrs_dir):
         os.makedirs(obs_chrs_dir)
     
