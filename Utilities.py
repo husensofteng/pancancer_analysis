@@ -669,7 +669,7 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
     if os.path.isfile(simulated_input_file_tmp_overallTFs_local_temp):
         shutil.move(simulated_input_file_tmp_overallTFs_local_temp, simulated_input_file_tmp_overallTFs_local)
     
-    os.remove(simulated_input_file_tmp_overallTFs_local_temp)
+    #os.remove(simulated_input_file_tmp_overallTFs_local_temp)
     #shutil.rmtree(sim_chrs_dir)
     
     
@@ -837,8 +837,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
-    #shutil.rmtree(sim_chrs_dir)
-    #shutil.rmtree(obs_chrs_dir)   
+    shutil.rmtree(sim_chrs_dir)
+    shutil.rmtree(obs_chrs_dir)   
     cleanup() 
     
     return  dict_type_mean_std_scores
