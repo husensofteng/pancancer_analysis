@@ -635,7 +635,7 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
     
     simulated_input_file_tmp_overallTFs_local_temp = simulated_input_file_tmp_overallTFs_local + '_temp'
         
-    sim_chr = simulated_input_file.split('/')[-1].split('_')[0].split('.')[0]
+    sim_chr = simulated_input_file.split('/')[-1].split('.')[0]
     print(sim_chr)
     print(observed_input_files_objs[sim_chr])
     obs_chr_obj = BedTool(observed_input_files_objs[sim_chr]).slop(b=window_size,genome='hg19')
@@ -739,10 +739,10 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         os.system("""sort -k1,1n -k2,2n -k3,3n {} > {}""".format(
         sim_chrs_dir+ sim_file, sim_file_sorted))
         #split files by 1 000 000 bps
-        os.system("""awk 'BEGIN{{n=1}}{{x=$3;if(x>n*100000){{++n}}{{print > "{sim_file_sorted}""_split_"n}}}}' {sim_file_sorted}""".format(
+        os.system("""awk 'BEGIN{{n=1}}{{x=$3;if(x>n*10000000){{++n}}{{print > "{sim_file_sorted}""_split_"n}}}}' {sim_file_sorted}""".format(
              sim_file_sorted=sim_file_sorted))
 
-    sim_input_files = [sim_chrs_dir+'/'+x for x in os.listdir(sim_chrs_dir) if 'sorted_split' in x]
+    sim_input_files = [sim_chrs_dir+'/'+x for x in os.listdir(sim_chrs_dir) if 'sorted_split_' in x]
 
     #sim_input_files.append(sim_file_sorted)
     print(sim_input_files)
