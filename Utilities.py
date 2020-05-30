@@ -739,7 +739,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         os.system("""sort -k1,1n -k2,2n -k3,3n {} > {}""".format(
         sim_chrs_dir+ sim_file, sim_file_sorted))
         #split files by 1 000 000 bps
-        os.system("""awk 'BEGIN{n=1}{x=$3;if(x>n*100000){++n}{print > "{sim_file_sorted}""_split_"n}}' {sim_file_sorted}""".format(
+        os.system("""awk 'BEGIN{{n=1}}{{x=$3;if(x>n*100000){{++n}}{{print > "{sim_file_sorted}""_split_"n}}}}' {sim_file_sorted}""".format(
              sim_file_sorted=sim_file_sorted))
 
     sim_input_files = [sim_chrs_dir+'/'+x for x in os.listdir(sim_chrs_dir) if 'sorted_split' in x]
