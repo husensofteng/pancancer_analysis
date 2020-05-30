@@ -738,8 +738,13 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         sim_file_sorted = sim_chrs_dir +'/' + sim_file +'sorted'
         os.system("""sort -k1,1n -k2,2n -k3,3n {} > {}""".format(
         sim_chrs_dir+ sim_file, sim_file_sorted))
-        #if sim_file.endswith('.bedsorted'):
-        sim_input_files.append(sim_file_sorted)
+        #split files by 1 000 000 bps
+        os.system("""awk 'BEGIN{n=1}{x=$3;if(x>n*100000){++n}{print > "{sim_file_sorted}""_split_"n}}' {sim_file_sorted}""".format(
+             sim_file_sorted=sim_file_sorted))
+
+    sim_input_files = [sim_chrs_dir+'/'+x for x in os.listdir(sim_chrs_dir) if 'sorted_split' in x]
+
+    #sim_input_files.append(sim_file_sorted)
     print(sim_input_files)
         
           #awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1);if($10==".") print $1, $2*1, $3*1, $11, $18; else print $1, $2*1, $3*1, $10+$11, $18}}' {simulated_file} | sort -k1,1n -k2,2n -k3,3n > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed_sorted)
