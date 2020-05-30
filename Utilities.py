@@ -620,7 +620,7 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
     
     
     #"remove chr, X>23,Y>24 and print in string format, check position if number"
-    simulated_input_file_fixed_sorted = tmp_dir + '/' + observed_input_file.split('/')[-1] + simulated_input_file.split('/')[-1]   
+    #simulated_input_file_fixed_sorted = tmp_dir + '/' + observed_input_file.split('/')[-1] + simulated_input_file.split('/')[-1]   
         
     #awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1);if($10==".") print $1, $2*1, $3*1, $11, $18; else print $1, $2*1, $3*1, $10+$11, $18}}' {simulated_file} | sort -k1,1n -k2,2n -k3,3n > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed_sorted)
 
@@ -669,7 +669,7 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
     if os.path.isfile(simulated_input_file_tmp_overallTFs_local_temp):
         shutil.move(simulated_input_file_tmp_overallTFs_local_temp, simulated_input_file_tmp_overallTFs_local)
     
-    #os.remove(simulated_input_file_fixed_sorted)
+    os.remove(simulated_input_file_tmp_overallTFs_local_temp)
     #shutil.rmtree(sim_chrs_dir)
     
     
@@ -836,7 +836,9 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
-       
+    
+    shutil.rmtree(sim_chrs_dir)
+    shutil.rmtree(obs_chrs_dir)   
     cleanup() 
     
     return  dict_type_mean_std_scores
