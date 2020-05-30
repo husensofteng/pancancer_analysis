@@ -626,9 +626,9 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
 
     #os.system(awk_stmt)
     
-    sim_chrs_dir = simulated_input_file_fixed_sorted+'_sim_chrs/'
-    if not os.path.isdir(sim_chrs_dir):
-        os.makedirs(sim_chrs_dir)
+    #sim_chrs_dir = simulated_input_file_fixed_sorted+'_sim_chrs/'
+    #if not os.path.isdir(sim_chrs_dir):
+    #    os.makedirs(sim_chrs_dir)
     
     #os.system("""awk '{{print $0>>"{}"$1".bed"}}' {}""".format(
     #    sim_chrs_dir, simulated_input_file_fixed_sorted))
@@ -641,9 +641,9 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
     obs_chr_obj = BedTool(observed_input_files_objs[sim_chr]).slop(b=window_size,genome='hg19')
     sim_chr_obj = BedTool(simulated_input_file)
     print("Intersecting ", simulated_input_file)
-    sim_chr_file_intersected = sim_chrs_dir+ sim_chr+ '_intersected'
-    obs_chr_obj.map(sim_chr_obj, c=4, o=['mean', 'stdev', 'count']).saveas(sim_chr_file_intersected)
-    window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if($7!=0) print $4,$5,$6,$7}}' {sim_intersected} >> {sim_scores_combined}""".format(
+    sim_chr_file_intersected = simulated_input_file+ '_intersected'
+    obs_chr_obj.map(sim_chr_obj, c=4, o=['mean', 'stdev', 'count','collapse']).saveas(sim_chr_file_intersected)
+    window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if($7!=0) print $4,$5,$6,$7, $8}}' {sim_intersected} >> {sim_scores_combined}""".format(
                 sim_intersected=sim_chr_file_intersected, sim_scores_combined=simulated_input_file_tmp_overallTFs_local_temp)
     os.system(window_id_fscroe_file)
     
@@ -740,6 +740,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         sim_chrs_dir+ sim_file, sim_file_sorted))
         #if sim_file.endswith('.bedsorted'):
         sim_input_files.append(sim_file_sorted)
+    print(sim_input_files)
         
           #awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1);if($10==".") print $1, $2*1, $3*1, $11, $18; else print $1, $2*1, $3*1, $10+$11, $18}}' {simulated_file} | sort -k1,1n -k2,2n -k3,3n > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed_sorted)
 
