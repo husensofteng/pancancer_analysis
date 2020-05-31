@@ -722,7 +722,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         if chr_file.endswith('.bed'):
             chr_file_window=obs_chrs_dir+chr_file+'_window'
             chr_file_window_sorted = chr_file_window +'_sorted'
-            BedTool(obs_chrs_dir+chr_file).slop(b=window_size,genome='hg19').saveas(chr_file_window)
+            BedTool(obs_chrs_dir+chr_file).slop(b=background_window_size,genome='hg19').saveas(chr_file_window)
             os.system("""sort -k1,1n -k2,2n {} > {}""".format(
         chr_file_window, chr_file_window_sorted))
             observed_input_files_objs[chr_file.replace('.bed', '')] = chr_file_window_sorted
