@@ -706,8 +706,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     
     "replace chr, X, Y, add Line Number to use as window ID and sort by chr,start"
     observed_input_file_sorted = tmp_dir+'/'+ annotated_input_file.split('/')[-1] + '_fixed_sorted'
-    cmd = """awk 'BEGIN{{OFS="\t"}}{{gsub("chr","",$1); gsub("X", 23, $1); gsub("Y", 24, $1); print $1,$2,$3,NR}}' {} | sort -k1,1n -k2,2n > {}""".format(
-        annotated_input_file, observed_input_file_sorted)
+    cmd = """awk 'BEGIN{{OFS="\t"}}{{gsub("chr","",$1); gsub("X", 23, $1); gsub("Y", 24, $1); print $1,$2,$3,NR}}' {} | bedtools slop -g /proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/chr_order_hg19.txt -b {}| sort -k1,1n -k2,2n > {}""".format(
+        annotated_input_file, background_window_size, observed_input_file_sorted)
     os.system(cmd)
     
     obs_chrs_dir = tmp_dir+'/'+cohort + '_chrs/'
@@ -717,15 +717,16 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     observed_input_files_objs = {}    
     os.system("""awk '{{print $0>>"{}"$1".bed"}}' {}""".format(
         obs_chrs_dir, observed_input_file_sorted))
+    
     for chr_file in os.listdir(obs_chrs_dir):
         
         if chr_file.endswith('.bed'):
-            chr_file_window=obs_chrs_dir+chr_file+'_window'
-            chr_file_window_sorted = chr_file_window +'_sorted'
-            BedTool(obs_chrs_dir+chr_file).slop(b=background_window_size,genome='hg19').saveas(chr_file_window)
-            os.system("""sort -k1,1n -k2,2n {} > {}""".format(
-        chr_file_window, chr_file_window_sorted))
-            observed_input_files_objs[chr_file.replace('.bed', '')] = chr_file_window_sorted
+            #chr_file_window=obs_chrs_dir+chr_file+'_window'
+            #chr_file_window_sorted = chr_file_window +'_sorted'
+            #BedTool(obs_chrs_dir+chr_file).slop(b=background_window_size,genome='hg19').saveas(chr_file_window)
+            #os.system("""sort -k1,1n -k2,2n {} > {}""".format(
+        #chr_file_window, chr_file_window_sorted))
+            observed_input_files_objs[chr_file.replace('.bed', '')] = obs_chrs_dir+chr_file
     
     sim_chrs_dir = tmp_dir + '/'+ cohort + '_sim/'
     if not os.path.isdir(sim_chrs_dir):
