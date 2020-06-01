@@ -796,7 +796,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     with open(simulated_mean_sd_outfiles, 'r') as simulated_mean_sd_ifile:        
         l = simulated_mean_sd_ifile.readline().strip().split('\t')            
         while l and len(l)>3:              
-            fscore = float(l[1].split(','))
+            fscore = [float(x) for x in l[1].split(',')]
             dict_simulated_mean_sd[l[0]] = {'mean': np.mean(fscore),          
                                                    "std": np.std(fscore),                                                        
                                                    "nummotifs": len(fscore)}
