@@ -772,7 +772,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     else:
         for simulated_annotated_input_file in simulated_annotated_input_files:
             obs_scores_files.append(get_scores_per_window(observed_input_files_objs, observed_input_file_sorted, tmp_dir, 
-                                  background_window_size, ext, sim_input_files))
+                                  background_window_size, ext, simulated_annotated_input_file))
     print(obs_scores_files)
     
     print('Combining the scores')
