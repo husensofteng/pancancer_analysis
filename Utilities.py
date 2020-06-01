@@ -644,9 +644,11 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
     sim_chr_file_intersected = simulated_input_file+ '_intersected'
     #obs_chr_obj.map(sim_chr_obj, c=4, o=['mean', 'stdev', 'count']).saveas(sim_chr_file_intersected)
     obs_chr_obj.map(sim_chr_obj, c=4, o=['collapse']).saveas(sim_chr_file_intersected)
-
-    window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if($7!=0) print $4,$5,$6,$7, $8}}' {sim_intersected} >> {sim_scores_combined}""".format(
+    
+    window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if($5!=.) print $4,$5}}' {sim_intersected} >> {sim_scores_combined}""".format(
                 sim_intersected=sim_chr_file_intersected, sim_scores_combined=simulated_input_file_tmp_overallTFs_local_temp)
+    #window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if($7!=0) print $4,$5,$6,$7, $8}}' {sim_intersected} >> {sim_scores_combined}""".format(
+    #            sim_intersected=sim_chr_file_intersected, sim_scores_combined=simulated_input_file_tmp_overallTFs_local_temp)
     os.system(window_id_fscroe_file)
     
     
