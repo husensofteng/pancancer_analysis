@@ -642,13 +642,13 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
     sim_chr_obj = BedTool(simulated_input_file)
     print("Intersecting ", simulated_input_file)
     sim_chr_file_intersected = simulated_input_file+ '_intersected'
-    #obs_chr_obj.map(sim_chr_obj, c=4, o=['mean', 'stdev', 'count']).saveas(sim_chr_file_intersected)
-    obs_chr_obj.map(sim_chr_obj, c=4, o=['collapse']).saveas(sim_chr_file_intersected)
+    obs_chr_obj.map(sim_chr_obj, c=4, o=['mean', 'stdev', 'count']).saveas(sim_chr_file_intersected)
+    #obs_chr_obj.map(sim_chr_obj, c=4, o=['collapse']).saveas(sim_chr_file_intersected)
     
-    window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if($5!=".") print $4,$5}}' {sim_intersected} >> {sim_scores_combined}""".format(
-                sim_intersected=sim_chr_file_intersected, sim_scores_combined=simulated_input_file_tmp_overallTFs_local_temp)
-    #window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if($7!=0) print $4,$5,$6,$7, $8}}' {sim_intersected} >> {sim_scores_combined}""".format(
+    #window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if($5!=".") print $4,$5}}' {sim_intersected} >> {sim_scores_combined}""".format(
     #            sim_intersected=sim_chr_file_intersected, sim_scores_combined=simulated_input_file_tmp_overallTFs_local_temp)
+    window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if($5!=".") print $4,$5,$6,$7, $8}}' {sim_intersected} >> {sim_scores_combined}""".format(
+                sim_intersected=sim_chr_file_intersected, sim_scores_combined=simulated_input_file_tmp_overallTFs_local_temp)
     os.system(window_id_fscroe_file)
     
     
@@ -799,15 +799,13 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
         l = simulated_mean_sd_ifile.readline().strip().split('\t')            
         while l and len(l)>1:    
             #fscore = map(float, l[1].split(','))          
-            fscore = [float(x) for x in l[1].split(',')]
-            print(fscore)
-            print(np.mean(fscore))
-            dict_simulated_mean_sd[l[0]] = {'mean': np.mean(fscore),          
-                                                   "std": np.std(fscore),                                                        
-                                                   "nummotifs": len(fscore)}
-            #dict_simulated_mean_sd[l[0]] = {'mean': l[1],          
-            #                                      "std": l[2],                                                        
-            #                                       "nummotifs": l[3]}
+            #fscore = [float(x) for x in l[1].split(',')]
+            #dict_simulated_mean_sd[l[0]] = {'mean': np.mean(fscore),          
+            #                                       "std": np.std(fscore),                                                        
+            #                                       "nummotifs": len(fscore)}
+            dict_simulated_mean_sd[l[0]] = {'mean': l[1],          
+                                                  "std": l[2],                                                        
+                                                   "nummotifs": l[3]}
             l = simulated_mean_sd_ifile.readline().strip().split('\t')
      
     #save the dictionery per category
@@ -817,8 +815,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     with open(cohort_mean_sd_per_tf_overall_output_dict_file, 'w') as dict_simulated_mean_sd_per_TF_motif_outfile:
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
-    #shutil.rmtree(sim_chrs_dir)
-    #shutil.rmtree(obs_chrs_dir)   
+    shutil.rmtree(sim_chrs_dir)
+    shutil.rmtree(obs_chrs_dir)   
     cleanup() 
     
     return  dict_type_mean_std_scores
