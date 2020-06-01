@@ -642,7 +642,9 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
     sim_chr_obj = BedTool(simulated_input_file)
     print("Intersecting ", simulated_input_file)
     sim_chr_file_intersected = simulated_input_file+ '_intersected'
-    obs_chr_obj.map(sim_chr_obj, c=4, o=['mean', 'stdev', 'count']).saveas(sim_chr_file_intersected)
+    #obs_chr_obj.map(sim_chr_obj, c=4, o=['mean', 'stdev', 'count']).saveas(sim_chr_file_intersected)
+    obs_chr_obj.map(sim_chr_obj, c=4, o=['collapse']).saveas(sim_chr_file_intersected)
+
     window_id_fscroe_file = """awk 'BEGIN{{FS=OFS="\t"}}{{if($7!=0) print $4,$5,$6,$7, $8}}' {sim_intersected} >> {sim_scores_combined}""".format(
                 sim_intersected=sim_chr_file_intersected, sim_scores_combined=simulated_input_file_tmp_overallTFs_local_temp)
     os.system(window_id_fscroe_file)
@@ -779,46 +781,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     print('Combining the scores')
     
 
-#     sim_score_dir = tmp_dir+'/'+cohort + '_score/'
-# 
-#     if not os.path.isdir(sim_score_dir):
-#         os.makedirs(sim_score_dir)
-#         
-#     os.system("""cat {} |  
-#         sort -k1,1 |
-#         awk '{{print $0>>"{}"$1".bed"}}'""".format(
-#                 tmp_dir+'/*'+ext, sim_score_dir))
-#     
-#     score_input_files_objs= {}
-#     for score_file in os.listdir(sim_score_dir):
-#         if score_file.endswith('.bed'):
-#             score_input_files[score_file.replace('.bed', '')] = BedTool(sim_score_dir+score_file)
-#         
-#     obs_scores_files = []
-#     p = Pool(n_cores_fscore)
-#     obs_scores_files = p.starmap(groupby_per_mut, product(
-#         score_input_files_objs, [tmp_dir], ))
-#     p.close()
-#     p.join()
-# 
-#     print(obs_scores_files)    
-        
-        #groupBy -g 1-6 -c 7,8,9 -o mean,mean,sum
-     
-     
-     
-     #groupBy -g 1 -c 2,2,2 -o mean,stdev,count > {file_out} """.format(tmp_dir_intersect = tmp_dir_intersect, file_out = simulated_mean_sd_outfiles)
-#     sim_muts_dir = tmp_dir+'/'+cohort + '_muts/'
-#     
-#     
-#     sim_input_files_objs = {}    
-#     os.system("""awk '{{print $0>>"{}"$1".bed"}}' {}""".format(
-#         sim_muts_dir, observed_input_file_sorted))
-#     for chr_file in os.listdir(obs_chrs_dir):
-#         if chr_file.endswith('.bed'):
-#             observed_input_files_objs[chr_file.replace('.bed', '')] = BedTool(obs_chrs_dir+chr_file)
-    
-    
+
     simulated_mean_sd_outfiles = tmp_dir + '/' + cohort + '_allscores'
      
     if not os.path.isfile(simulated_mean_sd_outfiles):
@@ -833,9 +796,13 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     with open(simulated_mean_sd_outfiles, 'r') as simulated_mean_sd_ifile:        
         l = simulated_mean_sd_ifile.readline().strip().split('\t')            
         while l and len(l)>3:              
-            dict_simulated_mean_sd[l[0]] = {'mean': l[1],          
-                                                   "std": l[2],                                                        
-                                                   "nummotifs": l[3]}
+            fscore = float(l[1].split(','))
+            dict_simulated_mean_sd[l[0]] = {'mean': np.mean(fscore),          
+                                                   "std": np.std(fscore),                                                        
+                                                   "nummotifs": len(fscore)}
+            #dict_simulated_mean_sd[l[0]] = {'mean': l[1],          
+            #                                      "std": l[2],                                                        
+            #                                       "nummotifs": l[3]}
             l = simulated_mean_sd_ifile.readline().strip().split('\t')
      
     #save the dictionery per category
