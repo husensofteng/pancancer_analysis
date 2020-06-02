@@ -43,14 +43,22 @@ def generate_extended_regions(regions, extended_output_file, chr_lengths, window
             ofile.write(region[0] + '\t' + str(extended_element_start) + '\t' + str(extended_element_end) + '\t' + str(region[3]) + '\n')
     return extended_output_file
 
-def get_nearby_genes(regions_input_file, genes_input_file,
+def get_nearby_genes(regions_input_file_obj, genes_input_file,
                      gene_types_to_consider = ['protein_coding', 'RNA'], 
                      gene_status_to_consider = ['KNOWN'], n=3, 
                      upstream=True, downstream=True, overlapping = True, max_dist = 100000):
     
     regions_input_file_intersect_genes = regions_input_file+"intersect_genes"
-    BedTool(regions_input_file).intersect(BedTool(genes_input_file), wo=True).saveas(regions_input_file_intersect_genes)#groupby(g=4, c=[], o=[])
+    regions_input_file_closest_genes = regions_input_file+"closest_genes"
+
+    #overlapping genes
+    regions_input_file_obj.intersect(BedTool(genes_input_file), wo=True).saveas(regions_input_file_intersect_genes)#groupby(g=4, c=[], o=[])
     
+    #closest genes far than window
+    regions_input_file_obj.closest(BedTool(genes_input_file), io=True).saveas(regions_input_file_closest_genes)
+    
+    
+    #identify intersected genes
     regions_ugenes_dict = {}
     regions_dgenes_dict = {}#contains gene info of each unique region - based on index
     regions_ogenes_dict = {}
@@ -116,7 +124,55 @@ def get_nearby_genes(regions_input_file, genes_input_file,
                 l = ifile.readline().strip().split('\t')
                 break
             l = ifile.readline().strip().split('\t')
-    os.remove(regions_input_file_intersect_genes)
+    #os.remove(regions_input_file_intersect_genes)
+    
+    #identify closest genes if no genes present within a window
+    with open(regions_input_file_closest_genes, 'r') as ifile:
+        l = ifile.readline().strip().split('\t')
+        while l:
+            try:
+                if l[11] in gene_status_to_consider and l[12] in gene_types_to_consider:
+                    region_start = int(l[3].split(':')[1].split('-')[0])
+                    region_end = int(l[3].split(':')[1].split('-')[1])
+                    gene_start = int(l[5])
+                    gene_end = int(l[6])
+                    if (l[3] not in regions_genes_dict and l[3] not in regions_ugenes_dict and l[3] not in regions_dgenes_dict):
+                        if region_start > gene_end:
+                            if upstream:
+                                d = region_start-gene_start
+                                if l[8] == '-':
+                                    d = region_start-gene_end
+                                gene_info = l[10]+"::"+l[9]
+                                try:
+                                    if len(regions_ugenes_dict[l[3]])<n:
+                                        regions_ugenes_dict[l[3]].append([gene_info, d])
+                                    else:#there are n genes already, remove a gene with a larger distance
+                                        regions_ugenes_dict[l[3]] = sorted(regions_ugenes_dict[l[3]],key=lambda l:l[1], reverse=False)
+                                        if regions_ugenes_dict[l[3]][n-1][1] > d:
+                                            regions_ugenes_dict[l[3]][n-1] = [gene_info, d]
+                                except KeyError:
+                                    regions_ugenes_dict[l[3]] = [[gene_info, d]]
+                                    
+                        elif (region_start < gene_end):
+                            if downstream:
+                                d = gene_start-region_end#region_start
+                                if l[8] == '-':
+                                    d = gene_end-region_end#region_start
+                                gene_info = l[10]+"::"+l[9]
+                                try:
+                                    if len(regions_dgenes_dict[l[3]])<n:
+                                        regions_dgenes_dict[l[3]].append([gene_info, d])
+                                    else:#there are n genes already, remove a gene with a larger distance
+                                        regions_dgenes_dict[l[3]] = sorted(regions_dgenes_dict[l[3]],key=lambda l:l[1], reverse=False)
+                                        if regions_dgenes_dict[l[3]][n-1][1] > d:
+                                            regions_dgenes_dict[l[3]][n-1] = [gene_info, d]
+                                except KeyError:
+                                    regions_dgenes_dict[l[3]] = [[gene_info, d]]
+            except IndexError:
+                l = ifile.readline().strip().split('\t')
+                break
+            l = ifile.readline().strip().split('\t')
+    #os.remove(regions_input_file_closest_genes)
     
     regions_genes_dict = {}
     for reg in regions_ogenes_dict:
@@ -972,17 +1028,27 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     
     chr_lengths = get_chr_lengths(chr_lengths_file)
     
-    extended_output_file = aggregated_output_file+"_extendedtemp"
-    extended_output_file = generate_extended_regions(regions=aggregated_lines, extended_output_file=extended_output_file, chr_lengths=chr_lengths, window=window)
+    extended_output_file = aggregated_output_file+"_extended"
+    extended_output_file_tmp = extended_output_file+"_temp"
+
+    #replace with slop
+    with open(extended_output_file_tmp, 'w') as ofile:
+        for line in aggregated_line:
+            ofile.write(line + '\n')
+
+    #create an extended output file 
+    extended_output_file_obj = BedTool(extended_output_file_tmp).slop(b=window,genome='hg19').saveas(extended_output_file)
+    #extended_output_file = generate_extended_regions(regions=aggregated_lines, extended_output_file=extended_output_file, chr_lengths=chr_lengths, window=window)
     
-    regions_genes_dict = get_nearby_genes(regions_input_file=extended_output_file, 
+    
+    regions_genes_dict = get_nearby_genes(extended_output_file_obj=extended_output_file_obj, 
                         genes_input_file = genes_input_file, 
                         gene_types_to_consider = gene_types_to_consider, 
                         gene_status_to_consider = gene_status_to_consider, 
                         n=n, upstream=upstream, downstream=downstream, 
                         overlapping = overlapping, max_dist = max_dist,
                         )
-    os.remove(extended_output_file)
+    #os.remove(extended_output_file)
     
     genesets_genes_dict = generate_genesets_genes_dict(cosmic_genes_file, kegg_pathways_file, pcawg_drivers_file)
     enrichment_regions_genes_dict, genes_all, genes_all_per_side, enriched_genesets_dict_overall, enriched_genesets_dict = get_enriched_gene_geneset(
