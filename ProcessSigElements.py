@@ -55,13 +55,13 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
     regions_input_file_obj.intersect(BedTool(genes_input_file), wo=True).saveas(regions_input_file_intersect_genes)#groupby(g=4, c=[], o=[])
     
     #removed missing chromosomes from genes file
-    genes_input_file_local = genes_input_file+'_local'
+    genes_input_file_local = regions_input_file + genes_input_file.split('/')[-1] +'_local'
     os.system("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {} {} > {}""".format(
         regions_input_file, genes_input_file, genes_input_file_local))
     #closest genes far than window
     regions_input_file_obj.closest(BedTool(genes_input_file_local), io=True).saveas(regions_input_file_closest_genes)
     
-    os.remove(genes_input_file_local)
+    #os.remove(genes_input_file_local)
     
     #identify intersected genes
     regions_ugenes_dict = {}
