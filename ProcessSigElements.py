@@ -43,7 +43,7 @@ def generate_extended_regions(regions, extended_output_file, chr_lengths, window
             ofile.write(region[0] + '\t' + str(extended_element_start) + '\t' + str(extended_element_end) + '\t' + str(region[3]) + '\n')
     return extended_output_file
 
-def get_nearby_genes(regions_input_file_obj, genes_input_file,
+def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_file,
                      gene_types_to_consider = ['protein_coding', 'RNA'], 
                      gene_status_to_consider = ['KNOWN'], n=3, 
                      upstream=True, downstream=True, overlapping = True, max_dist = 100000):
@@ -1042,7 +1042,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     #extended_output_file = generate_extended_regions(regions=aggregated_lines, extended_output_file=extended_output_file, chr_lengths=chr_lengths, window=window)
     
     
-    regions_genes_dict = get_nearby_genes(extended_output_file_obj=extended_output_file_obj, 
+    regions_genes_dict = get_nearby_genes(extended_output_file=extended_output_file, extended_output_file_obj=extended_output_file_obj, 
                         genes_input_file = genes_input_file, 
                         gene_types_to_consider = gene_types_to_consider, 
                         gene_status_to_consider = gene_status_to_consider, 
