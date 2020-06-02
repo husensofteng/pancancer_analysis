@@ -749,7 +749,8 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             sim_file, sim_file_tmp)) 
         os.system("""awk '{{print $0>>"{}"$1".bed"}}' {}""".format(
         sim_chrs_dir, sim_file_tmp))
-    
+        os.remove(sim_file_tmp)
+        
     sim_input_files =[]
     for sim_file in os.listdir(sim_chrs_dir):
         sim_file_sorted = sim_chrs_dir +'/' + sim_file +'sorted'
