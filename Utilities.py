@@ -683,7 +683,7 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
     #shutil.rmtree(sim_chrs_dir)
     
     
-    print('cleanup')
+    #print('cleanup')
     cleanup()
     return simulated_input_file_tmp_overallTFs_local
 
