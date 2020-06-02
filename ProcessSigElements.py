@@ -141,7 +141,7 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
                     region_end = int(l[3].split(':')[1].split('-')[1])
                     gene_start = int(l[5])
                     gene_end = int(l[6])
-                    if (l[3] not in regions_genes_dict and l[3] not in regions_ugenes_dict and l[3] not in regions_dgenes_dict):
+                    if (l[3] not in regions_ogenes_dict and l[3] not in regions_ugenes_dict and l[3] not in regions_dgenes_dict):
                         if region_start > gene_end:
                             if upstream:
                                 d = region_start-gene_start
