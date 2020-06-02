@@ -642,7 +642,8 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
     try: 
         obs_chr_obj =  BedTool(observed_input_files_objs[sim_chr])
     except KeyError:
-        return(open(simulated_input_file_tmp_overallTFs_local, 'a').close())
+        open(simulated_input_file_tmp_overallTFs_local, 'a').close()
+        return(simulated_input_file_tmp_overallTFs_local)
         
     sim_chr_obj = BedTool(simulated_input_file)
     print("Intersecting ", simulated_input_file)
