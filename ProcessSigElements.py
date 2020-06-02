@@ -1034,7 +1034,8 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     #replace with slop
     with open(extended_output_file_tmp, 'w') as ofile:
         for line in aggregated_lines:
-            ofile.write(line + '\n')
+            print(line)
+            ofile.write(str(line[0])+ '\t' + str(line[1]) + '\t' + str(line[2])+ '\t' + str(line[3]) + '\n')
 
     #create an extended output file 
     extended_output_file_obj = BedTool(extended_output_file_tmp).slop(b=window,genome='hg19').saveas(extended_output_file)
