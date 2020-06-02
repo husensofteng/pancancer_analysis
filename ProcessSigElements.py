@@ -1042,7 +1042,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     #create an extended output file 
     os.system("""sort -k1,1V -k2,2n -k3,3n {} > {}""".format(
         extended_output_file_tmp, extended_output_file_tmp_sorted))
-    extended_output_file_obj = BedTool(extended_output_file_tmp_sorted).slop(b=window,genome='hg19').saveas(extended_output_file)
+    extended_output_file_obj = BedTool(extended_output_file_tmp_sorted).slop(b=window,genome='hg19', nonamecheck=True).saveas(extended_output_file)
     #extended_output_file = generate_extended_regions(regions=aggregated_lines, extended_output_file=extended_output_file, chr_lengths=chr_lengths, window=window)
     
     
