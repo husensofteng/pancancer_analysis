@@ -1033,7 +1033,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
 
     #replace with slop
     with open(extended_output_file_tmp, 'w') as ofile:
-        for line in aggregated_line:
+        for line in aggregated_lines:
             ofile.write(line + '\n')
 
     #create an extended output file 
