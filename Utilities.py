@@ -636,9 +636,14 @@ def get_scores_per_window(observed_input_files_objs, observed_input_file, tmp_di
     simulated_input_file_tmp_overallTFs_local_temp = simulated_input_file_tmp_overallTFs_local + '_temp'
         
     sim_chr = simulated_input_file.split('/')[-1].split('.')[0]
-    print(sim_chr)
-    print(observed_input_files_objs[sim_chr])
-    obs_chr_obj =  BedTool(observed_input_files_objs[sim_chr])
+    #print(sim_chr)
+    #print(observed_input_files_objs[sim_chr])
+    "if observed mutation file for any chromosome doesn't exist, return en ampty file"
+    try: 
+        obs_chr_obj =  BedTool(observed_input_files_objs[sim_chr])
+    except KeyError:
+        return(open(simulated_input_file_tmp_overallTFs_local, 'a').close())
+        
     sim_chr_obj = BedTool(simulated_input_file)
     print("Intersecting ", simulated_input_file)
     sim_chr_file_intersected = simulated_input_file+ '_intersected'
