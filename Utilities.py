@@ -1034,7 +1034,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
             print(dict_pvals)
             print(dict_pvals.values())
             adjusted_dict_pvals = {} 
-            adjusted_dict_pvals = adjust_pvales(dict_pvals.values())
+            adjusted_dict_pvals = adjust_pvales(float(dict_pvals.values()))
             
             with open(annoted_output_file, 'w') as annoted_input_ofile, open(annoted_output_file_onlysig, 'w') as annoted_input_ofile_onlysig:
             
