@@ -1024,11 +1024,11 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     #no simulated mutations in the background to compare; set p-value as 1
                     p_value = 0.0
                 try:
-                    dict_pvals.append(p_value)
-                    dict_line_indices.append(line_index)
+                    dict_pvals[line_index].append(p_value)
+                    #dict_line_indices.append(line_index)
                 except KeyError:
-                    dict_pvals= [p_value]
-                    dict_line_indices = [line_index]
+                    dict_pvals[line_index]= [p_value]
+                    #dict_line_indices = [line_index]
             
             print("Computing adjusted P-values for {}".format(annoted_input_file))
             adjusted_dict_pvals = {} 
@@ -1042,8 +1042,8 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     #iterate through the pvalues list and report them all for this line
                     pvals = {}
                     adjust_pvals = {}
-                    pvals = dict_pvals[dict_line_indices.index(line_index)]
-                    adjust_pvals = adjusted_dict_pvals[dict_line_indices.index(line_index)]
+                    pvals = dict_pvals[line_index]
+                    adjust_pvals = adjusted_dict_pvals[line_index]
                     sl[motif_breaking_score_index+1] = (json.dumps(pvals)+'@'+json.dumps(adjust_pvals)).replace(',', ';')
                     
                     annoted_input_ofile.write('\t'.join(sl) + '\n')
