@@ -1045,7 +1045,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     adjust_pvals = {}
                     pvals = dict_pvals[line_index]
                     adjust_pvals = adjusted_dict_pvals[line_index]
-                    sl[motif_breaking_score_index+1] = (json.dumps(pvals)+'@'+json.dumps(adjust_pvals)).replace(',', ';')
+                    sl[motif_breaking_score_index+1] = (json.dumps({sig_cat: pvals})+'@'+json.dumps({sig_cat: adjust_pvals})).replace(',', ';')
                     
                     annoted_input_ofile.write('\t'.join(sl) + '\n')
                     sig_level = 1.0
