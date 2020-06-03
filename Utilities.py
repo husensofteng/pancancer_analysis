@@ -1031,6 +1031,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     dict_line_indices = [line_index]
             
             print("Computing adjusted P-values for {}".format(annoted_input_file))
+            print(dict_pvals)
             adjusted_dict_pvals = {} 
             adjusted_dict_pvals = adjust_pvales(dict_pvals.values())
             
