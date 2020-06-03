@@ -764,7 +764,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     #sim_input_files = [sim_chrs_dir+'/'+x for x in os.listdir(sim_chrs_dir) if 'sorted_split_' in x]
 
     #sim_input_files.append(sim_file_sorted)
-    print(sim_input_files)
+    #print(sim_input_files)
         
           #awk_stmt = r"""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("X","23", $1); gsub("Y","24", $1); gsub("chr","", $1);if($10==".") print $1, $2*1, $3*1, $11, $18; else print $1, $2*1, $3*1, $10+$11, $18}}' {simulated_file} | sort -k1,1n -k2,2n -k3,3n > {simulated_outfile_temp}""".format(simulated_file = simulated_input_file, simulated_outfile_temp = simulated_input_file_fixed_sorted)
 
@@ -823,14 +823,15 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
             json.dump(dict_type_mean_std_scores, dict_simulated_mean_sd_per_TF_motif_outfile)
     
     shutil.rmtree(sim_chrs_dir)
-    shutil.rmtree(obs_chrs_dir)   
+    #shutil.rmtree(obs_chrs_dir)   
     cleanup() 
     
-    return  dict_type_mean_std_scores
+    return  dict_type_mean_std_scores, obs_chrs_dir, observed_input_files_objs
 
 
 def get_simulated_mean_sd_per_TF_motif(simulated_annotated_input_files, 
                                        cohort_mean_sd_per_tf_overall_output_dict_file, 
+                                       obs_chrs_dir, observed_input_files_objs,
                                        motif_name_index = 17, f_score_index = 9, 
                                        motif_breaking_score_index = 10, chromatin_cat_index=22):
     
@@ -994,21 +995,21 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
     dict_pvals = {} #store p-values for seach line per category in the same order as the  lines
     dict_line_indices = {} #store index of the lines from the input files to keep track of the categories
     lines = []
-    with open(annoted_input_file, 'r') as observed_annoted_input_ifile:
-        lines = observed_annoted_input_ifile.readlines()
-        print("Computing P-values (TF motifs) for: ", annoted_input_file)
-        for line_index, line in enumerate(lines):
-            l = line.strip().split('\t')
-            if len(l)<motif_name_index:
-                continue
-            p_value = 1.0
-            if background_window:
-                pval_type = "overallTFs"
-                #print(pval_type)
+    
+    
+    if background_window:
+        with open(annoted_input_file, 'r') as observed_annoted_input_ifile:
+            lines = observed_annoted_input_ifile.readlines()
+            print("Computing P-values (TF motifs) for: ", annoted_input_file)
+            for line_index, line in enumerate(lines):
+                l = line.strip().split('\t')
+                if len(l)<motif_name_index:
+                    continue
+                p_value = 1.0
                 try: 
                     #check if the background exist
-                    avg = float(dict_type_mean_std_scores[pval_type][str(line_index)]['mean'])
-                    sd = float(dict_type_mean_std_scores[pval_type][str(line_index)]['std'])
+                    avg = float(dict_type_mean_std_scores[str(line_index)]['mean'])
+                    sd = float(dict_type_mean_std_scores[str(line_index)]['std'])
                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
                                          avg=avg, 
                                          sd=sd)
@@ -1016,86 +1017,58 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     #no simulated mutations in the background to compare; set p-value as 1
                     p_value = 0.0
                 try:
-                    dict_pvals[pval_type].append(p_value)
-                    dict_line_indices[pval_type].append(line_index)
+                    dict_pvals.append(p_value)
+                    dict_line_indices.append(line_index)
                 except KeyError:
-                    dict_pvals[pval_type] = [p_value]
-                    dict_line_indices[pval_type] = [line_index]
+                    dict_pvals= [p_value]
+                    dict_line_indices = [line_index]
             
-#                 pval_type = "perTF"
-#                 try: 
-#                     #check if the background exist
-#                     avg = float(dict_type_mean_std_scores[pval_type][str(line_index)]['mean'])
-#                     sd = float(dict_type_mean_std_scores[pval_type][str(line_index)]['std'])
-#                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
-#                                          avg=avg, 
-#                                          sd=sd)
-#                 except KeyError:
-#                     #no simulated mutations in the background to compare; set p-value as 1
-#                     p_value = 0.0
-#                 try:
-#                     dict_pvals[pval_type][l[motif_name_index]].append(p_value)
-#                     dict_line_indices[pval_type][l[motif_name_index]].append(line_index)
-#                 except KeyError:
-#                     try:
-#                         dict_pvals[pval_type][l[motif_name_index]] = [p_value]
-#                         dict_line_indices[pval_type][l[motif_name_index]] = [line_index]
-#                     except KeyError:
-#                         dict_pvals[pval_type] = {l[motif_name_index] : [p_value]}
-#                         dict_line_indices[pval_type] = {l[motif_name_index] :[line_index]}
-                        
+            print("Computing adjusted P-values for {}".format(annoted_input_file))
+            adjusted_dict_pvals = {} 
+            adjusted_dict_pvals = adjust_pvales(dict_pvals)
             
-#                 pval_type = "perChromatinCat"
-#                 #print(pval_type)
-#                 try: 
-#                     #check if the background exist
-#                     avg = float(dict_type_mean_std_scores[pval_type][str(line_index)]['mean'])
-#                     sd = float(dict_type_mean_std_scores[pval_type][str(line_index)]['std'])
-#                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
-#                                          avg=avg, 
-#                                          sd=sd)
-#                 except KeyError:
-#                     #no simulated mutations in the background to compare; set p-value as 1
-#                     p_value = 0.0
-#                 try:
-#                     dict_pvals[pval_type][l[chromatin_index]].append(p_value)
-#                     dict_line_indices[pval_type][l[chromatin_index]].append(line_index)
-#                 except KeyError:
-#                     try:
-#                         dict_pvals[pval_type][l[chromatin_index]] = [p_value]
-#                         dict_line_indices[pval_type][l[chromatin_index]] = [line_index]
-#                     except KeyError:
-#                         dict_pvals[pval_type] = {l[chromatin_index] : [p_value]}
-#                         dict_line_indices[pval_type] = {l[chromatin_index] :[line_index]}
-
+            with open(annoted_output_file, 'w') as annoted_input_ofile, open(annoted_output_file_onlysig, 'w') as annoted_input_ofile_onlysig:
             
-#                 pval_type = "perTF_perChromatinCat"
-#                 try: 
-#                     #check if the background exist
-#                     avg = float(dict_type_mean_std_scores[pval_type][str(line_index)]['mean'])
-#                     sd = float(dict_type_mean_std_scores[pval_type][str(line_index)]['std'])
-#                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
-#                                          avg=avg, 
-#                                          sd=sd)
-#                 except KeyError:
-#                     #no simulated mutations in the background to compare; set p-value as 1
-#                     p_value = 0.0
-#                 try:
-#                     dict_pvals[pval_type][l[motif_name_index]][l[chromatin_index]].append(p_value)
-#                     dict_line_indices[pval_type][l[motif_name_index]][l[chromatin_index]].append(line_index)
-#                 except KeyError:
-#                     try:
-#                         dict_pvals[pval_type][l[motif_name_index]][l[chromatin_index]] = [p_value]
-#                         dict_line_indices[pval_type][l[motif_name_index]][l[chromatin_index]] = [line_index]
-#                     except KeyError:
-#                         try:
-#                             dict_pvals[pval_type][l[motif_name_index]] = {l[chromatin_index] : [p_value]}
-#                             dict_line_indices[pval_type][l[motif_name_index]] = {l[chromatin_index] :[line_index]}
-#                         except KeyError:
-#                             dict_pvals[pval_type] = {l[motif_name_index]: {l[chromatin_index] : [p_value]}}
-#                             dict_line_indices[pval_type] = {l[motif_name_index]: {l[chromatin_index] :[line_index]}}
-
-            else:
+                for line_index, line in enumerate(lines):
+                    sl = line.strip().split('\t')    
+                    #if dict_p_values_per_tf[tf][i]<0.05 or dict_p_values_overall_per_tf[tf][i]<0.05:
+                    #iterate through the pvalues list and report them all for this line
+                    pvals = {}
+                    adjust_pvals = {}
+                    pvals = dict_pvals[dict_line_indices.index(line_index)]
+                    adjust_pvals = adjusted_dict_pvals[dict_line_indices.index(line_index)]
+                    sl[motif_breaking_score_index+1] = (json.dumps(pvals)+'@'+json.dumps(adjust_pvals)).replace(',', ';')
+                    
+                    annoted_input_ofile.write('\t'.join(sl) + '\n')
+                    sig_level = 1.0
+                    if filter_on_qval:
+                        sig_level = adjust_pvals
+                    else:
+                        sig_level = pvals
+                    #select the motif if its ChiP-seq signal larger than 0
+                    if sl[tf_binding_index]!="nan":
+                        if float(sl[tf_binding_index]) > 0.0:
+                            annoted_input_ofile_onlysig.write('\t'.join(sl) + '\n')
+                            continue
+                    
+                    if filter_on_signal:
+                        if (sig_level<sig_thresh and 
+                            float(sl[dnase_index])>0.0):# or float(tf_motif[fantom_index])>0.0 or float(tf_motif[num_other_tfs_index])>0.0
+                            annoted_input_ofile_onlysig.write('\t'.join(sl) + '\n')
+                    else:
+                        if sig_level<sig_thresh: #or adjusted_dict_p_values_per_tf[tf][i]<0.05:
+                            annoted_input_ofile_onlysig.write('\t'.join(sl) + '\n')
+                
+    
+    else:
+        with open(annoted_input_file, 'r') as observed_annoted_input_ifile:
+            lines = observed_annoted_input_ifile.readlines()
+            print("Computing P-values (TF motifs) for: ", annoted_input_file)
+            for line_index, line in enumerate(lines):
+                l = line.strip().split('\t')
+                if len(l)<motif_name_index:
+                    continue
+                p_value = 1.0
                 pval_type = "overallTFs"
                 try:
                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
@@ -1103,14 +1076,14 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                                      sd=dict_type_mean_std_scores[pval_type]['std'])
                 except KeyError:
                     p_value = 0.0
-
+    
                 try:
                     dict_pvals[pval_type].append(p_value)
                     dict_line_indices[pval_type].append(line_index)
                 except KeyError:
                     dict_pvals[pval_type] = [p_value]
                     dict_line_indices[pval_type] = [line_index]
-
+    
                 pval_type = "perTF"
                 try:
                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
@@ -1118,7 +1091,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                                  sd=dict_type_mean_std_scores[pval_type][l[motif_name_index]]['std'])
                 except KeyError:
                     p_value = 0.0
-
+    
                 try:
                     dict_pvals[pval_type][l[motif_name_index]].append(p_value)
                     dict_line_indices[pval_type][l[motif_name_index]].append(line_index)
@@ -1129,8 +1102,8 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     except KeyError:
                         dict_pvals[pval_type] = {l[motif_name_index] : [p_value]}
                         dict_line_indices[pval_type] = {l[motif_name_index] :[line_index]}
-
-
+    
+    
                 pval_type = "perChromatinCat"
                 try:
                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
@@ -1138,7 +1111,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                                  sd=dict_type_mean_std_scores[pval_type][l[chromatin_index]]['std'])
                 except KeyError:
                     p_value = 0.0
-
+    
                 try:
                     dict_pvals[pval_type][l[chromatin_index]].append(p_value)
                     dict_line_indices[pval_type][l[chromatin_index]].append(line_index)
@@ -1149,8 +1122,8 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     except KeyError:
                         dict_pvals[pval_type] = {l[chromatin_index] : [p_value]}
                         dict_line_indices[pval_type] = {l[chromatin_index] :[line_index]}
-
-
+    
+    
                 pval_type = "perTF_perChromatinCat"
                 try:
                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
@@ -1158,7 +1131,7 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                                  sd=dict_type_mean_std_scores[pval_type][l[motif_name_index]][l[chromatin_index]]['std'])
                 except KeyError:
                     p_value = 0.0
-
+    
                 try:
                     dict_pvals[pval_type][l[motif_name_index]][l[chromatin_index]].append(p_value)
                     dict_line_indices[pval_type][l[motif_name_index]][l[chromatin_index]].append(line_index)
@@ -1174,126 +1147,77 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                             dict_pvals[pval_type] = {l[motif_name_index]: {l[chromatin_index] : [p_value]}}
                             dict_line_indices[pval_type] = {l[motif_name_index]: {l[chromatin_index] :[line_index]}}
     
-    print("Computing adjusted P-values for {}".format(annoted_input_file))
-    adjusted_dict_pvals = {} 
+            print("Computing adjusted P-values for {}".format(annoted_input_file))
+            adjusted_dict_pvals = {} 
+       
     
-    if background_window:
-        adjusted_dict_pvals["overallTFs"] = adjust_pvales(dict_pvals["overallTFs"])
-#         pval_type = "perChromatinCat"
-#         adjusted_dict_pvals[pval_type] = {}
-#         for chrom_cat in dict_pvals[pval_type].keys():
-#             adjusted_dict_pvals[pval_type][chrom_cat] = adjust_pvales(dict_pvals[pval_type][chrom_cat])
-        
-        with open(annoted_output_file, 'w') as annoted_input_ofile, open(annoted_output_file_onlysig, 'w') as annoted_input_ofile_onlysig:
+            adjusted_dict_pvals["overallTFs"] = adjust_pvales(dict_pvals["overallTFs"])
+            pval_type = "perTF"
+            adjusted_dict_pvals[pval_type] = {}
+            for tf in dict_pvals[pval_type].keys():
+                adjusted_dict_pvals[pval_type][tf] = adjust_pvales(dict_pvals[pval_type][tf])
+            pval_type = "perChromatinCat"
+            adjusted_dict_pvals[pval_type] = {}
+            for chrom_cat in dict_pvals[pval_type].keys():
+                adjusted_dict_pvals[pval_type][chrom_cat] = adjust_pvales(dict_pvals[pval_type][chrom_cat])
+            pval_type = "perTF_perChromatinCat"
+            adjusted_dict_pvals[pval_type] = {}
+            for tf in dict_pvals[pval_type].keys():
+                adjusted_dict_pvals[pval_type][tf] = {}
+                for chrom_cat in dict_pvals[pval_type][tf].keys():
+                    adjusted_dict_pvals[pval_type][tf][chrom_cat] = adjust_pvales(dict_pvals[pval_type][tf][chrom_cat])
             
-            for line_index, line in enumerate(lines):
-                sl = line.strip().split('\t')    
-                #if dict_p_values_per_tf[tf][i]<0.05 or dict_p_values_overall_per_tf[tf][i]<0.05:
-                #iterate through the pvalues list and report them all for this line
-                pvals = {}
-                adjust_pvals = {}
-    
-                pval_type = "overallTFs"
-                pvals[pval_type] = dict_pvals[pval_type][dict_line_indices[pval_type].index(line_index)]
-                adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][dict_line_indices[pval_type].index(line_index)]
-            
-#                 pval_type = "perChromatinCat"
-#                 sub_type = sl[chromatin_index]
-#                 pvals[pval_type] = dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
-#                 adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
+            with open(annoted_output_file, 'w') as annoted_input_ofile, open(annoted_output_file_onlysig, 'w') as annoted_input_ofile_onlysig:
                 
+                for line_index, line in enumerate(lines):
+                    sl = line.strip().split('\t')    
+                    #if dict_p_values_per_tf[tf][i]<0.05 or dict_p_values_overall_per_tf[tf][i]<0.05:
+                    #iterate through the pvalues list and report them all for this line
+                    pvals = {}
+                    adjust_pvals = {}
+        
+                    pval_type = "overallTFs"
+                    pvals[pval_type] = dict_pvals[pval_type][dict_line_indices[pval_type].index(line_index)]
+                    adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][dict_line_indices[pval_type].index(line_index)]
+                
+                    pval_type = "perTF"
+                    sub_type = sl[motif_name_index]
+                    pvals[pval_type] = dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
+                    adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
+                
+                    pval_type = "perChromatinCat"
+                    sub_type = sl[chromatin_index]
+                    pvals[pval_type] = dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
+                    adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
                     
-                sl[motif_breaking_score_index+1] = (json.dumps(pvals)+'@'+json.dumps(adjust_pvals)).replace(',', ';')
-                
-                annoted_input_ofile.write('\t'.join(sl) + '\n')
-                sig_level = 1.0
-                if filter_on_qval:
-                    sig_level = adjust_pvals[sig_cat]
-                else:
-                    sig_level = pvals[sig_cat]
-                #select the motif if its ChiP-seq signal larger than 0
-                if sl[tf_binding_index]!="nan":
-                    if float(sl[tf_binding_index]) > 0.0:
-                        annoted_input_ofile_onlysig.write('\t'.join(sl) + '\n')
-                        continue
-                
-                if filter_on_signal:
-                    if (sig_level<sig_thresh and 
-                        float(sl[dnase_index])>0.0):# or float(tf_motif[fantom_index])>0.0 or float(tf_motif[num_other_tfs_index])>0.0
-                        annoted_input_ofile_onlysig.write('\t'.join(sl) + '\n')
-                else:
-                    if sig_level<sig_thresh: #or adjusted_dict_p_values_per_tf[tf][i]<0.05:
-                        annoted_input_ofile_onlysig.write('\t'.join(sl) + '\n')
-        
-        
-    else:
-        adjusted_dict_pvals["overallTFs"] = adjust_pvales(dict_pvals["overallTFs"])
-        pval_type = "perTF"
-        adjusted_dict_pvals[pval_type] = {}
-        for tf in dict_pvals[pval_type].keys():
-            adjusted_dict_pvals[pval_type][tf] = adjust_pvales(dict_pvals[pval_type][tf])
-        pval_type = "perChromatinCat"
-        adjusted_dict_pvals[pval_type] = {}
-        for chrom_cat in dict_pvals[pval_type].keys():
-            adjusted_dict_pvals[pval_type][chrom_cat] = adjust_pvales(dict_pvals[pval_type][chrom_cat])
-        pval_type = "perTF_perChromatinCat"
-        adjusted_dict_pvals[pval_type] = {}
-        for tf in dict_pvals[pval_type].keys():
-            adjusted_dict_pvals[pval_type][tf] = {}
-            for chrom_cat in dict_pvals[pval_type][tf].keys():
-                adjusted_dict_pvals[pval_type][tf][chrom_cat] = adjust_pvales(dict_pvals[pval_type][tf][chrom_cat])
-        
-        with open(annoted_output_file, 'w') as annoted_input_ofile, open(annoted_output_file_onlysig, 'w') as annoted_input_ofile_onlysig:
-            
-            for line_index, line in enumerate(lines):
-                sl = line.strip().split('\t')    
-                #if dict_p_values_per_tf[tf][i]<0.05 or dict_p_values_overall_per_tf[tf][i]<0.05:
-                #iterate through the pvalues list and report them all for this line
-                pvals = {}
-                adjust_pvals = {}
-    
-                pval_type = "overallTFs"
-                pvals[pval_type] = dict_pvals[pval_type][dict_line_indices[pval_type].index(line_index)]
-                adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][dict_line_indices[pval_type].index(line_index)]
-            
-                pval_type = "perTF"
-                sub_type = sl[motif_name_index]
-                pvals[pval_type] = dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
-                adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
-            
-                pval_type = "perChromatinCat"
-                sub_type = sl[chromatin_index]
-                pvals[pval_type] = dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
-                adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][dict_line_indices[pval_type][sub_type].index(line_index)]
-                
-                pval_type = "perTF_perChromatinCat"
-                sub_type = sl[motif_name_index]
-                sub_sub_type = sl[chromatin_index]
-                pvals[pval_type] = dict_pvals[pval_type][sub_type][sub_sub_type][dict_line_indices[pval_type][sub_type][sub_sub_type].index(line_index)]
-                adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][sub_sub_type][dict_line_indices[pval_type][sub_type][sub_sub_type].index(line_index)]
-                
+                    pval_type = "perTF_perChromatinCat"
+                    sub_type = sl[motif_name_index]
+                    sub_sub_type = sl[chromatin_index]
+                    pvals[pval_type] = dict_pvals[pval_type][sub_type][sub_sub_type][dict_line_indices[pval_type][sub_type][sub_sub_type].index(line_index)]
+                    adjust_pvals[pval_type] = adjusted_dict_pvals[pval_type][sub_type][sub_sub_type][dict_line_indices[pval_type][sub_type][sub_sub_type].index(line_index)]
                     
-                sl[motif_breaking_score_index+1] = (json.dumps(pvals)+'@'+json.dumps(adjust_pvals)).replace(',', ';')
-                
-                annoted_input_ofile.write('\t'.join(sl) + '\n')
-                sig_level = 1.0
-                if filter_on_qval:
-                    sig_level = adjust_pvals[sig_cat]
-                else:
-                    sig_level = pvals[sig_cat]
-                #select the motif if its ChiP-seq signal larger than 0
-                if sl[tf_binding_index]!="nan":
-                    if float(sl[tf_binding_index]) > 0.0:
-                        annoted_input_ofile_onlysig.write('\t'.join(sl) + '\n')
-                        continue
-                
-                if filter_on_signal:
-                    if (sig_level<sig_thresh and 
-                        float(sl[dnase_index])>0.0):# or float(tf_motif[fantom_index])>0.0 or float(tf_motif[num_other_tfs_index])>0.0
-                        annoted_input_ofile_onlysig.write('\t'.join(sl) + '\n')
-                else:
-                    if sig_level<sig_thresh: #or adjusted_dict_p_values_per_tf[tf][i]<0.05:
-                        annoted_input_ofile_onlysig.write('\t'.join(sl) + '\n')
+                        
+                    sl[motif_breaking_score_index+1] = (json.dumps(pvals)+'@'+json.dumps(adjust_pvals)).replace(',', ';')
+                    
+                    annoted_input_ofile.write('\t'.join(sl) + '\n')
+                    sig_level = 1.0
+                    if filter_on_qval:
+                        sig_level = adjust_pvals[sig_cat]
+                    else:
+                        sig_level = pvals[sig_cat]
+                    #select the motif if its ChiP-seq signal larger than 0
+                    if sl[tf_binding_index]!="nan":
+                        if float(sl[tf_binding_index]) > 0.0:
+                            annoted_input_ofile_onlysig.write('\t'.join(sl) + '\n')
+                            continue
+                    
+                    if filter_on_signal:
+                        if (sig_level<sig_thresh and 
+                            float(sl[dnase_index])>0.0):# or float(tf_motif[fantom_index])>0.0 or float(tf_motif[num_other_tfs_index])>0.0
+                            annoted_input_ofile_onlysig.write('\t'.join(sl) + '\n')
+                    else:
+                        if sig_level<sig_thresh: #or adjusted_dict_p_values_per_tf[tf][i]<0.05:
+                            annoted_input_ofile_onlysig.write('\t'.join(sl) + '\n')
         
     
     return annoted_output_file_onlysig
