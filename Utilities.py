@@ -1015,8 +1015,8 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                 p_value = 1.0
                 try: 
                     #check if the background exist
-                    avg = float(dict_type_mean_std_scores[sig_cat][str(line_index)]['mean'])
-                    sd = float(dict_type_mean_std_scores[sig_cat][str(line_index)]['std'])
+                    avg = float(dict_type_mean_std_scores[sig_cat][line_index]['mean'])
+                    sd = float(dict_type_mean_std_scores[sig_cat][line_index]['std'])
                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
                                          avg=avg, 
                                          sd=sd)
