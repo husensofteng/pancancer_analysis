@@ -1027,11 +1027,10 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     dict_pvals.append(p_value)
                     dict_line_indices = (line_index)
                 except KeyError:
-                    dict_pvals[line_index]= [float(p_value)]
+                    dict_pvals= [float(p_value)]
                     dict_line_indices = [line_index]
             
             print("Computing adjusted P-values for {}".format(annoted_input_file))
-            print(dict_pvals)
             adjusted_dict_pvals = {} 
             adjusted_dict_pvals = adjust_pvales(dict_pvals)
             
