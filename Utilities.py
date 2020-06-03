@@ -826,7 +826,7 @@ def get_simulated_mean_sd_per_TF_motif_background_window(cohort_full_name, annot
     #shutil.rmtree(obs_chrs_dir)   
     cleanup() 
     
-    return  dict_type_mean_std_scores, obs_chrs_dir, observed_input_files_objs
+    return  dict_type_mean_std_scores
 
 
 def get_simulated_mean_sd_per_TF_motif(simulated_annotated_input_files, 
