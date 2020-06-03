@@ -1024,14 +1024,15 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     #no simulated mutations in the background to compare; set p-value as 1
                     p_value = 0.0
                 try:
-                    dict_pvals[line_index].append(p_value)
-                    dict_line_indices.append(line_index)
+                    dict_pvals[line_index] = (p_value)
+                    dict_line_indices = (line_index)
                 except KeyError:
                     dict_pvals[line_index]= [p_value]
                     dict_line_indices = [line_index]
             
             print("Computing adjusted P-values for {}".format(annoted_input_file))
             print(dict_pvals)
+            print(dict_pvals.values())
             adjusted_dict_pvals = {} 
             adjusted_dict_pvals = adjust_pvales(dict_pvals.values())
             
@@ -1069,6 +1070,9 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                 
     
     else:
+        dict_pvals = {} #store p-values for seach line per category in the same order as the  lines
+        dict_line_indices = {} #store index of the lines from the input files to keep track of the categories
+        lines = []
         with open(annoted_input_file, 'r') as observed_annoted_input_ifile:
             lines = observed_annoted_input_ifile.readlines()
             print("Computing P-values (TF motifs) for: ", annoted_input_file)
