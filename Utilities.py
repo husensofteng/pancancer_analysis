@@ -976,11 +976,18 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     pvalues = dict(json.loads(sl[motif_breaking_score_index+1].split('@')[0]).replace(';', ','))
                     adj_pvalues = dict(json.loads(sl[motif_breaking_score_index+1].split('@')[1].replace(';', ',')))
                     sig_level = 1.0
-                    if filter_on_qval:
-                        sig_level = float(adj_pvalues[sig_cat])
+                    if background_window:
+                        if filter_on_qval:
+                            sig_level = float(adj_pvalues)
+                        else:
+                           sig_level = float(pvalues)
                     else:
-                        sig_level = float(pvalues[sig_cat])
+                        if filter_on_qval:
+                            sig_level = float(adj_pvalues[sig_cat])
+                        else:
+                            sig_level = float(pvalues[sig_cat])
                     
+                        
                     if filter_on_signal:
                         if (sig_level < sig_thresh and 
                             (float(sl[dnase_index])>0.0)):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs_index])>0.0
@@ -1008,8 +1015,8 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                 p_value = 1.0
                 try: 
                     #check if the background exist
-                    avg = float(dict_type_mean_std_scores[str(line_index)]['mean'])
-                    sd = float(dict_type_mean_std_scores[str(line_index)]['std'])
+                    avg = float(dict_type_mean_std_scores[sig_cat][str(line_index)]['mean'])
+                    sd = float(dict_type_mean_std_scores[sig_cat][str(line_index)]['std'])
                     p_value = get_pval(float(l[f_score_index]) + float(l[motif_breaking_score_index]), 
                                          avg=avg, 
                                          sd=sd)
