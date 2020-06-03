@@ -1024,10 +1024,10 @@ def get_muts_sig_per_TF(annoted_input_file, dict_type_mean_std_scores,
                     #no simulated mutations in the background to compare; set p-value as 1
                     p_value = 0.0
                 try:
-                    dict_pvals[line_index] = (p_value)
+                    dict_pvals[line_index] = float(p_value)
                     dict_line_indices = (line_index)
                 except KeyError:
-                    dict_pvals[line_index]= [p_value]
+                    dict_pvals[line_index]= [float(p_value)]
                     dict_line_indices = [line_index]
             
             print("Computing adjusted P-values for {}".format(annoted_input_file))
