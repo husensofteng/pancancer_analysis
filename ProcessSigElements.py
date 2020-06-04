@@ -54,10 +54,36 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
     #overlapping genes
     regions_input_file_obj.intersect(BedTool(genes_input_file), wo=True).saveas(regions_input_file_intersect_genes)#groupby(g=4, c=[], o=[])
     
+    
+    comm_gene_type = ''
+    first = True
+    for gene_type in gene_types_to_consider:
+        if first:
+            first = False
+            comm =  '$13=={}'.format(gene_type)
+            comm_gene_type += comm
+        else:
+            comm_gene_type += '|| $13=={}'.format(gene_type)
+            
+    print(comm_gene_type)
+    
+    comm_gene_status = ''
+    first = True
+    for gene_status in gene_status_to_consider:
+        if first:
+            first = False
+            comm =  '$12=={}'.format(gene_status)
+            comm_gene_status += comm
+        else:
+            comm_gene_status += '|| $12=={}'.format(gene_status)
+    
+    print(comm_gene_status)     
+    
+      
     #removed missing chromosomes from genes file
     genes_input_file_local = regions_input_file + genes_input_file.split('/')[-1] +'_local'
-    os.system("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {} {} > {}""".format(
-        regions_input_file, genes_input_file, genes_input_file_local))
+    os.system("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {} {} | if({}&{}) print $0 > {}""".format(
+        regions_input_file, genes_input_file,comm_gene_type,comm_gene_status, genes_input_file_local))
     #closest genes far than window
     regions_input_file_obj.closest(BedTool(genes_input_file_local), io=True).saveas(regions_input_file_closest_genes)
     
