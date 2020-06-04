@@ -44,8 +44,8 @@ def generate_extended_regions(regions, extended_output_file, chr_lengths, window
     return extended_output_file
 
 def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_file,
-                     gene_types_to_consider = ['protein_coding', 'RNA'], 
-                     gene_status_to_consider = ['KNOWN'], n=3, 
+                     gene_types_to_consider = ["protein_coding", "RNA"], 
+                     gene_status_to_consider = ["KNOWN"], n=3, 
                      upstream=True, downstream=True, overlapping = True, max_dist = 100000):
     
     regions_input_file_intersect_genes = regions_input_file+"intersect_genes"
@@ -82,7 +82,8 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
       
     #removed missing chromosomes from genes file
     genes_input_file_local = regions_input_file + genes_input_file.split('/')[-1] +'_local'
-    os.system("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a {} {} | {{if(({})&({})) print $0}}' > {}""".format(
+    print("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a {} {} | {{if(({})&&({})) print $0}}' > {}""")
+    os.system("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a {} {} | {{if(({})&&({})) print $0}}' > {}""".format(
         regions_input_file, genes_input_file,comm_gene_type,comm_gene_status, genes_input_file_local))
     #closest genes far than window
     regions_input_file_obj.closest(BedTool(genes_input_file_local), io=True).saveas(regions_input_file_closest_genes)
@@ -1095,10 +1096,10 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     gencode_output_file = gencode_input_file + "_extractedinfo"
     if not os.path.exists(gencode_output_file):
         get_features_from_gencode(gencode_input_file, gencode_output_file)
-    gene_types_to_consider = ['protein_coding',
-                              'IG_V_gene', 'IG_C_gene', 'IG_J_gene', 'IG_D_gene', 
-                              'TR_V_gene', 'TR_C_gene', 'TR_J_gene', 'TR_D_gene', 
-                              'processed_transcript']
+    gene_types_to_consider = ["protein_coding",
+                              "IG_V_gene", "IG_C_gene", "IG_J_gene", "IG_D_gene", 
+                              "TR_V_gene", "TR_C_gene", "TR_J_gene", "TR_D_gene", 
+                              "processed_transcript"]
     
     region_types_dict = get_region_type(aggregated_lines=aggregated_lines, genes_segments_input_file=gencode_output_file, 
                                         gene_types_to_consider=gene_types_to_consider, gene_status_to_consider=gene_status_to_consider,
