@@ -82,9 +82,13 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
       
     #removed missing chromosomes from genes file
     genes_input_file_local = regions_input_file + genes_input_file.split('/')[-1] +'_local'
-    print("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a {} {} | {{if(({})&&({})) print $0}}' > {}""")
-    os.system("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a {} {} | {{if(({})&&({})) print $0}}' > {}""".format(
+    print("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a {} {} | {{if(({})&&({})) print $0}}' > {}""".format(
         regions_input_file, genes_input_file,comm_gene_type,comm_gene_status, genes_input_file_local))
+    
+    #os.system("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a {} {} | {{if(({})&&({})) print $0}}' > {}""".format(
+     #   regions_input_file, genes_input_file,comm_gene_type,comm_gene_status, genes_input_file_local))
+    os.system("""awk -F'\t' '{{if(({})&&({})) print $0}}'{} > {}""".format(
+        comm_gene_type,comm_gene_status,genes_input_file, genes_input_file_local))
     #closest genes far than window
     regions_input_file_obj.closest(BedTool(genes_input_file_local), io=True).saveas(regions_input_file_closest_genes)
     
