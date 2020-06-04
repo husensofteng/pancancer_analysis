@@ -60,10 +60,10 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
     for gene_type in gene_types_to_consider:
         if first:
             first = False
-            comm =  '$9=={}'.format(gene_type)
+            comm =  '$9==' + gene_type
             comm_gene_type += comm
         else:
-            comm_gene_type += '|| $9=={}'.format(gene_type)
+            comm_gene_type += ' || $9==' + gene_type
             
     print(comm_gene_type)
     
@@ -72,10 +72,10 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
     for gene_status in gene_status_to_consider:
         if first:
             first = False
-            comm =  '$8=={}'.format(gene_status)
+            comm =  '$8=={}' + gene_status
             comm_gene_status += comm
         else:
-            comm_gene_status += '|| $8=={}'.format(gene_status)
+            comm_gene_status += ' || $8=={}'+gene_status
     
     print(comm_gene_status)     
     
