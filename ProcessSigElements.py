@@ -65,7 +65,7 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
         else:
             comm_gene_type += ' || $9=="{}"'.format(gene_type)
             
-    print(comm_gene_type)
+
     
     comm_gene_status = ''
     first = True
@@ -77,21 +77,17 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
         else:
             comm_gene_status += ' || $8=="{}"'.format(gene_status)
     
-    print(comm_gene_status)     
+  
     
       
     #removed missing chromosomes from genes file
     genes_input_file_local = regions_input_file + genes_input_file.split('/')[-1] +'_local'
-    print("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {} {} | awk 'BEGIN{{FS=OFS="\t"}} {{if(({})&&({})) print $0'}} > {}""".format(
-        regions_input_file, genes_input_file,comm_gene_type,comm_gene_status, genes_input_file_local))
-    
-    #os.system("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a {} {} | {{if(({})&&({})) print $0}}' > {}""".format(
-     #   regions_input_file, genes_input_file,comm_gene_type,comm_gene_status, genes_input_file_local))
+
     os.system("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {} {} | awk 'BEGIN{{FS=OFS="\t"}} {{if(({})&&({})) print $0'}} > {}""".format(
         regions_input_file, genes_input_file,comm_gene_type,comm_gene_status, genes_input_file_local))
     #closest genes far than window
     regions_input_file_obj.closest(BedTool(genes_input_file_local), io=True).saveas(regions_input_file_closest_genes)
-    #os.remove(genes_input_file_local)
+    os.remove(genes_input_file_local)
     
     #identify intersected genes
     regions_ugenes_dict = {}
@@ -207,7 +203,6 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
                 l = ifile.readline().strip().split('\t')
                 break
             l = ifile.readline().strip().split('\t')
-    #os.remove(regions_input_file_closest_genes)
     
     regions_genes_dict = {}
     for reg in regions_ogenes_dict:
@@ -237,6 +232,10 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
                 regions_genes_dict[reg].append(g[0]+"::{i}D{dist}".format(i=i, dist=g[1]))
             except KeyError:
                 regions_genes_dict[reg] = [g[0]+"::{i}D{dist}".format(i=i, dist=g[1])]
+                
+                
+    os.remove(regions_input_file_intersect_genes)
+    os.remove(regions_input_file_closest_genes )
     return regions_genes_dict
 
 def aggregate_results(regions_input_file):
