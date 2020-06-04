@@ -60,10 +60,10 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
     for gene_type in gene_types_to_consider:
         if first:
             first = False
-            comm =  '$13=={}'.format(gene_type)
+            comm =  '$9=={}'.format(gene_type)
             comm_gene_type += comm
         else:
-            comm_gene_type += '|| $13=={}'.format(gene_type)
+            comm_gene_type += '|| $9=={}'.format(gene_type)
             
     print(comm_gene_type)
     
@@ -72,17 +72,17 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
     for gene_status in gene_status_to_consider:
         if first:
             first = False
-            comm =  '$12=={}'.format(gene_status)
+            comm =  '$8=={}'.format(gene_status)
             comm_gene_status += comm
         else:
-            comm_gene_status += '|| $12=={}'.format(gene_status)
+            comm_gene_status += '|| $8=={}'.format(gene_status)
     
     print(comm_gene_status)     
     
       
     #removed missing chromosomes from genes file
     genes_input_file_local = regions_input_file + genes_input_file.split('/')[-1] +'_local'
-    print("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a {} {} | {{if(({})&&({})) print $0}}' > {}""".format(
+    print("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {} {} | awk 'BEGIN{{FS=OFS="\t"}} {{if(({})&&({})) print $0}}' > {}""".format(
         regions_input_file, genes_input_file,comm_gene_type,comm_gene_status, genes_input_file_local))
     
     #os.system("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a {} {} | {{if(({})&&({})) print $0}}' > {}""".format(
@@ -91,7 +91,6 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
         comm_gene_type,comm_gene_status,genes_input_file, genes_input_file_local))
     #closest genes far than window
     regions_input_file_obj.closest(BedTool(genes_input_file_local), io=True).saveas(regions_input_file_closest_genes)
-    
     #os.remove(genes_input_file_local)
     
     #identify intersected genes
@@ -167,43 +166,43 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
         l = ifile.readline().strip().split('\t')
         while l:
             try:
-                if l[11] in gene_status_to_consider and l[12] in gene_types_to_consider:
-                    region_start = int(l[3].split(':')[1].split('-')[0])
-                    region_end = int(l[3].split(':')[1].split('-')[1])
-                    gene_start = int(l[5])
-                    gene_end = int(l[6])
-                    if (l[3] not in regions_ogenes_dict and l[3] not in regions_ugenes_dict and l[3] not in regions_dgenes_dict):
-                        if region_start > gene_end:
-                            if upstream:
-                                d = region_start-gene_start
-                                if l[8] == '-':
-                                    d = region_start-gene_end
-                                gene_info = l[10]+"::"+l[9]
-                                try:
-                                    if len(regions_ugenes_dict[l[3]])<n:
-                                        regions_ugenes_dict[l[3]].append([gene_info, d])
-                                    else:#there are n genes already, remove a gene with a larger distance
-                                        regions_ugenes_dict[l[3]] = sorted(regions_ugenes_dict[l[3]],key=lambda l:l[1], reverse=False)
-                                        if regions_ugenes_dict[l[3]][n-1][1] > d:
-                                            regions_ugenes_dict[l[3]][n-1] = [gene_info, d]
-                                except KeyError:
-                                    regions_ugenes_dict[l[3]] = [[gene_info, d]]
-                                    
-                        elif (region_start < gene_end):
-                            if downstream:
-                                d = gene_start-region_end#region_start
-                                if l[8] == '-':
-                                    d = gene_end-region_end#region_start
-                                gene_info = l[10]+"::"+l[9]
-                                try:
-                                    if len(regions_dgenes_dict[l[3]])<n:
-                                        regions_dgenes_dict[l[3]].append([gene_info, d])
-                                    else:#there are n genes already, remove a gene with a larger distance
-                                        regions_dgenes_dict[l[3]] = sorted(regions_dgenes_dict[l[3]],key=lambda l:l[1], reverse=False)
-                                        if regions_dgenes_dict[l[3]][n-1][1] > d:
-                                            regions_dgenes_dict[l[3]][n-1] = [gene_info, d]
-                                except KeyError:
-                                    regions_dgenes_dict[l[3]] = [[gene_info, d]]
+
+                region_start = int(l[3].split(':')[1].split('-')[0])
+                region_end = int(l[3].split(':')[1].split('-')[1])
+                gene_start = int(l[5])
+                gene_end = int(l[6])
+                if (l[3] not in regions_ogenes_dict and l[3] not in regions_ugenes_dict and l[3] not in regions_dgenes_dict):
+                    if region_start > gene_end:
+                        if upstream:
+                            d = region_start-gene_start
+                            if l[8] == '-':
+                                d = region_start-gene_end
+                            gene_info = l[10]+"::"+l[9]
+                            try:
+                                if len(regions_ugenes_dict[l[3]])<n:
+                                    regions_ugenes_dict[l[3]].append([gene_info, d])
+                                else:#there are n genes already, remove a gene with a larger distance
+                                    regions_ugenes_dict[l[3]] = sorted(regions_ugenes_dict[l[3]],key=lambda l:l[1], reverse=False)
+                                    if regions_ugenes_dict[l[3]][n-1][1] > d:
+                                        regions_ugenes_dict[l[3]][n-1] = [gene_info, d]
+                            except KeyError:
+                                regions_ugenes_dict[l[3]] = [[gene_info, d]]
+                                
+                    elif (region_start < gene_end):
+                        if downstream:
+                            d = gene_start-region_end#region_start
+                            if l[8] == '-':
+                                d = gene_end-region_end#region_start
+                            gene_info = l[10]+"::"+l[9]
+                            try:
+                                if len(regions_dgenes_dict[l[3]])<n:
+                                    regions_dgenes_dict[l[3]].append([gene_info, d])
+                                else:#there are n genes already, remove a gene with a larger distance
+                                    regions_dgenes_dict[l[3]] = sorted(regions_dgenes_dict[l[3]],key=lambda l:l[1], reverse=False)
+                                    if regions_dgenes_dict[l[3]][n-1][1] > d:
+                                        regions_dgenes_dict[l[3]][n-1] = [gene_info, d]
+                            except KeyError:
+                                regions_dgenes_dict[l[3]] = [[gene_info, d]]
             except IndexError:
                 l = ifile.readline().strip().split('\t')
                 break
