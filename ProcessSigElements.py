@@ -1142,7 +1142,7 @@ def parse_args():
     parser.add_argument('--window', type=int, default=2000, help='window')
     parser.add_argument('--output_dir', default='processed_sigelements_output', help='processed_sigelements_output')
     parser.add_argument('--cohort_sig_test', default = 'All-tumors-without-Lymphatic-system-Skin-Melanoma',  help='')
-
+    parser.add.argument('--merged_mut_sig', action='store_const', const=True, help='Filter elements on FDR (adjusted p-values), if the flag is missing it would filter on p-value')
     parser.add_argument('--num_cores', type=int, default=10, help='')
     
     parser.add_argument('--observed_mutations_all', help='')
@@ -1181,8 +1181,24 @@ if __name__ == '__main__':
     
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
     
+    ext = "_statspvalueslocalw{local_domain_window}onlysig{merged_mut_sig_threshold}".format(local_domain_window=args.local_domain_window, merged_mut_sig_threshold=args.merged_mut_sig_threshold)
+    ext_rep = "_statspvalueslocalw{local_domain_window}".format(local_domain_window=args.local_domain_window)
+
+    generated_merged_element_files = [s.replace(ext, ext_rep) for s in generated_sig_merged_element_files]
+    
+    
+    #merged elements filterd by fdr
+    if args.merged_mut_sig:
+        merged_elements_files=generated_sig_merged_element_files
+    else:
+        merged_elements_files=generated_merged_element_files
+    
+    ATELM_generated_merged_element_files = [x for x in  merged_elements_files if args.cohort_sig_test in x]
+        
+    print(merged_elements_files)
+    
     aggregated_output_file = getSigElements(
-                    generated_sig_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+                    merged_elements_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
                     args.n, args.max_dist, args.window, 
                     args.output_dir,
                     args.observed_input_file, args.tracks_dir, 
@@ -1196,11 +1212,10 @@ if __name__ == '__main__':
     print("Generating genes and patwhways for ATELM cohort")
     #Genes and patwhways for ATELM cohort
     
-    ATELM_generated_sig_merged_element_files = [x for x in generated_sig_merged_element_files if args.cohort_sig_test in x]
  
  
     aggregated_output_file_ATELM = getSigElements(
-                     ATELM_generated_sig_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+                     ATELM_generated_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
                      args.n, args.max_dist, args.window, 
                      args.output_dir,
                      args.observed_input_file, args.tracks_dir, 
