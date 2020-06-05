@@ -1142,7 +1142,7 @@ def parse_args():
     parser.add_argument('--window', type=int, default=2000, help='window')
     parser.add_argument('--output_dir', default='processed_sigelements_output', help='processed_sigelements_output')
     parser.add_argument('--cohort_sig_test', default = 'All-tumors-without-Lymphatic-system-Skin-Melanoma',  help='')
-    parser.add.argument('--merged_mut_sig', action='store_const', const=True, help='Filter elements on FDR (adjusted p-values), if the flag is missing it would filter on p-value')
+    parser.add_argument('--merged_mut_sig', action='store_const', const=True, help='Filter elements on FDR (adjusted p-values), if the flag is missing it would filter on p-value')
     parser.add_argument('--num_cores', type=int, default=10, help='')
     
     parser.add_argument('--observed_mutations_all', help='')
