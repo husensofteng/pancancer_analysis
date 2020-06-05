@@ -1002,7 +1002,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
                     open(active_driver_output_file, 'a').close()
                 
                 #keep only significant elements    
-            awk_stmt_sig = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if($15<=0.005) print $0}}' {active_driver_output_file} > {active_driver_output_file_sig} 
+            awk_stmt_sig = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if($15<=0.05) print $0}}' {active_driver_output_file} > {active_driver_output_file_sig} 
                                 """).format(active_driver_output_file=active_driver_output_file, active_driver_output_file_sig = active_driver_output_file_sig)
             os.system(awk_stmt_sig)
             print(awk_stmt_sig)
