@@ -1184,13 +1184,12 @@ if __name__ == '__main__':
     ext = "_statspvalueslocalw{local_domain_window}onlysig{merged_mut_sig_threshold}".format(local_domain_window=args.local_domain_window, merged_mut_sig_threshold=args.merged_mut_sig_threshold)
     ext_rep = "_statspvalueslocalw{local_domain_window}".format(local_domain_window=args.local_domain_window)
     
-    generated_sig_merged_element_files = [args.mutations_cohorts_outdir for x in os.listdir(args.mutations_cohorts_outdir) if 'statspvalueslocalw25000onlysig0.05' in x]
-    
+    generated_sig_merged_element_files = [args.mutations_cohorts_outdir+x for x in os.listdir(args.mutations_cohorts_outdir) if 'statspvalueslocalw25000onlysig0.05' in x]
+
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
     print(generated_sig_merged_element_files)
     
 
-    
    
 
     generated_merged_element_files = [s.replace(ext, ext_rep) for s in generated_sig_merged_element_files]
