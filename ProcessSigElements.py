@@ -1171,23 +1171,23 @@ if __name__ == '__main__':
         os.makedirs(args.output_dir)
     
     print("Generated significant elements")
-    #generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
-    #    args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
-     #   args.simulated_input_dir, args.chr_lengths_file, args.num_cores, 
-    #    args.background_window, args.background_window_size, args.elements_oncodrive,
-    #    args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
-    #    args.distance_to_merge, args.merged_mut_sig_threshold,
-    #    args.local_domain_window, args.tmp_dir, args.n_cores_fscore)
+    generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
+        args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
+        args.simulated_input_dir, args.chr_lengths_file, args.num_cores, 
+        args.background_window, args.background_window_size, args.elements_oncodrive,
+        args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
+        args.distance_to_merge, args.merged_mut_sig_threshold,
+        args.local_domain_window, args.tmp_dir, args.n_cores_fscore)
     
     
     
     ext = "_statspvalueslocalw{local_domain_window}onlysig{merged_mut_sig_threshold}".format(local_domain_window=args.local_domain_window, merged_mut_sig_threshold=args.merged_mut_sig_threshold)
     ext_rep = "_statspvalueslocalw{local_domain_window}".format(local_domain_window=args.local_domain_window)
     
-    generated_sig_merged_element_files = [args.mutations_cohorts_outdir+x for x in os.listdir(args.mutations_cohorts_outdir) if 'statspvalueslocalw25000onlysig0.05' in x]
+    #generated_sig_merged_element_files = [args.mutations_cohorts_outdir+x for x in os.listdir(args.mutations_cohorts_outdir) if 'statspvalueslocalw25000onlysig0.05' in x]
 
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
-    print(generated_sig_merged_element_files)
+    #print(generated_sig_merged_element_files)
     
 
    
