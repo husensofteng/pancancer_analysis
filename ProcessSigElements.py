@@ -81,13 +81,13 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
     
       
     #removed missing chromosomes from genes file
-    genes_input_file_local = regions_input_file + genes_input_file.split('/')[-1] +'_local'
+    genes_input_file_local = regions_input_file +  +'hg19_genes_local'
 
     os.system("""awk -F'\t' 'NR==FNR{{a[$1];next;}} ($1) in a' {} {} | awk 'BEGIN{{FS=OFS="\t"}} {{if(({})&&({})) print $0'}} | sort -k1,1V -k2,2n -k3,3n > {}""".format(
         regions_input_file, genes_input_file,comm_gene_type,comm_gene_status, genes_input_file_local))
     #closest genes far than window
     regions_input_file_obj.closest(BedTool(genes_input_file_local), io=True).saveas(regions_input_file_closest_genes)
-    os.remove(genes_input_file_local)
+    
     
     #identify intersected genes
     regions_ugenes_dict = {}
@@ -236,6 +236,7 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
                 
     os.remove(regions_input_file_intersect_genes)
     os.remove(regions_input_file_closest_genes )
+    #os.remove(genes_input_file_local)
     return regions_genes_dict
 
 def aggregate_results(regions_input_file):
@@ -1002,11 +1003,11 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
                     open(active_driver_output_file, 'a').close()
                 
                 #keep only significant elements    
-            awk_stmt_sig = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if($15<=0.05) print $0}}' {active_driver_output_file} > {active_driver_output_file_sig} 
+                awk_stmt_sig = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if($15<=0.05) print $0}}' {active_driver_output_file} > {active_driver_output_file_sig} 
                                 """).format(active_driver_output_file=active_driver_output_file, active_driver_output_file_sig = active_driver_output_file_sig)
-            os.system(awk_stmt_sig)
-            print(awk_stmt_sig)
-            copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
+                os.system(awk_stmt_sig)
+                print(awk_stmt_sig)
+                copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
             with open(active_driver_output_file_local_sig) as infile:
                 for line in infile:
                     active_driver_output_local_sig_all_ofile.write(line)
