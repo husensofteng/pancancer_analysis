@@ -137,7 +137,7 @@ def draw_tfs_per_cohort(ax, fig, sig_input_file, tfs=['CEBPB_MA0466.2', 'CTCF_MA
     #df = df[df['FDR']>=2]
     df = df[df['Enrichment']>=1]
     print (df['Enrichment'].min())
-    print len(df)
+    print (len(df))
     df_pivot = df.pivot(index='Cohorts', columns='TFs', values='Enrichment')
     ax.set_frame_on(False)
     cbar_ax = fig.add_axes([.94, 0.05, .015, .15])
