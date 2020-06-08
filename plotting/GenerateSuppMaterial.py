@@ -115,14 +115,12 @@ def plot_barcharts(input_file, x_col_index = 17, col0_to_check = 10, col1_to_che
     ax = fig.add_subplot(111)
     df = pd.read_table(input_file, sep='\t', header=None, usecols=[col0_to_check, x_col_index, col1_to_check, col2_to_check], names=['Motif diff score', 'TF motifs', 'DHS', 'TFBS'])
     df['TF motifs'] = df['TF motifs'].apply(lambda x: x.split('_')[0])
-    print(head(df))
     df = df[df['TF motifs'].isin(tf_motifs_to_include)]
     df['TFBS'] = np.where(df['TFBS'].apply(math.isnan), 0.0, df['TFBS'])
     df['TFBS'] = df['TFBS'].apply(float)
     df['Potential Effect'] = np.where((df['Motif diff score']>=0.3) & (df['DHS']>0.0) | (df['TFBS']>0.0), 'Yes', 'No')
     df['count']=1
     sns.barplot(x='TF motifs', y='count', hue='Potential Effect', data=df, estimator=sum, ax=ax)
-    print(head(df))
     ax.set_xticklabels(ax.get_xticklabels(), rotation=rotation)
     ax.set_ylabel(y_col_name)
     ax.set_title(label=title, loc='left')
