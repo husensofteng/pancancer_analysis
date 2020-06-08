@@ -1172,20 +1172,20 @@ if __name__ == '__main__':
         os.makedirs(args.output_dir)
     
     print("Generated significant elements")
-    #generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
-    #    args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
-    #    args.simulated_input_dir, args.chr_lengths_file, args.num_cores, 
-    #    args.background_window, args.background_window_size, args.elements_oncodrive,
-    #    args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
-    #    args.distance_to_merge, args.merged_mut_sig_threshold,
-    #    args.local_domain_window, args.tmp_dir, args.n_cores_fscore)
+    generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
+        args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
+        args.simulated_input_dir, args.chr_lengths_file, args.num_cores, 
+        args.background_window, args.background_window_size, args.elements_oncodrive,
+        args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
+        args.distance_to_merge, args.merged_mut_sig_threshold,
+        args.local_domain_window, args.tmp_dir, args.n_cores_fscore)
     
     
     
     ext = "_statspvalueslocalw{local_domain_window}onlysig{merged_mut_sig_threshold}".format(local_domain_window=args.local_domain_window, merged_mut_sig_threshold=args.merged_mut_sig_threshold)
     ext_rep = "_statspvalueslocalw{local_domain_window}".format(local_domain_window=args.local_domain_window)
     
-    generated_sig_merged_element_files = [args.mutations_cohorts_outdir+x for x in os.listdir(args.mutations_cohorts_outdir) if 'statspvalueslocalw25000onlysig0.05' in x]
+    #generated_sig_merged_element_files = [args.mutations_cohorts_outdir+x for x in os.listdir(args.mutations_cohorts_outdir) if 'statspvalueslocalw25000onlysig0.05' in x]
 
     print("Processed {} cohorts".format(len(generated_sig_merged_element_files)))
     #print(generated_sig_merged_element_files)
@@ -1216,7 +1216,22 @@ if __name__ == '__main__':
                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'All')
+    
+    
+    elements_output_file = get_gene_enrichments(
+        elements_input_file=aggregated_output_file, 
+        elements_output_file=aggregated_output_file+"_GenesInclCDS.tsv", 
+        skip_exon_elements=False)
      
+    calculated_p_value_sig_out_file = find_overlap_genesets_genelist(
+        args.kegg_pathways_file, elements_output_file, 
+        elements_output_file+'_pathways.tsv', 
+        total_number_of_genes_in_the_universe=20278, 
+        min_number_of_genes_be_enriched_for_geneset_to_be_reported = 10, 
+        index_gene_name=0, index_gene_names_start=3, 
+        keywords_to_filter_out_with=[], only_keep_the_sig_file = False, 
+        min_number_of_genes_in_geneset_to_consider_the_geneset = 10, 
+        header_line = False, sample_ids_given=True) 
      
     print("Generating genes and patwhways for ATELM cohort")
     #Genes and patwhways for ATELM cohort
