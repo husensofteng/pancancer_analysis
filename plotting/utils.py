@@ -115,7 +115,7 @@ def draw_motif(ax, fig, fontfamily='Arial', size=80, motif_pwm=[], x_shift = 0, 
     
     for index, scores in enumerate(motif_pwm):
         yshift_window = 0
-        for base, score in sorted(dict(scores).viewitems(), key=lambda z: z[1], reverse=False): 
+        for base, score in sorted(dict(scores).items(), key=lambda z: z[1], reverse=False): 
             #print 'index,base,score, yshift_window, ypos'
             #print index,base,score, yshift_window, ypos
             txt = ax.text(index+x_shift+1, 
