@@ -18,6 +18,7 @@ from decimal import Decimal
 import os, sys
 import seaborn as sns
 import operator
+import argparse
 sns.set(style="ticks")
 #plt.style.use('ggplot')
 sns.set_style("white")
@@ -121,7 +122,7 @@ def plot_barcharts(input_file, x_col_index = 17, col0_to_check = 10, col1_to_che
     df['Potential Effect'] = np.where((df['Motif diff score']>=0.3) & (df['DHS']>0.0) | (df['TFBS']>0.0), 'Yes', 'No')
     df['count']=1
     sns.barplot(x='TF motifs', y='count', hue='Potential Effect', data=df, estimator=sum, ax=ax)
-    print df.head()
+    print(head(df))
     ax.set_xticklabels(ax.get_xticklabels(), rotation=rotation)
     ax.set_ylabel(y_col_name)
     ax.set_title(label=title, loc='left')
@@ -163,7 +164,7 @@ def draw_rec_sigregs(elements_input_file, title):
         ax.scatter(df[x].min()-0.8, df[y].max()-(i/3.0)-0.5, color=colors_region_types_dict[f])
         draw_text(ax, x=df[x].min()-0.6, y=df[y].max()-(i/3.0)-0.5, text=f.replace('proximal_','').replace('intronic', 'intron'), horizontalalignment='left', fontsize=8)
     labels_to_plot_df = df[(df['#Samples']>5) | (df['#Samples(RegMuts)']>=10)]# (df['Score']>5)]
-    print len(labels_to_plot_df)
+    print(len(labels_to_plot_df))
     for i, r in labels_to_plot_df.iterrows():
         color = 'black'
         label = r['Nearby-Genes(Name::ID::O|U|Ddistance::COSMIC|KCP|PCD)'].split('::')[0]
@@ -226,7 +227,7 @@ if __name__ == '__main__':
         pdf.savefig(fig)
         
         sfig_num+=1
-        print sfig_num
+        print(sfig_num)
         #Box plot for all mutations in motifs per sample per cancer type
         df = get_mut_df(input=args.motif_mut_input_file, x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
         #df = get_mut_df(input='/home/huum/projs/regMotifs/analysis/motifmuts_all.bed12', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
@@ -248,7 +249,7 @@ if __name__ == '__main__':
         #pdf.savefig(fig)
         
         sfig_num+=3
-        print sfig_num
+        print(sfig_num)
         #Bar charts per TF-motif (with DHS|TFBS and without)
         motif_muts_file = args.mut_anno_input_file
         #motif_muts_file = '/Users/karolinasg/Documents/pcawg/analysis/obsann22May2017_exclVEP.bed9' 
@@ -260,7 +261,7 @@ if __name__ == '__main__':
         
         
         sfig_num+=1
-        print sfig_num
+        print(sfig_num)
         #Box plot for CFRMs in SF-MREs per sample per cancer type
         #elements_input_file = '/Users/karolinasg/Documents/pcawg/NEW_RESULTS_removig_VEP_23_october/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
         elements_input_file =args.elements_input_file
@@ -273,7 +274,7 @@ if __name__ == '__main__':
         
         
         sfig_num+=1
-        print sfig_num
+        print(sfig_num)
         #heat map for RegMotifs in SF-MREs per TF motif per chromatin state
         box_plot_df, heatmap_df = get_df_from_elements(elements_input_file, col_to_use='Mutated-Moitfs', sep='#', 
                                             x_col_index=15, y_col_index=10, x_col_name = 'Chromatin States', y_col_name='TF Motifs', 
@@ -282,7 +283,7 @@ if __name__ == '__main__':
         pdf.savefig(fig)
         
         sfig_num+=1
-        print sfig_num
+        print(sfig_num)
         #elements_input_file = '/Users/karolinasg/Documents/pcawg/NEW_RESULTS_removig_VEP_23_october/merged200bp_extended200bp_nofullexon_Lymph/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
         elements_input_file =args.elements_input_file
         #elements_input_file = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_Lymph/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
