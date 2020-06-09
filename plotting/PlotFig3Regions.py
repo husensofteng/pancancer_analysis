@@ -65,7 +65,7 @@ def draw_sigregs(ax):
 def draw_rec_sigregs(ax, elements_input_file):
     elements_input = pd.read_table(elements_input_file, sep='\t', skiprows=6, header=0)
     df = elements_input[(elements_input['#Samples(RegMuts)']>1)]
-    print df.head(2)
+    #print(df)
     df['FDR'] = np.where(df['FDR']==0.0, 1e-300, df['FDR'])#to replace zero with a number that can be converted to log10
     df['FDR'] = df['FDR'].apply(lambda x: np.log10(x)*-1)
     y = 'Score'
@@ -88,7 +88,7 @@ def draw_rec_sigregs(ax, elements_input_file):
         ax.scatter(df[x].min()-0.8, df[y].max()-(i/3.0)-0.5, color=colors_region_types_dict[f])
         draw_text(ax, x=df[x].min()-0.6, y=df[y].max()-(i/3.0)-0.5, text=f.replace('proximal_','').replace('intronic', 'intron'), horizontalalignment='left', fontsize=8)
     labels_to_plot_df = df[(df['#Samples']>5) | (df['#Samples(RegMuts)']>=10)]# (df['Score']>5)]
-    print len(labels_to_plot_df)
+    print(len(labels_to_plot_df))
     for i, r in labels_to_plot_df.iterrows():
         color = 'black'
         label = r['Nearby-Genes(Name::ID::O|U|Ddistance::COSMIC|KCP|PCD)'].split('::')[0]
