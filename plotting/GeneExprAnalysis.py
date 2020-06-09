@@ -71,7 +71,7 @@ def get_exper_per_sample_per_gene(gene_counts, gene_info, sample_col_to_use, don
                 elif 'Metastatic tumour' in sample_info[specimen_type]:
                     k = 'Metastatic tumour'
                 else:
-                    print 'Unrecognized specimen type', sample_info[specimen_type]
+                    print('Unrecognized specimen type', sample_info[specimen_type])
                 try:
                     tumor_gene_expr_this_donor[k].append(gene_exp)
                     tumor_gene_expr_this_donor_info[k].append(sample_info)
