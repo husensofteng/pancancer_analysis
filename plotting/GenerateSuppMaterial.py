@@ -195,7 +195,7 @@ def parse_args():
     parser.add_argument('--mut_anno_input_file', default='', help='')
     parser.add_argument('--motif_mut_input_file', default='', help='')
     parser.add_argument('--elements_input_file', default='', help='')
-    parser.add_argument('--args.elements_input_file_Lymph', default='', help='')
+    parser.add_argument('--elements_input_file_Lymph', default='', help='')
     parser.add_argument('--output_dir', default='', help='')
     
 
@@ -266,7 +266,7 @@ if __name__ == '__main__':
         elements_input_file =args.elements_input_file
         #elements_input_file = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
         box_plot_df, heatmap_df = get_df_from_elements(elements_input_file, col_to_use='RegMuts', sep='#', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency', col_to_check='#Samples(RegMuts)', threshold=1)
-        fig = plot_boxplot(box_plot_df, groups_colors_dict=groups_colors_dict, rotation=90, title="SFig. {n} CFRMs across cancer types".format(n=sfig_num))
+        fig = plot_boxplot(box_plot_df, groups_colors_dict=groups_colors_dict, rotation=90, title="SFig. {n} regMuts across cancer types".format(n=sfig_num))
         pdf.savefig(fig)
         
         
@@ -278,7 +278,7 @@ if __name__ == '__main__':
         box_plot_df, heatmap_df = get_df_from_elements(elements_input_file, col_to_use='Mutated-Moitfs', sep='#', 
                                             x_col_index=15, y_col_index=10, x_col_name = 'Chromatin States', y_col_name='TF Motifs', 
                  col_to_check='#Samples(RegMuts)', threshold=1)
-        fig = plot_heatmap(heatmap_df, x_col_name='Chromatin States', y_col_name='', title="SFig. {n} Enrichment of mutated motifs in SF-MREs per chromatin state".format(n=sfig_num))
+        fig = plot_heatmap(heatmap_df, x_col_name='Chromatin States', y_col_name='', title="SFig. {n} Enrichment of mutated motifs in regEs per chromatin state".format(n=sfig_num))
         pdf.savefig(fig)
         
         sfig_num+=1
@@ -286,7 +286,7 @@ if __name__ == '__main__':
         #elements_input_file = '/Users/karolinasg/Documents/pcawg/NEW_RESULTS_removig_VEP_23_october/merged200bp_extended200bp_nofullexon_Lymph/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
         elements_input_file_Lymph =args.elements_input_file_Lymph
         #elements_input_file = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_Lymph/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
-        fig = draw_rec_sigregs(elements_input_file_Lymph, title='SFig. {n} SF-MREs identified from Lymphoma cohorts'.format(n=sfig_num))
+        fig = draw_rec_sigregs(elements_input_file_Lymph, title='SFig. {n} regEs identified from Lymphoma cohorts'.format(n=sfig_num))
         pdf.savefig(fig)
         
         sfig_num+=1

@@ -161,7 +161,7 @@ def plot_oncoprint(ax, input_file, groups_cols_file, x_shift=400, min_num_to_inc
     
     legend_x = len(cols) - (len(cols)/4.0)
     legend_y = -3
-    draw_text(ax, x=legend_x, y=legend_y, text="CFRMs", color='black', fontsize=10, horizontalalignment='left', rotation=0, verticalalignment='center')
+    draw_text(ax, x=legend_x, y=legend_y, text="regMuts", color='black', fontsize=10, horizontalalignment='left', rotation=0, verticalalignment='center')
     draw_marker(ax, x=legend_x-20, y=legend_y, marker='|', color='grey', markersize=12)
     draw_text(ax, x=legend_x+200, y=legend_y, text="Other Mutations", color='black', fontsize=10, horizontalalignment='left', rotation=0, verticalalignment='center')
     draw_marker(ax, x=legend_x+200-20, y=legend_y, marker='.', color='grey', markersize=12)
