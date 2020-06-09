@@ -241,7 +241,7 @@ def plot_genomic_context(ax1, ax2, ax3, x_shift, gene_name, cell_names, elements
     cells_boxes = get_boxes_to_plot(chip_seq_infile, chr=chr, start=start, end=end, cell_names=cell_names, factors=[])
     plot_peaks(ax3, start=start, end=end, cells_boxes=cells_boxes)
     
-def plot_gene_expr(fig, gs, row_num, genes_cancertypes,genes_mutated_input, meta_data,gene_expr_intput):
+def plot_gene_expr( genes_cancertypes,genes_mutated_input, meta_data,gene_expr_intput, fig, gs, row_num):
 
     #genes_mutated_input = '../analysis/PancanElements/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv_GenesInclExons.tsv'
     #genes_mutated_input = '../analysis/data/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb_pancan.tsv_GenesInclCDS.tsv'
@@ -320,7 +320,7 @@ if __name__ == '__main__':
     show_y_label = False
     plot_genomic_context(ax4, ax5, ax6, x_shift=x_shift, gene_name='MYC', cell_names=['GM12878'], elements_infile=elements_infile, gene_infile=gene_infile, chip_seq_infile=chip_seq_infile)
     
-    plot_gene_expr(fig, gs, row_num=3, genes_cancertypes=genes_cancertypes, genes_mutated_input, meta_data,gene_expr_intput)
+    plot_gene_expr( genes_mutated_input, meta_data,gene_expr_intput, fig, gs, row_num=3, genes_cancertypes=genes_cancertypes)
     fig4 = args.output_dir+'/Fig4'
     plt.savefig(fig4+'.pdf')
     plt.savefig(fig4+'.svg')
