@@ -311,7 +311,7 @@ if __name__ == '__main__':
     #chip_seq_infile='/Users/husensofteng/Documents/workspace/ActiveMotifs/analysis/data/tracks/all_chip-seq_data_CellInfo_combined.bed6'
     
     
-    elements_infile = arsg.elements_input_file
+    elements_infile = args.elements_input_file
     gene_infile = args.gene_input_file
     chip_seq_infile=args.chip_seq_input_file
     genes_mutated_input= args.genes_elem_input-file
