@@ -143,7 +143,7 @@ def draw_tfs_per_cohort(ax, fig, sig_input_file, tfs=['CEBPB_MA0466.2', 'CTCF_MA
     ax.set_frame_on(False)
     cbar_ax = fig.add_axes([.94, 0.05, .015, .15])
     plt_res = sns.heatmap(df_pivot, ax=ax, robust=True, center=1, square=True, 
-                          cbar_ax=cbar_ax, cbar=True, cbar_kws={'ticks': [0,1.5,3]}, cmap = sns.cm.rocket_r)
+                          cbar_ax=cbar_ax, cbar=True, cbar_kws={'ticks': [0,1.5,3]}, cmap = "YlGnBu")
     #plt.xticks(rotation=90)
     plt_res.set_yticklabels(plt_res.get_yticklabels(), rotation=0)
     plt_res.set_xticklabels(plt_res.get_xticklabels(), rotation=90)
