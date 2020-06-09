@@ -74,7 +74,7 @@ def plot_heatmap(df, x_col_name, y_col_name, fig_width=8, fig_height=6, title=""
             if df[c].sum()>threshold_to_include_element:
                 df_pivot_filtered[c] = df[c] 
     cbar_ax = fig.add_axes([.75, 0.85, .2, .03])
-    sns.heatmap(df_pivot_filtered, ax=ax, square=True, cbar_ax=cbar_ax, cbar=True, cbar_kws={"orientation": "horizontal"}, cmap=sns.cm.rocket_r )
+    sns.heatmap(df_pivot_filtered, ax=ax, square=True, cbar_ax=cbar_ax, cbar=True, cbar_kws={"orientation": "horizontal"}, cmap = "YlGnBu" )
     ax.set_xticklabels(ax.get_xticklabels(), rotation=rotation)
     ax.set_ylabel(y_col_name)
     ax.set_title(label=title, loc='left')

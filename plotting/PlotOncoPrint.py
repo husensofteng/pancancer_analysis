@@ -7,7 +7,7 @@ import matplotlib
 from numpy.lib.function_base import average
 from collections import Counter
 import math
-matplotlib.use('Agg')
+matplotlib.use('pdf')
 #matplotlib.use('TkAgg')
 from matplotlib.pyplot import tight_layout
 import seaborn as sns
