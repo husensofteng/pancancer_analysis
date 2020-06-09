@@ -4,7 +4,7 @@ Created on Jun 6, 2017
 @author: husensofteng
 '''
 import matplotlib
-matplotlib.use('TkAgg')
+matplotlib.use('Agg')
 from numpy.lib.function_base import average
 import math
 from matplotlib.pyplot import tight_layout

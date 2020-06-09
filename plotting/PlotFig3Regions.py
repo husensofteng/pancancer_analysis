@@ -6,7 +6,7 @@ Created on 21 Jul 2017
 import matplotlib
 from numpy.lib.function_base import average
 import math
-matplotlib.use('pdf')
+matplotlib.use('Agg')
 from matplotlib.pyplot import tight_layout
 import seaborn as sns
 import matplotlib.pyplot as plt
