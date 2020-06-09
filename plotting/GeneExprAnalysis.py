@@ -37,7 +37,7 @@ def read_genes_elements(genes_mutated_input):
     return genes
     
 def read_gene_expr(gene_exp_input, mutated_genes = []):
-    print gene_exp_input+'_filtered'
+    print(gene_exp_input+'_filtered')
     if os.path.exists(gene_exp_input+'_filtered'+str(len(mutated_genes))):
         return pd.read_table(gene_exp_input+'_filtered'+str(len(mutated_genes)), sep='\t'), gene_exp_input+'_filtered'+str(len(mutated_genes))
     gene_expr = pd.read_table(gene_exp_input, sep='\t')
@@ -87,7 +87,7 @@ def get_exper_per_sample_per_gene(gene_counts, gene_info, sample_col_to_use, don
             elif 'Metastatic tumour' in tumor_gene_expr_this_donor.keys():
                 to_use='Metastatic tumour'
             else:
-                print 'Unrecognized specimen types: ', tumor_gene_expr_this_donor.keys()
+                print('Unrecognized specimen types: ', tumor_gene_expr_this_donor.keys())
             gene_expr_avg = np.mean(tumor_gene_expr_this_donor[to_use])
             samples = tumor_gene_expr_this_donor_info[to_use]
             aliquot_ids = []
@@ -140,7 +140,7 @@ def get_exper_per_sample_per_gene(gene_counts, gene_info, sample_col_to_use, don
                 elif 'Metastatic tumour' in sample_info[specimen_type]:
                     k = 'Metastatic tumour'
                 else:
-                    print 'Unrecognized specimen type', sample_info[specimen_type]
+                    print('Unrecognized specimen type', sample_info[specimen_type])
                 try:
                     tumor_gene_expr_this_donor[k].append(gene_exp)
                     tumor_gene_expr_this_donor_info[k].append(sample_info)
@@ -156,7 +156,7 @@ def get_exper_per_sample_per_gene(gene_counts, gene_info, sample_col_to_use, don
             elif 'Metastatic tumour' in tumor_gene_expr_this_donor.keys():
                 to_use='Metastatic tumour'
             else:
-                print 'Unrecognized specimen types: ', tumor_gene_expr_this_donor.keys()
+                print('Unrecognized specimen types: ', tumor_gene_expr_this_donor.keys())
             gene_expr_avg = np.mean(tumor_gene_expr_this_donor[to_use])
             samples = tumor_gene_expr_this_donor_info[to_use]
             aliquot_ids = []
@@ -189,7 +189,7 @@ def get_expr_per_sample(mutated_genes, meta_data, gene_counts, gene_counts_file,
     for i, gene_info in mutated_genes.iterrows():
         if gene_info['GeneID']=='None':
             continue
-        print gene_info['GeneID'], gene_info['Gene_symbol']
+        print(gene_info['GeneID'], gene_info['Gene_symbol'])
         #generated_list_per_sample_per_gene = get_exper_per_sample_per_gene(gene_info, sample_col_to_use, donor_id_col, aliquot_id, specimen_type, all_samples)
         #gene_counts_list.extend(generated_list_per_sample_per_gene)
         p.apply_async(get_exper_per_sample_per_gene, args=(gene_counts, gene_info, sample_col_to_use, donor_id_col, aliquot_id, specimen_type, all_samples, meta_data), callback=(gene_counts_list.extend))
@@ -510,7 +510,7 @@ def plot_gene_expression(dfs):
     plt.savefig('sig.pdf')
     plt.clf()
     plt.close()
-    print 'done'
+    print('done')
 
 #plot RP11-731F5.1
 def plot_gene_expr(dfs):
@@ -577,7 +577,7 @@ def plot_gene_expr(dfs):
     plt.savefig('sig.pdf')
     plt.clf()
     plt.close()
-    print 'done'
+    print('done')
     
 def get_sig_expr_events(gene_stats, gene_stats_file):
     pval_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log2)', 'P-val (-log10)', 'DiffCheck']]
@@ -622,7 +622,7 @@ def plot_scatter_geneexpr(df):
     df[x_col] = df[x_col].apply(lambda x: math.log(x,2))
     df[y_col] = np.where(df[y_col]==0, 1e-100, df[y_col])
     df[y_col] = df[y_col].apply(lambda x: math.log(x,10)*-1) 
-    print df['num_mutated_values']
+    print(df['num_mutated_values'])
     df['col'] = np.where(df['DiffCheck']=='Diff', 'green', 'grey')
     ax.scatter(x=x_col, y=y_col, data=df, color=df['col'])
         
@@ -642,7 +642,7 @@ def plot_scatter_geneexpr(df):
     gs.tight_layout(fig, pad=2, h_pad=0.0, w_pad=0.0)
     plt.savefig('sig_min10samples.pdf')
     plt.close()
-    print 'done'
+    print('done')
     
 def box_plot_per_gene_cancertype(fig, gs, row_num, gene_counts_info_stats, genes_cancertypes):
     axes = []
@@ -665,7 +665,7 @@ def box_plot_per_gene_cancertype(fig, gs, row_num, gene_counts_info_stats, genes
             #except AttributeError:
             #    continue
         gene_df = pd.DataFrame(gene_values, columns=['Expr (FPKM-UQ)', 'Mutation Status','Gene', 'Cancer Type'])
-        print gene_df.head(3)
+        print(gene_df)
         tick_spacing = 5
         if gene_df['Expr (FPKM-UQ)'].max() > 100:
             tick_spacing =50
@@ -710,15 +710,15 @@ if __name__ == '__main__':
     gene_expr_intput = '/home/huum/projs/regMotifs/analysis/RNA-seq/tophat_star_fpkm_uq.v2_aliquot_gl.tsv'
     
     meta_data = get_sample_data(meta_data)
-    print 'metadata'
+    print('metadata')
     mutated_genes = read_genes_elements(genes_mutated_input)
-    print 'mutated_genes'
+    print('mutated_genes')
     gene_counts, gene_counts_file =  read_gene_expr(gene_expr_intput, mutated_genes['GeneID'])
-    print 'expr loaded'
+    print('expr loaded')
     gene_counts_info, gene_counts_info_file = get_expr_per_sample(mutated_genes, meta_data, gene_counts, gene_counts_file, sample_col_to_use='Samples')
-    print 'gene counts'
+    print('gene counts')
     gene_counts_info_stats, gene_counts_info_stats_file = process_gene_counts(gene_counts_info, mutated_genes, gene_counts_info_file)
-    print 'stats done'
+    print('stats done')
     #make a scatter plot for genes that are mutated in at least 10 samples with expr data (pval and avg FC (WT)
     #df = get_sig_expr_events(gene_counts_info_stats, gene_counts_info_stats_file)
     #plot_scatter_geneexpr(df)
