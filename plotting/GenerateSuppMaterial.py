@@ -74,7 +74,7 @@ def plot_heatmap(df, x_col_name, y_col_name, fig_width=8, fig_height=6, title=""
             if df[c].sum()>threshold_to_include_element:
                 df_pivot_filtered[c] = df[c] 
     cbar_ax = fig.add_axes([.75, 0.85, .2, .03])
-    sns.heatmap(df_pivot_filtered, ax=ax, square=True, cbar_ax=cbar_ax, cbar=True, cbar_kws={"orientation": "horizontal"}, )
+    sns.heatmap(df_pivot_filtered, ax=ax, square=True, cbar_ax=cbar_ax, cbar=True, cbar_kws={"orientation": "horizontal"}, cmap=sns.cm.rocket_r )
     ax.set_xticklabels(ax.get_xticklabels(), rotation=rotation)
     ax.set_ylabel(y_col_name)
     ax.set_title(label=title, loc='left')
@@ -195,6 +195,7 @@ def parse_args():
     parser.add_argument('--mut_anno_input_file', default='', help='')
     parser.add_argument('--motif_mut_input_file', default='', help='')
     parser.add_argument('--elements_input_file', default='', help='')
+    parser.add_argument('--args.elements_input_file_Lymph', default='', help='')
     parser.add_argument('--output_dir', default='', help='')
     
 
@@ -283,9 +284,9 @@ if __name__ == '__main__':
         sfig_num+=1
         print(sfig_num)
         #elements_input_file = '/Users/karolinasg/Documents/pcawg/NEW_RESULTS_removig_VEP_23_october/merged200bp_extended200bp_nofullexon_Lymph/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
-        elements_input_file =args.elements_input_file
+        elements_input_file_Lymph =args.elements_input_file_Lymph
         #elements_input_file = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_Lymph/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
-        fig = draw_rec_sigregs(elements_input_file, title='SFig. {n} SF-MREs identified from Lymphoma cohorts'.format(n=sfig_num))
+        fig = draw_rec_sigregs(elements_input_file_Lymph, title='SFig. {n} SF-MREs identified from Lymphoma cohorts'.format(n=sfig_num))
         pdf.savefig(fig)
         
         sfig_num+=1

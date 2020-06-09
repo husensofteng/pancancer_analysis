@@ -189,7 +189,7 @@ def plot_enrichment(dict_data, output_file, count_uniq_items):
         #df_pivot = df_pivot[df_pivot.sum(axis=0) > 20]
         if df_pivot_filtered.shape[0]>0 and df_pivot_filtered.shape[1]>0:
             plt.figure(figsize=(25, 10))
-            plt_results = sns.heatmap(df_pivot_filtered, annot=True, fmt='g', linewidths=.5)
+            plt_results = sns.heatmap(df_pivot_filtered, annot=True, fmt='g', linewidths=.5, cmap = sns.cm.rocket_r)
             plt_results.axes.set_title("Enrichment of mutations at {}".format(k))
             plt_results.axes.set_ylabel(x_label)
             plt_results.axes.set_xlabel(k)
@@ -697,7 +697,7 @@ def read_sig_tfs(sig_tfs_file, output_file_ext="Fig", key_name='TFs', threshold_
     #df_pivot = df_pivot[df_pivot.sum(axis=0) > 20]
     if df_pivot_filtered.shape[0]>0 and df_pivot_filtered.shape[1]>0:
         plt.figure(figsize=(25, 10))
-        plt_results = sns.heatmap(df_pivot_filtered, annot=df_pivot_annot_filtered, fmt='g', linewidths=.5, annot_kws={"size": 12, "color":'white'}, vmin=0, vmax=10)
+        plt_results = sns.heatmap(df_pivot_filtered, annot=df_pivot_annot_filtered, fmt='g', linewidths=.5, annot_kws={"size": 12, "color":'white'}, vmin=0, vmax=10, cmap = sns.cm.rocket_r)
         plt_results.axes.set_title("Enrichment of mutations at {}".format(key_name))
         plt_results.axes.set_ylabel('Cohorts')
         plt_results.axes.set_xlabel(key_name)
@@ -788,7 +788,7 @@ def plot_motifs(input_file, x_label='TF-Motifs', y_label='Cancer Types', output_
     #df_pivot = df_pivot[df_pivot.sum(axis=0) > 20]
     if df_pivot_filtered.shape[0]>0 and df_pivot_filtered.shape[1]>0:
         plt.figure(figsize=(25, 10))
-        plt_results = sns.heatmap(df_pivot_filtered, annot=True, fmt='g', linewidths=.5, annot_kws={"size": 12, "color":'grey'})
+        plt_results = sns.heatmap(df_pivot_filtered, annot=True, fmt='g', linewidths=.5, annot_kws={"size": 12, "color":'grey'}, cmap = sns.cm.rocket_r)
         plt_results.axes.set_title("Enrichment of mutations at {}".format(x_label))
         plt_results.axes.set_ylabel(y_label)
         plt_results.axes.set_xlabel(x_label)
