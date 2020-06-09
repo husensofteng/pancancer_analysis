@@ -151,7 +151,7 @@ def plot_muts(ax, regions, muts_to_plot, motifs, x_shift, start, end):
                   markeredgecolor=None, stemline_color='red', markersize=1.0, markeredgewidth=0.2)
     '''
     #get the max mutation count 
-    ymax = sorted(muts_plotted.viewitems(), key=lambda x: x[1], reverse=True)[0][1]
+    ymax = sorted(muts_plotted.items(), key=lambda x: x[1], reverse=True)[0][1]
     ax.set_ylim(-0.8, 6.2)#ymax+0.2)
     ax.plot([i for i in np.arange(start,end)], [-0.3 for i in np.arange(start,end)], color='grey', linewidth=1.0)
     draw_text(ax, x=start+((end-start)/2), y=-0.8, text=str(end-start)+' bp', fontsize=8)
