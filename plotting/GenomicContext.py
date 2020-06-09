@@ -4,6 +4,7 @@ Created on Jun 16, 2017
 @author: husensofteng
 '''
 import matplotlib
+matplotlib.use('Agg')
 import math
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
