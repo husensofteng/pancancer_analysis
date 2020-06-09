@@ -242,7 +242,7 @@ def plot_genomic_context(ax1, ax2, ax3, x_shift, gene_name, cell_names, elements
     cells_boxes = get_boxes_to_plot(chip_seq_infile, chr=chr, start=start, end=end, cell_names=cell_names, factors=[])
     plot_peaks(ax3, start=start, end=end, cells_boxes=cells_boxes)
     
-def plot_gene_expr( genes_cancertypes,genes_mutated_input, meta_data,gene_expr_intput, fig, gs, row_num):
+def plot_gene_expr(genes_mutated_input, meta_data,gene_expr_intput, fig, gs, row_num, genes_cancertypes):
 
     #genes_mutated_input = '../analysis/PancanElements/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv_GenesInclExons.tsv'
     #genes_mutated_input = '../analysis/data/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb_pancan.tsv_GenesInclCDS.tsv'
