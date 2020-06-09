@@ -314,7 +314,7 @@ if __name__ == '__main__':
     elements_infile = args.elements_input_file
     gene_infile = args.gene_input_file
     chip_seq_infile=args.chip_seq_input_file
-    genes_mutated_input= args.genes_elem_input-file
+    genes_mutated_input= args.genes_elem_input_file
     meta_data = args.meta_data
     gene_expr_intput=args.gene_expr_intput
     plot_genomic_context(ax1, ax2, ax3, x_shift=x_shift, gene_name='VHL', cell_names=['HEK293'], elements_infile=elements_infile, gene_infile=gene_infile, chip_seq_infile=chip_seq_infile)
