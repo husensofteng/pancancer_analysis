@@ -1222,10 +1222,10 @@ def getSigElements_oncodrive(generated_sig_merged_element_files, active_driver_s
             os.system(awk_stmt_mut)
              #add header
             awk_stmt_mut2 = """echo "CHROMOSOME\tPOSITION\tREF\tALT\tSAMPLE\tCANCER_TYPE" | cat - {infile} > {mutation_file}""".format(
-                                                 infile=mutation_file_oncodrive+'_header', mutation_file=mutation_file_oncodrive)
+                                                 infile=observed_mutations_cohort_oncodrive+'_header', mutation_file=observed_mutations_cohort_oncodrive)
             os.system(awk_stmt_mut2)
     
-            os.remove(mutation_file_oncodrive +'_header')
+            os.remove(observed_mutations_cohort_oncodrive +'_header')
             
             
             
