@@ -15,7 +15,7 @@ from decimal import Decimal
 from shutil import copyfile
 
 from AnnotateMutations import get_annotated_muts
-from Utilities import get_number_of_mutations_per_sample_list_and_write_to_file, calculate_p_value_motifregions, find_overlap_genesets_genelist 
+from Utilities import get_number_of_mutations_per_sample_list_and_write_to_file, calculate_p_value_motifregions, find_overlap_genesets_genelist, get_sig_merged_elements_oncodrive 
 
 def get_chr_lengths(chr_lengths_file):
     chr_lengths = {}
@@ -1115,6 +1115,275 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     
     return(aggregated_output_file)
 
+def getSigElements_oncodrive(generated_sig_merged_element_files, active_driver_script_dir, active_driver_min_mut, n_cores,
+                   n, max_dist, window, output_dir,
+                   annotated_motifs, tracks_dir, observed_mutations_all, chr_lengths_file,
+                   genes_input_file, gencode_input_file, 
+                   cell_names_to_use, tissue_cell_mappings_file,
+                   cosmic_genes_file, kegg_pathways_file, pcawg_drivers_file, tmp_dir, mutations_cohorts_outdir,
+                   cohorts='All'
+                   ):
+
+    upstream=True
+    downstream=True
+    overlapping = True
+    nbp_to_extend = 200
+    ext = ""
+    try:
+        ext = generated_sig_merged_element_files[0].split('/')[-1].split('.bed9')[1].replace('groupedbymutwithmotifinfo_','').replace('_statspvalues', '')
+
+    except IndexError:
+        print("error: ", generated_sig_merged_element_files)
+        sys.exit()
+
+    aggregated_output_file = output_dir+'/{cohorts}_combined{ext}_merged_maxdist{max_dist}kb_within{window}kb.tsv'.format(cohorts=cohorts,ext=ext, n=n, up="Up", dw="Dw", max_dist=max_dist/1000, window=window/1000)
+    if os.path.exists(aggregated_output_file):
+        return aggregated_output_file
+    
+    
+    #regions_input_file = output_dir+'/combined_onlysig_merged_intersectedmuts_grouped_recurrent.col12'
+    #per cohort
+    #extend the elemtents to 200bp, intersect with all observed mutations, aggregate all mut information per element, run activedriver to obtain p-value of element
+    active_driver_output_local_sig_all_tmp = aggregated_output_file + '_tmp'
+    with open(active_driver_output_local_sig_all_tmp, 'w') as active_driver_output_local_sig_all_ofile:
+        for cohort_sigregions_file in generated_sig_merged_element_files:  
+            #cohort name
+            cohort_name = cohort_sigregions_file.split('/')[-1].split('_')[0]
+            
+            cohort_mut_grouped_file = tmp_dir+'/'+ cohort_name +'_combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
+            cohort_mut_grouped_file_local = output_dir+'/'+ cohort_name +'_combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
+            observed_mutations_cohort = mutations_cohorts_outdir + '/' + cohort_name + '_' + annotated_motifs.split('/')[-1]
+    
+            if not os.path.exists(cohort_mut_grouped_file_local):
+                #elements extended by 200bp
+                cohort_mut_grouped_file_tmp = cohort_mut_grouped_file+'_temp'
+    
+                cohort_sigregions_file_extend_elements = tmp_dir + '/'+ cohort_name +'_extend_elements'
+                #tmp file
+                cohort_sigregions_file_extend_elements_tmp =  cohort_sigregions_file_extend_elements + '_tmp'      
+                with open(cohort_mut_grouped_file_tmp, 'w') as regions_input_ofile:
+    
+                            with open(cohort_sigregions_file, 'r') as cohort_sigregions_ifile:
+                                l = cohort_sigregions_ifile.readline().strip().split('\t')
+                                while l and len(l)>10:
+                                    regions_input_ofile.write('\t'.join(l[0:3]) + '\t' + cohort_name + '\t' + '~'.join([x.replace(',', '|') for x in l]) + '\n')
+                                    l = cohort_sigregions_ifile.readline().strip().split('\t')  
+    
+                cohort_file_all_merged = cohort_mut_grouped_file+'_temp_merged'
+                awk_stmt = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if(($3-$2)<{nbp_to_extend}){{s={nbp_to_extend}-($3-$2); $2=$2-int(s/2); $3=$3+int(s/2);}}; print $0}}' {cohort_mut_grouped_file_tmp} | sort -k1,1n -k2,2n -k3,3n | mergeBed -i stdin -c 4,4,5 -o count_distinct,collapse,collapse | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print "chr"$0}}' > {cohort_file_all_merged} 
+                                    """).format(cohort_mut_grouped_file_tmp=cohort_mut_grouped_file_tmp, nbp_to_extend = nbp_to_extend, cohort_file_all_merged=cohort_file_all_merged)
+                os.system(awk_stmt)
+                #print(awk_stmt)
+                #intersection results
+                muts_overlapping_cohort_file_all = cohort_file_all_merged+"_muts"
+                BedTool(observed_mutations_cohort).intersect(BedTool(cohort_file_all_merged)).saveas(muts_overlapping_cohort_file_all)
+                #annotat the overlapping muts
+                muts_overlapping_cohort_file_all_annotated =  muts_overlapping_cohort_file_all+'_annotated'
+                muts_overlapping__cohort_file_all_annotated = get_annotated_muts(
+                    muts_input_file=muts_overlapping_cohort_file_all, tracks_dir=tracks_dir, 
+                    muts_out=muts_overlapping_cohort_file_all_annotated, 
+                    cell_names_to_use=cell_names_to_use, tissue_cell_mappings_file=tissue_cell_mappings_file,
+                    filter_on_dnase1_or_tf_peak=False)
+                cohort_mut_grouped_file_with_annotated_muts = cohort_mut_grouped_file + "_withannotatedmuts"
+                print("Combining results")
+                awk_stmt = ("""intersectBed -wo -loj -a {cohort_file_all_merged} -b {observed_mutations_all} | 
+                            awk 'BEGIN{{FS=OFS="\t"}}{{print $1,$2,$3,$4,$5,$10">"$11,$12,$15,$6,$7":"$8"-"$9"#"$10">"$11"#"$12"#"$13"#"$14"#"$15"#"$16}}' | 
+                            groupBy -g 1-5 -c 8,8,8,6,7,9,10 -o count,count_distinct,collapse,collapse,collapse,distinct,collapse > {cohort_mut_grouped_file_with_annotated_muts}""".format(
+                            cohort_file_all_merged=cohort_file_all_merged, observed_mutations_all=muts_overlapping_cohort_file_all_annotated, cohort_mut_grouped_file_with_annotated_muts=cohort_mut_grouped_file_with_annotated_muts))
+                os.system(awk_stmt)#awk '$7>1'
+    
+                #get all mutated motifs in the extended element
+                #combined_mut_grouped_file_with_annotated_muts_with_motifs = combined_mut_grouped_file + "_withannotatedmuts_motifs"
+                awk_stmt = ("""intersectBed -wo -loj -a {cohort_mut_grouped_file_with_annotated_muts} -b {annotated_motifs} | 
+                            awk 'BEGIN{{FS=OFS="\t"}}{{print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,{motif_cols}}}' | 
+                            groupBy -g 1-12 -c 13 -o collapse > {cohort_mut_grouped_file_with_annotated_muts_with_motifs}""".format(
+                            cohort_mut_grouped_file_with_annotated_muts=cohort_mut_grouped_file_with_annotated_muts, annotated_motifs=annotated_motifs, 
+                            cohort_mut_grouped_file_with_annotated_muts_with_motifs=cohort_mut_grouped_file,
+                            motif_cols = '"#"'.join(["$"+str(x) for x in range(13,45)])))#motif cols are starting from col12 and end in col44
+                os.system(awk_stmt)
+                copyfile(cohort_mut_grouped_file, cohort_mut_grouped_file_local)
+            else: 
+                copyfile(cohort_mut_grouped_file_local, cohort_mut_grouped_file)
+            #activedriver results file
+            active_driver_output_file = cohort_mut_grouped_file + '_ActiveDriver'
+            active_driver_output_file_sig = active_driver_output_file + '_sig'
+            active_driver_output_file_local_sig = cohort_mut_grouped_file_local + '_ActiveDriver_sig'
+            active_driver_output_file_local_results = cohort_mut_grouped_file_local + '_ActiveDriver_results'
+
+    
+            
+            
+            '''Prepare mutation file'''
+            print('Calcuate pval for each element using OncodriveFML')
+            observed_mutations_cohort_oncodrive = observed_mutations_cohort + '_oncodrive'
+            fsep = '\t'
+            awk_stmt_mut = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{print $1,$2,$4,$5,$8,$6}}' {infile} | sort -k1,1n -k2,2n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); gsub("chr","", $1); print $0}}' > {mutation_file}""".format(
+                                                fsep=fsep,  infile=observed_mutations_cohort, mutation_file=observed_mutations_cohort_oncodrive+'_header')
+            os.system(awk_stmt_mut)
+             #add header
+            awk_stmt_mut2 = """echo "CHROMOSOME\tPOSITION\tREF\tALT\tSAMPLE\tCANCER_TYPE" | cat - {infile} > {mutation_file}""".format(
+                                                 infile=mutation_file_oncodrive+'_header', mutation_file=mutation_file_oncodrive)
+            os.system(awk_stmt_mut2)
+    
+            os.remove(mutation_file_oncodrive +'_header')
+            
+            
+            
+            '''Prepare elements file'''
+            element_file_oncodrive = cohort_mut_grouped_file + '_oncodrive'
+    
+            filter_cond = 'if($6>=1)' #remove elements with one mutation
+            awk_stmt_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond} {{print $1,$2,$3,$13}}}}' {infile} | sort -k1,1n -k2,3n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print $0}}' > {element_file}""".format(
+                                                fsep=fsep, filter_cond= filter_cond, infile=cohort_mut_grouped_file, element_file=element_file_oncodrive+'_header')
+            os.system(awk_stmt_elem)
+    
+            
+                
+            #add header
+            awk_stmt_elem2 = """echo "CHROMOSOME\tSTART\tEND\tELEMENT" | cat - {infile} > {element_file}""".format(
+                                                         infile=element_file_oncodrive+'_header', element_file=element_file_oncodrive)
+            os.system(awk_stmt_elem2)
+            
+            os.remove(element_file_oncodrive +'_header')
+            
+            '''Calcuate pval for each element using oncodrivefml'''
+            
+            tmp_dir_onco = observed_mutations_cohort_oncodrive + '_tmp'
+            if not os.path.exists(tmp_dir_onco):
+                os.mkdir(tmp_dir_onco) 
+                
+            awk_stm_oncodrive ="""oncodrivefml -i {mutation_file} -e {element_file} -s wgs -c /proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/oncodrivefml_v2.conf -o {oncodrive_dir}""".format(mutation_file = mutation_file_oncodrive,
+                                                                                                            element_file = element_file_oncodrive, oncodrive_dir = tmp_dir_onco)
+            
+            #print(awk_stm_oncodrive)
+            os.system(awk_stm_oncodrive)
+            
+            #oncodrive result: tsv file
+            oncodrive_out_file = [tmp_dir_onco+'/'+x for x in os.listdir(tmp_dir_onco) if '.tsv' in x]
+            #merge elements with oncodrive results
+            merged_elements_statspvalues = cohort_mut_grouped_file+"_statspvalues"    
+            
+            element=pd.read_csv(cohort_mut_grouped_file, sep="\t",  header=None)
+            oncodrive_element=pd.read_csv(oncodrive_out_file[0], sep="\t")
+            
+            merged_element = element.merge(oncodrive_element, left_on=14, right_on='GENE_ID')
+            #remove unnecessary columns
+            merged_element_removed_columns = merged_element.drop(['GENE_ID','MUTS', 'MUTS_RECURRENCE', 'SAMPLES','SNP', 'MNP','INDELS', 'SYMBOL','P_VALUE_NEG', 'Q_VALUE_NEG'], axis=1)
+            merged_element_removed_columns.to_csv(merged_elements_statspvalues, index=False, sep='\t', header =False)
+            #find significant elements in oncodrive results
+            sig_thresh = 0.05
+            awk_stm_sig_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{if ($17<= {sig_thresh} && $17 != "") print $0,$16,$17; else if ($16<= {sig_thresh} && $17 == "") print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$16}}' {infile} > {merged_elements_statspvaluesonlysig}""".format(
+            fsep=fsep, sig_thresh=sig_thresh,infile = merged_elements_statspvalues,  merged_elements_statspvaluesonlysig=sig_elements_output_file)
+            os.system(awk_stm_sig_elem)
+           
+
+            with open(sig_elements_output_file) as infile:
+                for line in infile:
+                    active_driver_output_local_sig_all_ofile.write(line)
+            
+
+
+
+    #merged all elements into one file
+    aggregated_output_file_merged = aggregated_output_file+ '_merged'
+    
+    awk_stm_activedriver = """sort -k1,1 -k2,2n {active_driver_output_local_sig_all_tmp} | mergeBed -i stdin -c 4,5,6,7,8,9,10,11,12,13,14,15 -o sum,collapse,sum,sum,collapse,collapse,collapse,collapse,collapse,collapse,collapse,collapse > {aggregated_output_file}""".format(
+                                                active_driver_output_local_sig_all_tmp=active_driver_output_local_sig_all_tmp,
+                                              aggregated_output_file=aggregated_output_file_merged)
+
+    os.system(awk_stm_activedriver)
+    
+    print("Aggregating for final results")
+    #function is sligtly different due to p-value of elements
+    aggregated_lines, summaries_dict = aggregate_results(aggregated_output_file_merged)
+          
+        
+    #aggregated_lines = compute_fdr_per_element(aggregated_lines, mutations_input_file=observed_mutations_all, sample_ids_index_muts_file=8, num_muts_index = 12, index_sample_ids=-1, index_elment_start_coordinate=1, index_elment_stop_coordinate=2, genome_size=3000000000.0)
+    '''
+    #Get pvalue for each Element
+    if not os.path.exists(annotated_mutations_statcalc_output_file):
+        print("Calculating p-values")
+        print("getting mut frequency per sample")
+        sample_id_and_number_of_mutations_per_sample_dict = get_number_of_mutations_per_sample_list_and_write_to_file(Mutations_dir_list, "", index_sample_ids=8)
+        number_of_elements_tested = file_len(annotated_mutations_final_output_file_scored_merged)
+        if header:
+            number_of_elements_tested-=1
+            calculate_p_value_motifregions(annotated_mutations_final_output_file_scored_merged, sample_id_and_number_of_mutations_per_sample_dict, mutated_regions_pval_outfile=annotated_mutations_statcalc_output_file, index_mutation_frequency=5, index_sample_ids=4, index_elment_start_coordinate=1, index_elment_stop_coordinate=2, genome_size=3100000000.0, total_number_tested_regions=number_of_elements_tested)
+    '''
+    cols_to_write = ['chr', 'start', 'end', 'Position', 'Cohorts', '#Cohorts', 'Score', 'FDR',
+                     '#RegMuts', '#Samples(RegMuts)', 'Cancer-Types:#RegMuts', 'Cancer-Types:#Samples(RegMuts)',
+                     '#Muts', '#Samples', 'Cancer-Types:#Muts', 'Cancer-Types:#Samples','StatsMuts', 'StatsSamples',
+                     'RegMuts','Muts', 'Mutated-Moitfs', 'Max-RegMotif', 
+                     'SamplesMuts', 'ElementPval', 'ELementFDR',
+                     'Nearby-Genes(Name::ID::O|U|Ddistance::COSMIC|KCP|PCD)',
+                     'Feature_type'
+                     ]
+    
+    
+    #gene_types_to_consider = ['protein_coding', 'lincRNA', 'miRNA', 'snRNA', 'snoRNA', 'rRNA', 'Mt_tRNA', 'Mt_rRNA', 'antisense', 'sense_intronic', 'sense_overlapping', '3prime_overlapping_ncrna']
+    gene_types_to_consider = ['protein_coding', 'lincRNA',
+                              'IG_V_gene', 'IG_C_gene', 'IG_J_gene', 'IG_D_gene', 
+                              'TR_V_gene', 'TR_C_gene', 'TR_J_gene', 'TR_D_gene', 
+                              'processed_transcript']
+    gene_status_to_consider = ['KNOWN']
+    
+    #aggregated_output_file = output_dir+'/combined{ext}_merged_intersectedmuts_grouped_aggregated{n}{up}{dw}maxdist{max_dist}kb_within{window}kb.tsv'.format(ext=ext, n=n, up="Up", dw="Dw", max_dist=max_dist/1000, window=window/1000)
+    
+    
+    chr_lengths = get_chr_lengths(chr_lengths_file)
+    
+    extended_output_file = aggregated_output_file+"_extended"
+    extended_output_file_tmp = extended_output_file+"_temp"
+    extended_output_file_tmp_sorted = extended_output_file_tmp+"_sorted"
+
+
+    #replace with slop
+    with open(extended_output_file_tmp, 'w') as ofile:
+        for line in aggregated_lines:
+            print(line)
+            ofile.write(str(line[0])+ '\t' + str(line[1]) + '\t' + str(line[2])+ '\t' + str(line[3]) + '\n')
+
+    #create an extended output file 
+    os.system("""sort -k1,1V -k2,2n -k3,3n {} > {}""".format(
+        extended_output_file_tmp, extended_output_file_tmp_sorted))
+    extended_output_file_obj = BedTool(extended_output_file_tmp_sorted).slop(b=window,genome='hg19').saveas(extended_output_file)
+    #extended_output_file = generate_extended_regions(regions=aggregated_lines, extended_output_file=extended_output_file, chr_lengths=chr_lengths, window=window)
+    
+    
+    regions_genes_dict = get_nearby_genes(extended_output_file, extended_output_file_obj, 
+                        genes_input_file = genes_input_file, 
+                        gene_types_to_consider = gene_types_to_consider, 
+                        gene_status_to_consider = gene_status_to_consider, 
+                        n=n, upstream=upstream, downstream=downstream, 
+                        overlapping = overlapping, max_dist = max_dist,
+                        )
+    #os.remove(extended_output_file)
+    
+    genesets_genes_dict = generate_genesets_genes_dict(cosmic_genes_file, kegg_pathways_file, pcawg_drivers_file)
+    enrichment_regions_genes_dict, genes_all, genes_all_per_side, enriched_genesets_dict_overall, enriched_genesets_dict = get_enriched_gene_geneset(
+                                                                                                                        regions_genes_dict, genesets_genes_dict)
+    summary_dicts_to_write = {"All genes:": genes_all, "All genes per dir:": genes_all_per_side ,"Enriched genes:": enriched_genesets_dict_overall, "Enriched genes per dir:": enriched_genesets_dict}
+    summary_info_to_write = {'Element Info': summaries_dict}
+    
+    gencode_output_file = gencode_input_file + "_extractedinfo"
+    if not os.path.exists(gencode_output_file):
+        get_features_from_gencode(gencode_input_file, gencode_output_file)
+    gene_types_to_consider = ["protein_coding",
+                              "IG_V_gene", "IG_C_gene", "IG_J_gene", "IG_D_gene", 
+                              "TR_V_gene", "TR_C_gene", "TR_J_gene", "TR_D_gene", 
+                              "processed_transcript"]
+    
+    region_types_dict = get_region_type(aggregated_lines=aggregated_lines, genes_segments_input_file=gencode_output_file, 
+                                        gene_types_to_consider=gene_types_to_consider, gene_status_to_consider=gene_status_to_consider,
+                                        feature_types_to_consider=['CDS', 'UTR','proximal_promoter', 'gene','start_codon', 'stop_codon'])
+    
+    write_aggregated_lines_to_outfile(aggregated_lines, cols_to_write, 
+                                      enrichment_regions_genes_dict, summary_info_to_write, summary_dicts_to_write, 
+                                      region_types_dict,
+                                      aggregated_output_file)
+    
+    return(aggregated_output_file)
+
 def parse_args():
     '''Parse command line arguments'''
     
@@ -1175,7 +1444,7 @@ if __name__ == '__main__':
     generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
         args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
         args.simulated_input_dir, args.chr_lengths_file, args.num_cores, 
-        args.background_window, args.background_window_size, args.elements_oncodrive,
+        args.background_window, args.background_window_size, 
         args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
         args.local_domain_window, args.tmp_dir, args.n_cores_fscore)
@@ -1206,7 +1475,9 @@ if __name__ == '__main__':
         
     print(merged_elements_files)
     
-    aggregated_output_file = getSigElements(
+    
+    if args.elements_oncodrive:
+         aggregated_output_file = getSigElements_oncodrive(
                     merged_elements_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
                     args.n, args.max_dist, args.window, 
                     args.output_dir,
@@ -1216,7 +1487,38 @@ if __name__ == '__main__':
                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'All')
-    
+         aggregated_output_file_ATELM = getSigElements_oncodrive(
+                     ATELM_generated_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+                     args.n, args.max_dist, args.window, 
+                     args.output_dir,
+                     args.observed_input_file, args.tracks_dir, 
+                     args.observed_mutations_all, args.chr_lengths_file,
+                     args.genes_input_file, 
+                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
+                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
+                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = args.cohort_sig_test)
+    else:
+        aggregated_output_file = getSigElements(
+                        merged_elements_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+                        args.n, args.max_dist, args.window, 
+                        args.output_dir,
+                        args.observed_input_file, args.tracks_dir, 
+                        args.observed_mutations_all, args.chr_lengths_file,
+                        args.genes_input_file, 
+                        args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
+                        args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
+                        args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'All')
+        aggregated_output_file_ATELM = getSigElements(
+                     ATELM_generated_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+                     args.n, args.max_dist, args.window, 
+                     args.output_dir,
+                     args.observed_input_file, args.tracks_dir, 
+                     args.observed_mutations_all, args.chr_lengths_file,
+                     args.genes_input_file, 
+                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
+                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
+                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = args.cohort_sig_test)
+        
     
     elements_output_file = get_gene_enrichments(
         elements_input_file=aggregated_output_file, 
@@ -1238,28 +1540,19 @@ if __name__ == '__main__':
     
  
  
-    aggregated_output_file_ATELM = getSigElements(
-                     ATELM_generated_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
-                     args.n, args.max_dist, args.window, 
-                     args.output_dir,
-                     args.observed_input_file, args.tracks_dir, 
-                     args.observed_mutations_all, args.chr_lengths_file,
-                     args.genes_input_file, 
-                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
-                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
-                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = args.cohort_sig_test)
+    
     combine_sig_TFs(sig_tfs_files, output_dir=args.output_dir)
     combine_sig_TFs(sig_tfpos_files, tf_label='TF Positions', output_dir=args.output_dir)
 
     
-    elements_output_file = get_gene_enrichments(
+    elements_output_file_ATELM = get_gene_enrichments(
         elements_input_file=aggregated_output_file_ATELM, 
         elements_output_file=aggregated_output_file_ATELM+"_GenesInclCDS.tsv", 
         skip_exon_elements=False)
      
     calculated_p_value_sig_out_file = find_overlap_genesets_genelist(
-        args.kegg_pathways_file, elements_output_file, 
-        elements_output_file+'_pathways.tsv', 
+        args.kegg_pathways_file, elements_output_file_ATELM, 
+        elements_output_file_ATELM+'_pathways.tsv', 
         total_number_of_genes_in_the_universe=20278, 
         min_number_of_genes_be_enriched_for_geneset_to_be_reported = 10, 
         index_gene_name=0, index_gene_names_start=3, 

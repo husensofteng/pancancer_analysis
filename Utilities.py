@@ -1643,3 +1643,97 @@ def get_simulated_mean_sd_per_TF_motif_background_window_correction(cohort_full_
     #    shutil.rmtree(tmp_dir_intersect)
             
     return  dict_type_mean_std_scores
+
+def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_input_files, cohort_full_name, 
+                            output_extension, distance_to_merge, 
+                            merged_mut_sig_threshold, local_domain_window, 
+                            chr_lengths_file, sig_elements_output_file, 
+                            sig_thresh):
+    
+    
+    if os.path.exists(sig_elements_output_file):
+        return sig_elements_output_file
+    
+    "Merge the observed mutations into elements"
+    unified_observed_muts_file_wihtmotifinfo = unified_mutation_input_files
+    merged_muts_output_file = unified_observed_muts_file_wihtmotifinfo+"_mergedmuts{distance_to_merge}bp".format(
+                                            distance_to_merge=distance_to_merge)
+    Utilities.merge_muts(muts_input_file=unified_observed_muts_file_wihtmotifinfo, 
+                         merged_muts_output_file=merged_muts_output_file, 
+                         filter_mut_motifs=False, filter_col_index=15, 
+                         filter_value=merged_mut_sig_threshold, mut_score_index=9, 
+                         motifs_col_index =10, ref_alt_col_index=11, mutpos_col_index=12, 
+                         motifname_col_index=13, motif_col_index=14, 
+                         distance_to_merge=distance_to_merge)
+    
+    
+    '''Prepare mutation file'''
+    print('Calcuate pval for each element using OncodriveFML')
+    mutation_file_oncodrive = mutation_input_files + '_oncodrive'
+    fsep = '\t'
+    awk_stmt_mut = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{print $1,$2,$4,$5,$8,$6}}' {infile} | sort -k1,1n -k2,2n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); gsub("chr","", $1); print $0}}' > {mutation_file}""".format(
+                                                fsep=fsep,  infile=mutation_input_files, mutation_file=mutation_file_oncodrive+'_header')
+    os.system(awk_stmt_mut)
+    
+    #add header
+    awk_stmt_mut2 = """echo "CHROMOSOME\tPOSITION\tREF\tALT\tSAMPLE\tCANCER_TYPE" | cat - {infile} > {mutation_file}""".format(
+                                                 infile=mutation_file_oncodrive+'_header', mutation_file=mutation_file_oncodrive)
+    os.system(awk_stmt_mut2)
+    
+    os.remove(mutation_file_oncodrive +'_header')
+    
+    '''Prepare elements file'''
+    element_file_oncodrive = merged_muts_output_file + '_oncodrive'
+    
+    filter_cond = 'if($6>=1)' #remove elements with one mutation
+    awk_stmt_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond} {{print $1,$2,$3,$15}}}}' {infile} | sort -k1,1n -k2,3n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print $0}}' > {element_file}""".format(
+                                                fsep=fsep, filter_cond= filter_cond, infile=merged_muts_output_file, element_file=element_file_oncodrive+'_header')
+    os.system(awk_stmt_elem)
+    
+    filesize = os.path.getsize(element_file_oncodrive+'_header')
+    #check if elements exist
+    if filesize == 0:
+        os.remove(element_file_oncodrive +'_header')
+        with open(sig_elements_output_file, 'w') as fp: 
+            pass
+    else:
+        
+        #add header
+        awk_stmt_elem2 = """echo "CHROMOSOME\tSTART\tEND\tELEMENT" | cat - {infile} > {element_file}""".format(
+                                                     infile=element_file_oncodrive+'_header', element_file=element_file_oncodrive)
+        os.system(awk_stmt_elem2)
+        
+        os.remove(element_file_oncodrive +'_header')
+        
+        '''Calcuate pval for each element using oncodrivefml'''
+        
+        tmp_dir = mutation_file_oncodrive + '_tmp'
+        if not os.path.exists(tmp_dir):
+            os.mkdir(tmp_dir) 
+            
+        awk_stm_oncodrive ="""oncodrivefml -i {mutation_file} -e {element_file} -s wgs -c /proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/oncodrivefml_v2.conf -o {oncodrive_dir}""".format(mutation_file = mutation_file_oncodrive,
+                                                                                                        element_file = element_file_oncodrive, oncodrive_dir = tmp_dir)
+        
+        #print(awk_stm_oncodrive)
+        os.system(awk_stm_oncodrive)
+        
+        #oncodrive result: tsv file
+        oncodrive_out_file = [tmp_dir+'/'+x for x in os.listdir(tmp_dir) if '.tsv' in x]
+        #merge elements with oncodrive results
+        merged_elements_statspvalues = merged_muts_output_file+"_statspvalues"    
+        
+        element=pd.read_csv(merged_muts_output_file, sep="\t",  header=None)
+        oncodrive_element=pd.read_csv(oncodrive_out_file[0], sep="\t")
+        
+        merged_element = element.merge(oncodrive_element, left_on=14, right_on='GENE_ID')
+        #remove unnecessary columns
+        merged_element_removed_columns = merged_element.drop(['GENE_ID','MUTS', 'MUTS_RECURRENCE', 'SAMPLES','SNP', 'MNP','INDELS', 'SYMBOL','P_VALUE_NEG', 'Q_VALUE_NEG'], axis=1)
+        merged_element_removed_columns.to_csv(merged_elements_statspvalues, index=False, sep='\t', header =False)
+        #find significant elements in oncodrive results
+        awk_stm_sig_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{if ($17<= {sig_thresh} && $17 != "") print $0,$16,$17; else if ($16<= {sig_thresh} && $17 == "") print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$16,$16,$16}}' {infile} > {merged_elements_statspvaluesonlysig}""".format(
+        fsep=fsep, sig_thresh=sig_thresh,infile = merged_elements_statspvalues,  merged_elements_statspvaluesonlysig=sig_elements_output_file)
+        os.system(awk_stm_sig_elem)
+       
+    os.remove(element_file_oncodrive)   
+    os.remove(mutation_file_oncodrive)
+    return sig_elements_output_file
