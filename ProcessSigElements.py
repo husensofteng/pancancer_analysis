@@ -1270,11 +1270,16 @@ def getSigElements_oncodrive(generated_sig_merged_element_files, active_driver_s
             merged_element = element.merge(oncodrive_element, left_on=12, right_on='GENE_ID')
             #remove unnecessary columns
             merged_element_removed_columns = merged_element.drop(['GENE_ID','MUTS', 'MUTS_RECURRENCE', 'SAMPLES','SNP', 'MNP','INDELS', 'SYMBOL','P_VALUE_NEG', 'Q_VALUE_NEG'], axis=1)
-            merged_element_removed_columns.to_csv(merged_elements_statspvalues, index=False, sep='\t', header =False)
+            merged_element_removed_columns_noNA = merged_element_removed_columns.replace(r'\s+', 1, regex=True)
+            merged_element_removed_columns_noNA.to_csv(merged_elements_statspvalues, index=False, sep='\t', header =False)
             #find significant elements in oncodrive results
-            sig_thresh = 1
+            sig_thresh = 0.05
             sig_elements_output_file =  merged_elements_statspvalues + '_sig'
-
+            awk_stm_sig_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{if ($14<= {sig_thresh} && $15 == "") print $0, 1.0}}' {infile} > {merged_elements_statspvaluesonlysig}""".format(
+            fsep=fsep, sig_thresh=sig_thresh,infile = merged_elements_statspvalues,  merged_elements_statspvaluesonlysig=sig_elements_output_file)
+            os.system(awk_stm_sig_elem)
+            
+            
             awk_stm_sig_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{if ($15<= {sig_thresh} && $15 != "") print $0}}' {infile} > {merged_elements_statspvaluesonlysig}""".format(
             fsep=fsep, sig_thresh=sig_thresh,infile = merged_elements_statspvalues,  merged_elements_statspvaluesonlysig=sig_elements_output_file)
             os.system(awk_stm_sig_elem)
