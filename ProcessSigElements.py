@@ -1267,7 +1267,7 @@ def getSigElements_oncodrive(generated_sig_merged_element_files, active_driver_s
             element=pd.read_csv(cohort_mut_grouped_file, sep="\t",  header=None)
             oncodrive_element=pd.read_csv(oncodrive_out_file[0], sep="\t")
             
-            merged_element = element.merge(oncodrive_element, left_on=14, right_on='GENE_ID')
+            merged_element = element.merge(oncodrive_element, left_on=12, right_on='GENE_ID')
             #remove unnecessary columns
             merged_element_removed_columns = merged_element.drop(['GENE_ID','MUTS', 'MUTS_RECURRENCE', 'SAMPLES','SNP', 'MNP','INDELS', 'SYMBOL','P_VALUE_NEG', 'Q_VALUE_NEG'], axis=1)
             merged_element_removed_columns.to_csv(merged_elements_statspvalues, index=False, sep='\t', header =False)
