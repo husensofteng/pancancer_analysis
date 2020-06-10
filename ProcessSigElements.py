@@ -1215,7 +1215,7 @@ def getSigElements_oncodrive(generated_sig_merged_element_files, active_driver_s
             
             '''Prepare mutation file'''
             print('Calcuate pval for each element using OncodriveFML')
-            observed_mutations_cohort_oncodrive = observed_mutations_cohort + '_oncodrive'
+            observed_mutations_cohort_oncodrive = output_dir+'/'+ cohort_name + '_oncodrive'
             fsep = '\t'
             awk_stmt_mut = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{print $1,$2,$4,$5,$8,$6}}' {infile} | sort -k1,1n -k2,2n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); gsub("chr","", $1); print $0}}' > {mutation_file}""".format(
                                                 fsep=fsep,  infile=observed_mutations_cohort, mutation_file=observed_mutations_cohort_oncodrive+'_header')
@@ -1248,7 +1248,7 @@ def getSigElements_oncodrive(generated_sig_merged_element_files, active_driver_s
             
             '''Calcuate pval for each element using oncodrivefml'''
             
-            tmp_dir_onco = observed_mutations_cohort_oncodrive + '_tmp'
+            tmp_dir_onco = output_dir+ '/' + cohort_name + 'oncodrive_results'
             if not os.path.exists(tmp_dir_onco):
                 os.mkdir(tmp_dir_onco) 
                 
@@ -1272,7 +1272,7 @@ def getSigElements_oncodrive(generated_sig_merged_element_files, active_driver_s
             merged_element_removed_columns = merged_element.drop(['GENE_ID','MUTS', 'MUTS_RECURRENCE', 'SAMPLES','SNP', 'MNP','INDELS', 'SYMBOL','P_VALUE_NEG', 'Q_VALUE_NEG'], axis=1)
             merged_element_removed_columns.to_csv(merged_elements_statspvalues, index=False, sep='\t', header =False)
             #find significant elements in oncodrive results
-            sig_thresh = 0.05
+            sig_thresh = 1
             awk_stm_sig_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{if ($17<= {sig_thresh} && $17 != "") print $0,$16,$17; else if ($16<= {sig_thresh} && $17 == "") print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$16}}' {infile} > {merged_elements_statspvaluesonlysig}""".format(
             fsep=fsep, sig_thresh=sig_thresh,infile = merged_elements_statspvalues,  merged_elements_statspvaluesonlysig=sig_elements_output_file)
             os.system(awk_stm_sig_elem)
