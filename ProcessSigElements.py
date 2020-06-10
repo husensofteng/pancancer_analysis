@@ -1262,7 +1262,7 @@ def getSigElements_oncodrive(generated_sig_merged_element_files, active_driver_s
             #oncodrive result: tsv file
             oncodrive_out_file = [tmp_dir_onco+'/'+x for x in os.listdir(tmp_dir_onco) if '.tsv' in x]
             #merge elements with oncodrive results
-            merged_elements_statspvalues = cohort_mut_grouped_file+"_statspvalues"    
+            merged_elements_statspvalues = output_dir+'/'+ cohort_name + '_oncodrive_results'  
             
             element=pd.read_csv(cohort_mut_grouped_file, sep="\t",  header=None)
             oncodrive_element=pd.read_csv(oncodrive_out_file[0], sep="\t")
@@ -1273,6 +1273,8 @@ def getSigElements_oncodrive(generated_sig_merged_element_files, active_driver_s
             merged_element_removed_columns.to_csv(merged_elements_statspvalues, index=False, sep='\t', header =False)
             #find significant elements in oncodrive results
             sig_thresh = 1
+            sig_elements_output_file =  merged_elements_statspvalues + '_sig'
+
             awk_stm_sig_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{if ($17<= {sig_thresh} && $17 != "") print $0,$16,$17; else if ($16<= {sig_thresh} && $17 == "") print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$16}}' {infile} > {merged_elements_statspvaluesonlysig}""".format(
             fsep=fsep, sig_thresh=sig_thresh,infile = merged_elements_statspvalues,  merged_elements_statspvaluesonlysig=sig_elements_output_file)
             os.system(awk_stm_sig_elem)
