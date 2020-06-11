@@ -1533,12 +1533,12 @@ if __name__ == '__main__':
     
     if args.skip_exon_elements:
         aggregated_output_file_exclCDS = aggregated_output_file+'_exclCDS'
-        os.system(("""awk -F"\t" '{if($27!="CDS") print $0}' {} > {}""").format(aggregated_output_file, aggregated_output_file_exclCDS))
+        os.system(("""awk -F"\t" '{{if($27!="CDS") print $0}}' {} > {}""").format(aggregated_output_file, aggregated_output_file_exclCDS))
         elements_input_file = aggregated_output_file_exclCDS
         elements_output_file_Genes=elements_input_file+"_GenesExclCDS.tsv"
         
         aggregated_output_file_ATELM_exclCDS = aggregated_output_file_ATELM+'_exclCDS'
-        os.system(("""awk -F"\t" '{if($27!="CDS") print $0}' {} > {}""").format(aggregated_output_file_ATELM, aggregated_output_file_ATELM_exclCDS))
+        os.system(("""awk -F"\t" '{{if($27!="CDS") print $0}}' {} > {}""").format(aggregated_output_file_ATELM, aggregated_output_file_ATELM_exclCDS))
         elements_input_file_ATELM = aggregated_output_file_ATELM_exclCDS
         elements_output_file_ATELM_Genes=elements_input_file_ATELM+"_GenesExclCDS.tsv"
 
