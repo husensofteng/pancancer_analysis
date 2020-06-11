@@ -1421,7 +1421,7 @@ def parse_args():
     parser.add_argument('--cohort_sig_test', default = 'All-tumors-without-Lymphatic-system-Skin-Melanoma',  help='')
     parser.add_argument('--merged_mut_sig', action='store_const', const=True, help='Filter elements on FDR (adjusted p-values), if the flag is missing it would filter on p-value')
     parser.add_argument('--num_cores', type=int, default=10, help='')
-    
+    parser.add_argument('--skip_exon_elements', action='store_const', const=True, help='Exclude elements within CDS')
     parser.add_argument('--observed_mutations_all', help='')
     parser.add_argument('--tracks_dir', help='')
     parser.add_argument('--genes_input_file', help='')
@@ -1527,10 +1527,34 @@ if __name__ == '__main__':
                      args.tmp_dir, args.mutations_cohorts_outdir, cohorts = args.cohort_sig_test)
         
     
+    
+    
+    
+    
+    if args.skip_exon_elements:
+        aggregated_output_file_exclCDS = aggregated_output_file+'_exclCDS'
+        os.system("""awk -F"\t" '{if($27!="CDS") print 0}' {} > {}""").format(aggregated_output_file, aggregated_output_file_exclCDS)
+        elements_input_file = aggregated_output_file_exclCDS
+        elements_output_file_Genes=elements_input_file+"_GenesExclCDS.tsv"
+        
+        aggregated_output_file_ATELM_exclCDS = aggregated_output_file_ATELM+'_exclCDS'
+        os.system("""awk -F"\t" '{if($27!="CDS") print 0}' {} > {}""").format(aggregated_output_file_ATELM, aggregated_output_file_ATELM_exclCDS)
+        elements_input_file_ATELM = aggregated_output_file_ATELM_exclCDS
+        elements_output_file_ATELM_Genes=elements_input_file_ATELM+"_GenesExclCDS.tsv"
+
+    else:
+         
+        elements_input_file = aggregated_output_file
+        elements_output_file_Genes=elements_input_file+"_GenesInclCDS.tsv"
+        
+        elements_input_file_ATELM = aggregated_output_file_ATELM
+        elements_output_file_ATELM_Genes=elements_input_file_ATELM+"_GenesInclCDS.tsv"
+        
+        
     elements_output_file = get_gene_enrichments(
-        elements_input_file=aggregated_output_file, 
-        elements_output_file=aggregated_output_file+"_GenesInclCDS.tsv", 
-        skip_exon_elements=False)
+        elements_input_file=elements_input_file, 
+        elements_output_file=elements_output_file_Genes, 
+        skip_exon_elements=args.skip_exon_elements)
      
     calculated_p_value_sig_out_file = find_overlap_genesets_genelist(
         args.kegg_pathways_file, elements_output_file, 
@@ -1553,9 +1577,9 @@ if __name__ == '__main__':
 
     
     elements_output_file_ATELM = get_gene_enrichments(
-        elements_input_file=aggregated_output_file_ATELM, 
-        elements_output_file=aggregated_output_file_ATELM+"_GenesInclCDS.tsv", 
-        skip_exon_elements=False)
+        elements_input_file=elements_input_file_ATELM, 
+        elements_output_file=elements_output_file_ATELM_Genes, 
+        skip_exon_elements=args.skip_exon_elements)
      
     calculated_p_value_sig_out_file = find_overlap_genesets_genelist(
         args.kegg_pathways_file, elements_output_file_ATELM, 
