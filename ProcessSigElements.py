@@ -13,6 +13,7 @@ from pybedtools import BedTool
 from ProcessCohorts import process_cohorts
 from decimal import Decimal
 from shutil import copyfile
+import csv
 
 from AnnotateMutations import get_annotated_muts
 from Utilities import get_number_of_mutations_per_sample_list_and_write_to_file, calculate_p_value_motifregions, find_overlap_genesets_genelist, get_sig_merged_elements_oncodrive 
@@ -1232,9 +1233,9 @@ def getSigElements_oncodrive(generated_sig_merged_element_files, active_driver_s
             '''Prepare elements file'''
             element_file_oncodrive = cohort_mut_grouped_file_local + '_oncodrive'
     
-            filter_cond = 'if($6>=1)' #remove elements with one mutation
-            awk_stmt_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond} {{print $1,$2,$3,$13}}}}' {infile} | sort -k1,1n -k2,3n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print $0}}' > {element_file}""".format(
-                                                fsep=fsep, filter_cond= filter_cond, infile=cohort_mut_grouped_file_local, element_file=element_file_oncodrive+'_header')
+             #remove elements with one mutation
+            awk_stmt_elem = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{print $1,$2,$3,$13}}' {infile} | sort -k1,1n -k2,3n | uniq -u | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print $0}}' > {element_file}""".format(
+                                                fsep=fsep, infile=cohort_mut_grouped_file_local, element_file=element_file_oncodrive+'_header')
             os.system(awk_stmt_elem)
     
             
@@ -1270,7 +1271,7 @@ def getSigElements_oncodrive(generated_sig_merged_element_files, active_driver_s
             merged_element = element.merge(oncodrive_element, left_on=12, right_on='GENE_ID')
             #remove unnecessary columns
             merged_element_removed_columns = merged_element.drop(['GENE_ID','MUTS', 'MUTS_RECURRENCE', 'SAMPLES','SNP', 'MNP','INDELS', 'SYMBOL','P_VALUE_NEG', 'Q_VALUE_NEG'], axis=1)
-            merged_element_removed_columns.to_csv(merged_elements_statspvalues, index=False, sep='\t', header =False)
+            merged_element_removed_columns.to_csv(merged_elements_statspvalues, index=False, sep='\t', header =False, quoting=csv.QUOTE_NONE)
             #find significant elements in oncodrive results
             sig_thresh = 0.05
             sig_elements_output_file =  merged_elements_statspvalues + '_sig'
