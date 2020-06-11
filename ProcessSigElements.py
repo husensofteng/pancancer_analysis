@@ -1009,6 +1009,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
                 os.system(awk_stmt_sig)
                 print(awk_stmt_sig)
                 copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
+            
             with open(active_driver_output_file_local_sig) as infile:
                 for line in infile:
                     active_driver_output_local_sig_all_ofile.write(line)
@@ -1535,12 +1536,12 @@ if __name__ == '__main__':
         aggregated_output_file_exclCDS = aggregated_output_file+'_exclCDS'
         os.system(("""awk -F"\t" '{{if($27!="CDS") print $0}}' {} > {}""").format(aggregated_output_file, aggregated_output_file_exclCDS))
         elements_input_file = aggregated_output_file_exclCDS
-        elements_output_file_Genes=elements_input_file+"_GenesExclCDS.tsv"
+        elements_output_file_Genes=elements_input_file+"_Genes.tsv"
         
         aggregated_output_file_ATELM_exclCDS = aggregated_output_file_ATELM+'_exclCDS'
         os.system(("""awk -F"\t" '{{if($27!="CDS") print $0}}' {} > {}""").format(aggregated_output_file_ATELM, aggregated_output_file_ATELM_exclCDS))
         elements_input_file_ATELM = aggregated_output_file_ATELM_exclCDS
-        elements_output_file_ATELM_Genes=elements_input_file_ATELM+"_GenesExclCDS.tsv"
+        elements_output_file_ATELM_Genes=elements_input_file_ATELM+"_Genes.tsv"
 
     else:
          
