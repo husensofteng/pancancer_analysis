@@ -222,7 +222,7 @@ if __name__ == '__main__':
         #df = get_mut_df(input='/home/huum/projs/regMotifs/mutations_files/obsagr22May2017_exclVEP.bed9', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
 
         #df = get_mut_df(input='/Users/karolinasg/Documents/pcawg/analysis/obsagr22May2017_exclVEP.bed9', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
-        fig = plot_boxplot(df, groups_colors_dict=groups_colors_dict,  log=TRUE)
+        fig = plot_boxplot(df, groups_colors_dict=groups_colors_dict,  log=True)
         #fig = plot_boxplot(df, groups_colors_dict=groups_colors_dict, title="SFig. {n} Mutation rate across cancer types".format(n=sfig_num), log=TRUE)
 
         pdf.savefig(fig)
@@ -234,7 +234,7 @@ if __name__ == '__main__':
         #df = get_mut_df(input='/home/huum/projs/regMotifs/analysis/motifmuts_all.bed12', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
 
         #df = get_mut_df(input='/Users/karolinasg/Documents/pcawg/analysis/motifmuts_all.bed12', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
-        fig = plot_boxplot(df, groups_colors_dict=groups_colors_dict, log=TRUE)
+        fig = plot_boxplot(df, groups_colors_dict=groups_colors_dict, log=True)
         #fig = plot_boxplot(df, groups_colors_dict=groups_colors_dict, title="SFig. {n} Mutation rate in TF motifs across cancer types".format(n=sfig_num), log=TRUE)
 
         pdf.savefig(fig)
@@ -272,7 +272,7 @@ if __name__ == '__main__':
         elements_input_file =args.elements_input_file
         #elements_input_file = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
         box_plot_df, heatmap_df = get_df_from_elements(elements_input_file, col_to_use='RegMuts', sep='#', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency', col_to_check='#Samples(RegMuts)', threshold=1)
-        fig = plot_boxplot(box_plot_df, groups_colors_dict=groups_colors_dict, rotation=90, log=TRUE)
+        fig = plot_boxplot(box_plot_df, groups_colors_dict=groups_colors_dict, rotation=90, log=True)
         
         #fig = plot_boxplot(box_plot_df, groups_colors_dict=groups_colors_dict, rotation=90, title="SFig. {n} regMuts across cancer types".format(n=sfig_num), log=TRUE)
         pdf.savefig(fig)
