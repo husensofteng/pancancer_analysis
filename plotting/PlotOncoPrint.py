@@ -7,7 +7,7 @@ import matplotlib
 from numpy.lib.function_base import average
 from collections import Counter
 import math
-matplotlib.use('pdf')
+matplotlib.use('TkAgg')
 #matplotlib.use('TkAgg')
 from matplotlib.pyplot import tight_layout
 import seaborn as sns
@@ -74,9 +74,9 @@ def generate_dicts(input_file, groups_cols_file, min_num_to_include_row =50,
                 except KeyError:
                     rows_cols_dict[l[rows_index]] = [sample]
                 
-                color = '.'
+                color = ','
                 if sample in l[cols_index_reg].split(','):
-                    color = '|'
+                    color = '.'
                 try:
                     rows_cols_types_dict[l[rows_index]][sample] = color
                 except KeyError:
@@ -125,7 +125,7 @@ def plot_oncoprint(ax, input_file, groups_cols_file, x_shift=400, min_num_to_inc
             color = groups_colors_dict[cols_groups_dict[col]]
             marker = rows_cols_types_dict[row][col]
             size = 10
-            if marker=='.':
+            if marker==',':
                 size =6
             draw_marker(ax, x=x+x_shift, y=y+gap, color=color, marker=marker, markersize=size)
         gap+=1.0
@@ -141,7 +141,7 @@ def plot_oncoprint(ax, input_file, groups_cols_file, x_shift=400, min_num_to_inc
             except KeyError:
                 #print 'sample: ' + col + 'not found in cancer type groups'
                 color = 'white'
-            draw_marker(ax, x=x+x_shift, y=y, color=color, marker='|', markersize=14)
+            draw_marker(ax, x=x+x_shift, y=y, color=color, marker='.', markersize=14)
             
             try:
                 group = cols_groups_dict[col]
@@ -162,9 +162,9 @@ def plot_oncoprint(ax, input_file, groups_cols_file, x_shift=400, min_num_to_inc
     legend_x = len(cols) - (len(cols)/4.0)
     legend_y = -3
     draw_text(ax, x=legend_x, y=legend_y, text="regMuts", color='black', fontsize=10, horizontalalignment='left', rotation=0, verticalalignment='center')
-    draw_marker(ax, x=legend_x-20, y=legend_y, marker='|', color='grey', markersize=12)
+    draw_marker(ax, x=legend_x-20, y=legend_y, marker='.', color='grey', markersize=12)
     draw_text(ax, x=legend_x+200, y=legend_y, text="Other Mutations", color='black', fontsize=10, horizontalalignment='left', rotation=0, verticalalignment='center')
-    draw_marker(ax, x=legend_x+200-20, y=legend_y, marker='.', color='grey', markersize=12)
+    draw_marker(ax, x=legend_x+200-20, y=legend_y, marker=',', color='grey', markersize=12)
     #gap-=5.0
     #draw_text(ax, x=len(cols)+80, y=y, text="%, FDR", horizontalalignment='center')
     ''''x = 0
@@ -196,7 +196,7 @@ def draw_pathwyas(input_file, groups_cols_file, output_dir):
     df = pd.read_table(input_file,
                        sep = '\t', header=None, names=
                        ['Pathways','Total Num. genes', 'Num. enriched genes', 'Num. mutated samples with CFRMs', 'Num. mutated samples', 'Enriched Genes', 'Samples', 'Genes', 'P-Value','FDR'])
-    df['Enrichment size'] = df['Num. enriched genes']/df['Total Num. genes']
+    df['Enrichment size'] = pd.to_numeric(df['Num. enriched genes'])/pd.to_numeric(df['Total Num. genes'])
     df.sort_values(by='FDR', inplace=True)
     print ('/'.join(input_file.split('/')[:-1])+'/sigpathways_sorted.tsv')
     df.to_csv('/'.join(input_file.split('/')[:-1])+'/sigpathways_sorted.tsv', sep='\t')

@@ -16,6 +16,7 @@ from multiprocessing import Pool
 import seaborn as sns
 from utils import draw_text
 from decimal import Decimal
+import argparse
 #sns.set_context("paper", font_scale=1)                                                  
 import matplotlib.ticker as ticker
     
@@ -338,9 +339,9 @@ def process_results(gene_stats, gene_stats_file):
     min_matching_samples = 0
     min_mutated_values = 3
     min_percentage_matching_samples = 0.75
-    pval_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log2)', 'P-val (-log10)', 'DiffCheck']]
-    fc_matching_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log2)', 'Avg FC - Matching Normal (log2)', 'DiffCheck']]
-    fc_pop_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log2)', 'Avg FC - Normal (log2)', 'DiffCheck']]
+    pval_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log10)', 'P-val (-log10)', 'DiffCheck']]
+    fc_matching_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log10)', 'Avg FC - Matching Normal (log10)', 'DiffCheck']]
+    fc_pop_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log10)', 'Avg FC - Normal (log10)', 'DiffCheck']]
     
     for gene,gene_df in gene_stats.groupby('gene_id'):
         gene_symbol = gene_df['Gene_symbol'].values[0]
@@ -412,7 +413,7 @@ def process_results(gene_stats, gene_stats_file):
     df_fc_pop = pd.DataFrame(fc_pop_df[1:], columns=fc_pop_df[0])
     return [df_pval]#, df_matching_normal, df_fc_pop]
 
-def plot_gene_expression(dfs):
+def plot_gene_expression(dfs,output_dir):
     sns.set_style(style='white')
     fig = plt.figure(figsize=(8,6), linewidth=1.0)#design a figure with the given size
     gs = gridspec.GridSpec(len(dfs), 1, wspace=0.0, hspace=0.0)#create 4 rows and three columns with the given ratio for each
@@ -425,21 +426,21 @@ def plot_gene_expression(dfs):
         else:
             ax = fig.add_subplot(gs[i,0])
         axes.append(ax)
-        x_col = 'Avg FC - Not Mutated (log2)'
+        x_col = 'Avg FC - Not Mutated (log10)'
         y_col = 'P-val (-log10)'
-        if 'Avg FC - Matching Normal (log2)' in df.columns:
-            y_col = 'Avg FC - Matching Normal (log2)'
-        elif 'Avg FC - Normal (log2)' in df.columns:
-            y_col = 'Avg FC - Normal (log2)'
+        if 'Avg FC - Matching Normal (log10)' in df.columns:
+            y_col = 'Avg FC - Matching Normal (log10)'
+        elif 'Avg FC - Normal (log10)' in df.columns:
+            y_col = 'Avg FC - Normal (log10)'
         
-        df.to_csv('/home/huum/projs/regMotifs/analysis/RNA-seq/{y_label}_expr_df.tsv'.format(y_label=y_col), sep='\t')
+        df.to_csv(output_dir + '/{y_label}_expr_df.tsv'.format(y_label=y_col), sep='\t')
         log_value = 10
-        if 'log2' in y_col:
-            log_value = 2
+        if 'log10' in y_col:
+            log_value = 10
         
         df[x_col] = np.where(df[x_col]==0, 1e-300, df[x_col])
         df[y_col] = np.where(df[y_col]==0, 1e-300, df[y_col])
-        df[x_col] = df[x_col].apply(lambda x: math.log(x,2))
+        df[x_col] = df[x_col].apply(lambda x: math.log(x,10))
         df[y_col] = df[y_col].apply(lambda x: math.log(x,log_value)*-1) 
         
         min_x = int(df[x_col].min())
@@ -507,13 +508,13 @@ def plot_gene_expression(dfs):
     sns.despine(ax=ax)
     gs.tight_layout(fig, pad=2, h_pad=0.0, w_pad=0.0)
     
-    plt.savefig('sig.pdf')
+    plt.savefig(output_dir + 'sig.pdf')
     plt.clf()
     plt.close()
     print('done')
 
 #plot RP11-731F5.1
-def plot_gene_expr(dfs):
+def plot_gene_expr(dfs, output_dir):
 
     sns.set_style(style='white')
     fig = plt.figure(figsize=(8,6), linewidth=1.0)#design a figure with the given size
@@ -522,12 +523,12 @@ def plot_gene_expr(dfs):
     for i,df in enumerate(dfs):
         ax = fig.add_subplot(gs[i,0])
         axes.append(ax)
-        x_col = 'Avg FC - Not Mutated (log2)'
+        x_col = 'Avg FC - Not Mutated (log10)'
         y_col = 'P-val (-log10)'
-        if 'Avg FC - Matching Normal (log2)' in df.columns:
-            y_col = 'Avg FC - Matching Normal (log2)'
-        elif 'Avg FC - Normal (log2)' in df.columns:
-            y_col = 'Avg FC - Normal (log2)'
+        if 'Avg FC - Matching Normal (log10)' in df.columns:
+            y_col = 'Avg FC - Matching Normal (log10)'
+        elif 'Avg FC - Normal (log10)' in df.columns:
+            y_col = 'Avg FC - Normal (log10)'
         
         df.to_csv('/home/huum/projs/regMotifs/analysis/RNA-seq/{y_label}_expr_df.tsv'.format(y_label=y_col), sep='\t')
         
@@ -574,7 +575,7 @@ def plot_gene_expr(dfs):
     sns.despine(ax=ax)
     gs.tight_layout(fig, pad=2, h_pad=0.0, w_pad=0.0)
     
-    plt.savefig('sig.pdf')
+    plt.savefig(output_dir + 'sig.pdf')
     plt.clf()
     plt.close()
     print('done')
@@ -608,18 +609,18 @@ def get_sig_expr_events(gene_stats, gene_stats_file):
     df = pd.DataFrame(pval_df[1:], columns=pval_df[0])
     return df
 
-def plot_scatter_geneexpr(df):
+def plot_scatter_geneexpr(df, output_dir):
     
     sns.set_style(style='white')
     fig = plt.figure(figsize=(6,4), linewidth=1.0)#design a figure with the given size
     gs = gridspec.GridSpec(1, 1, wspace=0.0, hspace=0.0)#create 4 rows and three columns with the given ratio for each
     ax = fig.add_subplot(gs[0,0])
-    x_col = 'Avg FC - Not Mutated (log2)'
+    x_col = 'Avg FC - Not Mutated (log10)'
     y_col = 'P-val (-log10)'
-    df.to_csv('/home/huum/projs/regMotifs/analysis/RNA-seq/{y_label}_expr_df.tsv'.format(y_label=y_col), sep='\t')
+    df.to_csv(output_dir + '/{y_label}_expr_df.tsv'.format(y_label=y_col), sep='\t')
     
     df[x_col] = np.where(df[x_col]<=1e-2, 1e-2, df[x_col])
-    df[x_col] = df[x_col].apply(lambda x: math.log(x,2))
+    df[x_col] = df[x_col].apply(lambda x: math.log(x,10))
     df[y_col] = np.where(df[y_col]==0, 1e-100, df[y_col])
     df[y_col] = df[y_col].apply(lambda x: math.log(x,10)*-1) 
     print(df['num_mutated_values'])
@@ -640,7 +641,7 @@ def plot_scatter_geneexpr(df):
     ax.set_ylim(0,df[y_col].max()+1)
     sns.despine(ax=ax)
     gs.tight_layout(fig, pad=2, h_pad=0.0, w_pad=0.0)
-    plt.savefig('sig_min10samples.pdf')
+    plt.savefig(output_dir + 'sig_min10samples.pdf')
     plt.close()
     print('done')
     
@@ -703,11 +704,27 @@ def box_plot_per_gene_cancertype(fig, gs, row_num, gene_counts_info_stats, genes
     
     return
 
+
+def parse_args():
+    '''Parse command line arguments'''
+    
+    parser = argparse.ArgumentParser(description='Plot Expression')
+    parser.add_argument('--genes_mutated_input', default='', help='')
+    parser.add_argument('--meta_data', default='', help='')
+    parser.add_argument('--gene_expr_intput', default='', help='')
+    parser.add_argument('--output_dir', default='', help='')
+    
+
+    
+    return parser.parse_args(sys.argv[1:])
+
 if __name__ == '__main__':
     #merged200bp_extended200bp_nofullexon_pancan , PancanElements
-    genes_mutated_input = '/home/huum/projs/regMotifs/analysis/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv_GenesInclCDS.tsv'
-    meta_data = '/home/huum/projs/regMotifs/analysis/RNA-seq/extended_meatadata_syn7416381'
-    gene_expr_intput = '/home/huum/projs/regMotifs/analysis/RNA-seq/tophat_star_fpkm_uq.v2_aliquot_gl.tsv'
+    args = parse_args()
+    
+    genes_mutated_input = args.genes_mutated_input
+    meta_data = args.meta_data
+    gene_expr_intput = args.gene_expr_intput
     
     meta_data = get_sample_data(meta_data)
     print('metadata')
@@ -720,14 +737,14 @@ if __name__ == '__main__':
     gene_counts_info_stats, gene_counts_info_stats_file = process_gene_counts(gene_counts_info, mutated_genes, gene_counts_info_file)
     print('stats done')
     #make a scatter plot for genes that are mutated in at least 10 samples with expr data (pval and avg FC (WT)
-    #df = get_sig_expr_events(gene_counts_info_stats, gene_counts_info_stats_file)
-    #plot_scatter_geneexpr(df)
+    df = get_sig_expr_events(gene_counts_info_stats, gene_counts_info_stats_file)
+    plot_scatter_geneexpr(df, output_dir)
     
     #box_plot_per_gene_cancertype(gene_counts_info_stats, genes_cancertypes=['VHL:Kidney-RCC', 'BCL2:Lymph-BNHL', 'MYC:Lymph-BNHL', 'RP11-731F5.1:Lymph-BNHL'])#, 'TERT':['Skin-Melanoma', 'Bladder-TCC','CNS-Oligo','Thy-AdenoCA']})
     #box_plot_per_gene_cancertype(gene_counts_info_stats, genes_cancertypes=['VHL:Kidney-RCC'], out_ext='vhlexpr', fig_width=4, fig_hieght=2)
     
     
     #dfs = process_results(gene_counts_info_stats, gene_counts_info_stats_file)
-    #plot_gene_expression(dfs)
-    #plot_gene_expr(dfs)
+    #plot_gene_expression(dfs, output_dir)
+    #plot_gene_expr(dfs, output_dir)
     

@@ -46,7 +46,7 @@ def draw_motifalignment(ax, fig):
         draw_motif(ax, fig, motif_pwm=all_scores_2, size=10, x_shift=xi, ypos=ys)
     #aligned
     for yi in [-15, -20, -25]:
-        draw_motif(ax, fig, motif_pwm=all_scores_1, size=10, x_shift=10, ypos=yi)
+            draw_motif(ax, fig, motif_pwm=all_scores_1, size=10, x_shift=10, ypos=yi)
         
     for yi in [-15, -20, -25]:
         draw_motif(ax, fig, motif_pwm=all_scores_2, size=10, x_shift=30, ypos=yi)

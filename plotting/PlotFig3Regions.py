@@ -6,7 +6,7 @@ Created on 21 Jul 2017
 import matplotlib
 from numpy.lib.function_base import average
 import math
-matplotlib.use('Agg')
+matplotlib.use('TkAgg')
 from matplotlib.pyplot import tight_layout
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -64,6 +64,8 @@ def draw_sigregs(ax):
 
 def draw_rec_sigregs(ax, elements_input_file):
     elements_input = pd.read_table(elements_input_file, sep='\t', skiprows=6, header=0)
+    #print(elements_input['#Samples(RegMuts)'])
+    elements_input['#Samples(RegMuts)'] = pd.to_numeric(elements_input['#Samples(RegMuts)'])
     df = elements_input[(elements_input['#Samples(RegMuts)']>1)]
     #print(df)
     df['FDR'] = np.where(df['FDR']==0.0, 1e-300, df['FDR'])#to replace zero with a number that can be converted to log10
@@ -71,8 +73,8 @@ def draw_rec_sigregs(ax, elements_input_file):
     y = 'Score'
     x = '#Samples'
     s = '#Samples(RegMuts)'
-    df[x]=df[x].apply(np.log2)
-    df[y]=df[y].apply(np.log2)
+    df[x]=df[x].apply(np.log10)
+    df[y]=df[y].apply(np.log10)
     colors = []
     colors_region_types_dict = {'CDS': 'green', 'UTR':'orange', 'intergenic': 'black', 'intronic': 'blue', 'proximal_promoter': 'red'}
     for r in df['Feature_type'].values:
@@ -100,8 +102,8 @@ def draw_rec_sigregs(ax, elements_input_file):
         if label == 'None':
             label = ''
         draw_text(ax, x=r[x]+x_shift, y=r[y]+y_shift, text=label, horizontalalignment='left', verticalalignment='bottom', color=color, fontsize=8, rotation=rotation)
-    ax.set_xlabel('Number of mutated samples (log2)')
-    ax.set_ylabel('Regulatory score (log2)')
+    ax.set_xlabel('Number of mutated samples (log10)')
+    ax.set_ylabel('Regulatory score (log10)')
     ax.set_xlim(0,df[x].max()+0.2)
     ax.set_ylim(0,df[y].max()+0.2)
     #ax.legend(loc='upper center')

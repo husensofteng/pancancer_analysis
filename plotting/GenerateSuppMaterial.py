@@ -144,8 +144,8 @@ def draw_rec_sigregs(elements_input_file, title):
     y = 'Score'
     x = '#Samples'
     s = '#Samples(RegMuts)'
-    df[x]=df[x].apply(np.log2)
-    df[y]=df[y].apply(np.log2)
+    df[x]=df[x].apply(np.log10)
+    df[y]=df[y].apply(np.log10)
     colors = []
     colors_region_types_dict = {'CDS': 'green', 'UTR':'orange', 'intergenic': 'black', 'intronic': 'blue', 'proximal_promoter': 'red'}
     for r in df['Feature_type'].values:
@@ -174,8 +174,8 @@ def draw_rec_sigregs(elements_input_file, title):
         if label == 'None':
             label = ''
         draw_text(ax, x=r[x]+x_shift, y=r[y]+y_shift, text=label, horizontalalignment='left', verticalalignment='bottom', color=color, fontsize=8, rotation=rotation)
-    ax.set_xlabel('Number of mutated samples (log2)')
-    ax.set_ylabel('Regulatory score (log2)')
+    ax.set_xlabel('Number of mutated samples (log10)')
+    ax.set_ylabel('Regulatory score (log10)')
     ax.set_xlim(0,df[x].max()+0.2)
     ax.set_ylim(0,df[y].max()+0.2)
     #ax.legend(loc='upper center')
@@ -222,7 +222,10 @@ if __name__ == '__main__':
         #df = get_mut_df(input='/home/huum/projs/regMotifs/mutations_files/obsagr22May2017_exclVEP.bed9', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
 
         #df = get_mut_df(input='/Users/karolinasg/Documents/pcawg/analysis/obsagr22May2017_exclVEP.bed9', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
-        fig = plot_boxplot(df, groups_colors_dict=groups_colors_dict, title="SFig. {n} Mutation rate across cancer types".format(n=sfig_num))
+        #fig = plot_boxplot(df, groups_colors_dict=groups_colors_dict,  log=TRUE)
+        fig = plot_boxplot(df, groups_colors_dict=groups_colors_dict, #title="SFig. {n} Mutation rate across cancer types".format(n=sfig_num), 
+                           log=TRUE)
+
         pdf.savefig(fig)
         
         sfig_num+=1
@@ -232,7 +235,9 @@ if __name__ == '__main__':
         #df = get_mut_df(input='/home/huum/projs/regMotifs/analysis/motifmuts_all.bed12', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
 
         #df = get_mut_df(input='/Users/karolinasg/Documents/pcawg/analysis/motifmuts_all.bed12', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency')
-        fig = plot_boxplot(df, groups_colors_dict=groups_colors_dict, title="SFig. {n} Mutation rate in TF motifs across cancer types".format(n=sfig_num))
+        fig = plot_boxplot(df, groups_colors_dict=groups_colors_dict, #title="SFig. {n} Mutation rate in TF motifs across cancer types".format(n=sfig_num), 
+                           log=TRUE)
+
         pdf.savefig(fig)
         
         #Skip the chromatin states figure
@@ -253,8 +258,9 @@ if __name__ == '__main__':
         motif_muts_file = args.mut_anno_input_file
         #motif_muts_file = '/Users/karolinasg/Documents/pcawg/analysis/obsann22May2017_exclVEP.bed9' 
 
-        fig = plot_barcharts(motif_muts_file, x_col_index = 17, col1_to_check = 24, col2_to_check=25, fig_width=6, fig_height=6, 
-                             title="SFig. {n} Number of active and inactive mutated-motifs".format(n=sfig_num))
+        fig = plot_barcharts(motif_muts_file, x_col_index = 17, col1_to_check = 24, col2_to_check=25, fig_width=6, fig_height=6#, 
+                             #title="SFig. {n} Number of active and inactive mutated-motifs".format(n=sfig_num)
+                             )
         pdf.savefig(fig)
         
         
@@ -266,7 +272,9 @@ if __name__ == '__main__':
         elements_input_file =args.elements_input_file
         #elements_input_file = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_pancan/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
         box_plot_df, heatmap_df = get_df_from_elements(elements_input_file, col_to_use='RegMuts', sep='#', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency', col_to_check='#Samples(RegMuts)', threshold=1)
-        fig = plot_boxplot(box_plot_df, groups_colors_dict=groups_colors_dict, rotation=90, title="SFig. {n} regMuts across cancer types".format(n=sfig_num))
+        fig = plot_boxplot(box_plot_df, groups_colors_dict=groups_colors_dict, rotation=90, 
+                           #title="SFig. {n} regMuts across cancer types".format(n=sfig_num), 
+                           log=TRUE)
         pdf.savefig(fig)
         
         
@@ -278,7 +286,8 @@ if __name__ == '__main__':
         box_plot_df, heatmap_df = get_df_from_elements(elements_input_file, col_to_use='Mutated-Moitfs', sep='#', 
                                             x_col_index=15, y_col_index=10, x_col_name = 'Chromatin States', y_col_name='TF Motifs', 
                  col_to_check='#Samples(RegMuts)', threshold=1)
-        fig = plot_heatmap(heatmap_df, x_col_name='Chromatin States', y_col_name='', title="SFig. {n} Enrichment of mutated motifs in regEs per chromatin state".format(n=sfig_num))
+        fig = plot_heatmap(heatmap_df, x_col_name='Chromatin States', y_col_name=''#, title="SFig. {n} Enrichment of mutated motifs in mutEs per chromatin state".format(n=sfig_num)
+                           )
         pdf.savefig(fig)
         
         sfig_num+=1
@@ -286,7 +295,8 @@ if __name__ == '__main__':
         #elements_input_file = '/Users/karolinasg/Documents/pcawg/NEW_RESULTS_removig_VEP_23_october/merged200bp_extended200bp_nofullexon_Lymph/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
         elements_input_file_Lymph =args.elements_input_file_Lymph
         #elements_input_file = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_Lymph/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
-        fig = draw_rec_sigregs(elements_input_file_Lymph, title='SFig. {n} regEs identified from Lymphoma cohorts'.format(n=sfig_num))
+        fig = draw_rec_sigregs(elements_input_file_Lymph#, title='SFig. {n} mutEs identified from Lymphoma cohorts'.format(n=sfig_num)
+                               )
         pdf.savefig(fig)
         
         sfig_num+=1
