@@ -295,7 +295,7 @@ if __name__ == '__main__':
         #elements_input_file = '/Users/karolinasg/Documents/pcawg/NEW_RESULTS_removig_VEP_23_october/merged200bp_extended200bp_nofullexon_Lymph/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
         elements_input_file_Lymph =args.elements_input_file_Lymph
         #elements_input_file = '/home/huum/projs/regMotifs/analysis_exclVEP/merged200bp_extended200bp_nofullexon_Lymph/combined_rand103setsTFsigQval0.05_meanTFExprMotifBreaking03Filters_mergedmuts200bpSimSig1.0localw25000onlysig0.05_merged_intersectedmuts_grouped_aggregated0UpDwmaxdist2kb_within500kb.tsv'
-        fig = draw_rec_sigregs(elements_input_file_Lymph) #, title='SFig. {n} mutEs identified from Lymphoma cohorts'.format(n=sfig_num)
+        fig = draw_rec_sigregs(elements_input_file_Lymph, title='') #, title='SFig. {n} mutEs identified from Lymphoma cohorts'.format(n=sfig_num)
                               # )
         pdf.savefig(fig)
         
