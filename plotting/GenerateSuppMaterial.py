@@ -26,7 +26,7 @@ sns.set_context("paper")#talk
 from utils import *
 
     
-def get_mut_df(input='', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency'):
+def get_mut_df(input='', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency (log10)'):
     if os.path.isfile(str(input)):
         names = [x_col_name, y_col_name]
         if x_col_index>y_col_index:
@@ -38,7 +38,7 @@ def get_mut_df(input='', x_col_index=5, y_col_index=8, x_col_name = 'Cancer type
             df[x_col_name] = df[x_col_name].apply(get_unique_state).apply(replace_state)
     return df
 
-def plot_boxplot(df, x_col_name = 'Cancer types', y_col_name='Mutation Frequency', title="",
+def plot_boxplot(df, x_col_name = 'Cancer types', y_col_name='Mutation Frequency (log10)', title="",
                  groups_colors_dict=None, order=None, rotation=90, fig_width=8, fig_height=6, log=False
     ):
     plt.clf()
@@ -83,7 +83,7 @@ def plot_heatmap(df, x_col_name, y_col_name, fig_width=8, fig_height=6, title=""
     return fig
     
 
-def get_df_from_elements(input_file='', col_to_use='RegMuts', sep='#', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency', 
+def get_df_from_elements(input_file='', col_to_use='RegMuts', sep='#', x_col_index=5, y_col_index=8, x_col_name = 'Cancer types', y_col_name='Mutation Frequency (log10)', 
                  col_to_check='#Samples(RegMuts)', threshold=1):
     elements_input = pd.read_table(input_file, sep='\t', skiprows=6, header=0, usecols=[col_to_check,col_to_use])
     elements_input = elements_input[(elements_input['#Samples(RegMuts)']>threshold)]
