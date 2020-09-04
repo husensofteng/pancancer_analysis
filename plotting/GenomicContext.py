@@ -186,7 +186,7 @@ def get_boxes_to_plot(infile, chr, start, end, cell_names=[], factors=[], names=
     df.to_csv(infile+".csvtemp", sep='\t', index=False, header=None)
     cells_boxes = {}
     if len(df)==0:
-        print('no peaks found overlapping this region:', chr, start, end)
+        print('no peaks found overlapping this region:'+ chr + start + end)
         return cells_boxes
     merged = BedTool(infile+".csvtemp").sort().merge(c=[2,3,4,5,6], o=['collapse', 'collapse', 'collapse', 'collapse','collapse'])#.groupby(g=[4,5], c=[1,2,3,6], o=['distinct','min','max','distinct'], full=True)
     for r in merged:
@@ -236,7 +236,7 @@ def plot_genomic_context(ax1, ax2, ax3, x_shift, gene_name, cell_names, elements
     plot_muts(ax1, regions, muts_to_plot, motifs, x_shift=x_shift, start=min(region_positions), end=max(region_positions))
     
     gene_df, chr, start, end = get_gene_features(infile=gene_infile, gene_name=gene_name, 
-                                features_to_show=['exon'])
+                                features_to_show=['proximal_promoter'])
     draw_genes(ax2, gene_df, start=start, end=end, regionstart=min(region_positions), regionend=max(region_positions))
     
     cells_boxes = get_boxes_to_plot(chip_seq_infile, chr=chr, start=start, end=end, cell_names=cell_names, factors=[])
@@ -288,7 +288,7 @@ if __name__ == '__main__':
 
     plt.clf()
     fig = plt.figure(figsize=(8, 6), linewidth=1.0)#design a figure with the given size
-    genes_cancertypes = ['VHL:Kidney-RCC', 'BCL2:Lymph-BNHL', 'MYC:Lymph-BNHL', 'RP11-731F5.1:Lymph-BNHL']
+    genes_cancertypes = ['BCL2:Lymph-BNHL', 'MYC:Lymph-BNHL', 'RP11-731F5.1:Lymph-BNHL']
     num_cols = len(genes_cancertypes)
     gs = gridspec.GridSpec(4, 8, height_ratios=[4,2,2,4], wspace=0.0, hspace=0.0)#create 4 rows and three columns with the given ratio for each
     sns.set_style('white', {'axes.linewidth': 1})
@@ -317,9 +317,9 @@ if __name__ == '__main__':
     genes_mutated_input= args.genes_elem_input_file
     meta_data = args.meta_data
     gene_expr_intput=args.gene_expr_intput
-    plot_genomic_context(ax1, ax2, ax3, x_shift=x_shift, gene_name='VHL', cell_names=['HEK293'], elements_infile=elements_infile, gene_infile=gene_infile, chip_seq_infile=chip_seq_infile)
+    #plot_genomic_context(ax1, ax2, ax3, x_shift=x_shift, gene_name='VHL', cell_names=['HEK293'], elements_infile=elements_infile, gene_infile=gene_infile, chip_seq_infile=chip_seq_infile)
     show_y_label = False
-    plot_genomic_context(ax4, ax5, ax6, x_shift=x_shift, gene_name='MYC', cell_names=['GM12878'], elements_infile=elements_infile, gene_infile=gene_infile, chip_seq_infile=chip_seq_infile)
+    plot_genomic_context(ax4, ax5, ax6, x_shift=x_shift, gene_name='BCL2', cell_names=['GM12878'], elements_infile=elements_infile, gene_infile=gene_infile, chip_seq_infile=chip_seq_infile)
     
     plot_gene_expr( genes_mutated_input, meta_data,gene_expr_intput, fig, gs, row_num=3, genes_cancertypes=genes_cancertypes)
     fig4 = args.output_dir+'/Fig4'
