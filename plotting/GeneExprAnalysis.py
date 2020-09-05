@@ -186,7 +186,7 @@ def get_expr_per_sample(mutated_genes, meta_data, gene_counts, gene_counts_file,
     
     all_samples = gene_counts.columns[2:]
     gene_counts_list = []
-    p = Pool(15)
+    p = Pool(10)
     for i, gene_info in mutated_genes.iterrows():
         if gene_info['GeneID']=='None':
             continue
@@ -319,7 +319,7 @@ def process_gene_counts(gene_counts_info, mutated_genes, gene_counts_info_file):
         'mutated_samples', 'mutated_aliquots',
         'mutated_values', 'normal_values', 'notmutated_values', 'normal_notmut_combined_values']
     results = []
-    p = Pool(15)
+    p = Pool(10)
     #mutated versus nonmutated tumors per gene per cancer type
     for gene_id, gene_df in gene_counts_info.groupby('GeneID'):
         #if mutated_genes.loc[mutated_genes['GeneID'] == gene_id]['#RegMuts'].values[0]<10:
