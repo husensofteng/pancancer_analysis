@@ -288,18 +288,18 @@ if __name__ == '__main__':
 
     plt.clf()
     fig = plt.figure(figsize=(8, 6), linewidth=1.0)#design a figure with the given size
-    genes_cancertypes = ['BCL2:Lymph-BNHL', 'MYC:Lymph-BNHL', 'RP11-731F5.1:Lymph-BNHL']
+    genes_cancertypes = ['BCL2:Lymph-BNHL', 'BCL7A:Lymph-BNHL', 'CD83:Lymph-BNHL', 'CSF2RA:Kidney-RCC']
     num_cols = len(genes_cancertypes)
     gs = gridspec.GridSpec(4, 8, height_ratios=[4,2,2,4], wspace=0.0, hspace=0.0)#create 4 rows and three columns with the given ratio for each
     sns.set_style('white', {'axes.linewidth': 1})
     #first genomic track
-    ax1 = fig.add_subplot(gs[0,0:3])
-    ax2 = fig.add_subplot(gs[1,0:3])
-    ax3 = fig.add_subplot(gs[2,0:3])
+    ax1 = fig.add_subplot(gs[0,0:8])
+    ax2 = fig.add_subplot(gs[1,0:8])
+    ax3 = fig.add_subplot(gs[2,0:8])
     #second genomic track
-    ax4 = fig.add_subplot(gs[0,3:8])
-    ax5 = fig.add_subplot(gs[1,3:8])
-    ax6 = fig.add_subplot(gs[2,3:8])
+   # ax4 = fig.add_subplot(gs[0,3:8])
+    #ax5 = fig.add_subplot(gs[1,3:8])
+    #ax6 = fig.add_subplot(gs[2,3:8])
     
     gs.tight_layout(fig, pad=2, h_pad=2.0, w_pad=2.0)
     x_shift=100
@@ -319,9 +319,9 @@ if __name__ == '__main__':
     gene_expr_intput=args.gene_expr_intput
     #plot_genomic_context(ax1, ax2, ax3, x_shift=x_shift, gene_name='VHL', cell_names=['HEK293'], elements_infile=elements_infile, gene_infile=gene_infile, chip_seq_infile=chip_seq_infile)
     show_y_label = False
-    plot_genomic_context(ax4, ax5, ax6, x_shift=x_shift, gene_name='BCL2', cell_names=['GM12878'], elements_infile=elements_infile, gene_infile=gene_infile, chip_seq_infile=chip_seq_infile)
+    plot_genomic_context(ax1, ax2, ax3, x_shift=x_shift, gene_name='BCL2', cell_names=['GM12878'], elements_infile=elements_infile, gene_infile=gene_infile, chip_seq_infile=chip_seq_infile)
     
-    plot_gene_expr( genes_mutated_input, meta_data,gene_expr_intput, fig, gs, row_num=3, genes_cancertypes=genes_cancertypes)
+    #plot_gene_expr( genes_mutated_input, meta_data,gene_expr_intput, fig, gs, row_num=3, genes_cancertypes=genes_cancertypes)
     fig4 = args.output_dir+'/Fig4'
     plt.savefig(fig4+'.pdf')
     plt.savefig(fig4+'.svg')
