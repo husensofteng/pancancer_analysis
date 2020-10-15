@@ -1475,8 +1475,9 @@ if __name__ == '__main__':
 
    
 
-    generated_merged_element_files = [s.replace(ext, ext_rep) for s in generated_sig_merged_element_files]
-    
+    generated_merged_element_files = generated_sig_merged_element_files
+    #generated_merged_element_files = [s.replace(ext, ext_rep) for s in generated_sig_merged_element_files]
+
     
     #merged elements filterd by fdr
     if args.merged_mut_sig:
