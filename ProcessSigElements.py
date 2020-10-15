@@ -994,7 +994,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
             #temporary file to keep the activedriver rsults
             #active_driver_output_file = active_driver_output_file +'_merged'
             #run activedriver
-            if not os.path.exists(active_driver_output_file):
+            if not os.path.exists(active_driver_output_file_local_sig):
                 print(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file,active_driver_output_file_local_results,  n_cores])
                 
                 try:
