@@ -994,21 +994,21 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
             #temporary file to keep the activedriver rsults
             #active_driver_output_file = active_driver_output_file +'_merged'
             #run activedriver
-            if not os.path.exists(active_driver_output_file_local_sig):
-                print(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file,active_driver_output_file_local_results,  n_cores])
+            #if not os.path.exists(active_driver_output_file_local_sig):
+             #   print(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file,active_driver_output_file_local_results,  n_cores])
                 
-                try:
-                    subprocess.call(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, active_driver_output_file_local_results,n_cores])
-
-                except KeyError:
-                    open(active_driver_output_file, 'a').close()
+                #try:
+                #    subprocess.call(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, active_driver_output_file_local_results,n_cores])
+#
+               # except KeyError:
+                #    open(active_driver_output_file, 'a').close()
                 
                 #keep only significant elements    
-                awk_stmt_sig = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if($15<=0.05) print $0}}' {active_driver_output_file} > {active_driver_output_file_sig} 
-                                """).format(active_driver_output_file=active_driver_output_file, active_driver_output_file_sig = active_driver_output_file_sig)
-                os.system(awk_stmt_sig)
-                print(awk_stmt_sig)
-                copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
+                #awk_stmt_sig = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if($15<=0.05) print $0}}' {active_driver_output_file} > {active_driver_output_file_sig} 
+                #                """).format(active_driver_output_file=active_driver_output_file, active_driver_output_file_sig = active_driver_output_file_sig)
+                #os.system(awk_stmt_sig)
+             #   print(awk_stmt_sig)
+             #   copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
             
             with open(active_driver_output_file_local_sig) as infile:
                 for line in infile:
