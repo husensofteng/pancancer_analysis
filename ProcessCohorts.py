@@ -351,7 +351,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                             sim_output_extension+output_extension, 
                             distance_to_merge, merged_mut_sig_threshold, 
                             local_domain_window, chr_lengths_file, 
-                                sig_elements_output_file, sim_sig_thresh, p_value_on_score=False )
+                                sig_elements_output_file, sim_sig_thresh, p_value_on_score=p_value_on_score)
     
     return sig_elements_output_file, sig_tfs_file, sig_tfpos_file
     
