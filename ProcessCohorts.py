@@ -128,7 +128,7 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
                             output_extension, distance_to_merge, 
                             merged_mut_sig_threshold, local_domain_window, 
                             chr_lengths_file, sig_elements_output_file, 
-                            sim_sig_thresh):
+                            sim_sig_thresh, p_value_on_score=False):
     
     combined_simulated_muts_merged_output_file = cohort_full_name + output_extension + '_unified_combined' + '_merged{distance_to_merge}bp'.format(distance_to_merge=distance_to_merge) + '_combined'
 #     merged_muts_output_ext = "_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)
@@ -196,7 +196,7 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
                                    merged_elements_statspvalues=merged_elements_statspvalues, 
                                    merged_elements_statspvaluesonlysig=merged_elements_statspvaluesonlysig, 
                                    merged_mut_sig_threshold=merged_mut_sig_threshold, 
-                                   score_index_observed_elements=3, score_index_sim_elements=3)
+                                   score_index_observed_elements=3, score_index_sim_elements=3, p_value_on_score=False)
     
     #based on a local domain distribution of scores
     '''Calcuate pval for each element by comparing its score to 
@@ -211,10 +211,10 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
         merged_elements_statspvaluesonlysig=sig_elements_output_file, 
         chr_lengths_file=chr_lengths_file, local_domain_window=local_domain_window, 
         merged_mut_sig_threshold=merged_mut_sig_threshold, 
-        score_index_observed_elements=3, score_index_sim_elements=3)
+        score_index_observed_elements=3, score_index_sim_elements=3, p_value_on_score=False)
     
-    if os.path.exists(combined_simulated_muts_merged_output_file):
-        os.remove(combined_simulated_muts_merged_output_file)
+    #if os.path.exists(combined_simulated_muts_merged_output_file):
+    #    os.remove(combined_simulated_muts_merged_output_file)
     
     return sig_elements_output_file
 
@@ -229,7 +229,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                filter_cond, operation_on_unify, output_extension, 
                distance_to_merge, merged_mut_sig_threshold,
                local_domain_window, chr_lengths_file,
-               sig_elements_output_file, sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore):    
+               sig_elements_output_file, sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore, p_value_on_score):    
     
     "get the cohort name to use for output file names"
     cohort_full_name = created_cohorts[cohort][0].split('_')[0]
@@ -351,7 +351,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                             sim_output_extension+output_extension, 
                             distance_to_merge, merged_mut_sig_threshold, 
                             local_domain_window, chr_lengths_file, 
-                                sig_elements_output_file, sim_sig_thresh)
+                                sig_elements_output_file, sim_sig_thresh, p_value_on_score=False )
     
     return sig_elements_output_file, sig_tfs_file, sig_tfpos_file
     
@@ -439,7 +439,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                     filter_cond, operation_on_unify, output_extension, 
                     distance_to_merge, merged_mut_sig_threshold,
                     local_domain_window, chr_lengths_file, sig_elements_output_file, 
-                    sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore))#, callback=generated_sig_merged_element_files.append)
+                    sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore, p_value_on_score))#, callback=generated_sig_merged_element_files.append)
         else:
             run_cohort(cohort, created_cohorts, 
                        mutation_input_files, mutations_cohorts_dir, motif_name_index, 
@@ -450,7 +450,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                        filter_cond, operation_on_unify, output_extension, 
                        distance_to_merge, merged_mut_sig_threshold,
                        local_domain_window, chr_lengths_file, sig_elements_output_file, 
-                       sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore)
+                       sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore, p_value_on_score)
         
         generated_sig_merged_element_files.append(sig_elements_output_file)
         sig_tfs_files.append(sig_tfs_file)
@@ -481,6 +481,7 @@ def parse_args():
     parser.add_argument('--sig_thresh', type=float, default=0.05, help='Sig level threshold on mutation score level')
     parser.add_argument('--sim_sig_thresh', type=float, default=1.0, help='Sig level threshold for simulated mutations on score level')
     parser.add_argument('--merged_mut_sig_threshold', type=float, default=0.05, help='P-value threshold for simulated mutations on score level')
+    parser.add_argument('--p_value_on_score', action='store_const', const=True, help='P-value of elements computed based on the score distribution, if the flag is missing it would use the probability density function to obtain p-value')
     parser.add_argument('--distance_to_merge', type=int, default=200, help='Window size (number of base-pairs) to merge nearby mutations within')
     parser.add_argument('--local_domain_window', type=int, default=25000, help='Window width for capturing simulated elements to compare mutation frequency ')
     parser.add_argument('--filter_on_qval', action='store_const', const=True, help='Filter on FDR (adjusted p-values), if the flag is missing it would filter on p-value')
@@ -511,7 +512,7 @@ if __name__ == '__main__':
         args.background_window, args.background_window_size, 
         args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
-        args.local_domain_window, args.tmp_dir, args.n_cores_fscore)
+        args.local_domain_window, args.tmp_dir, args.n_cores_fscore, args.p_value_on_score)
     #print("Generated Sig. Element Sets: \n", '\n'.join(generated_sig_merged_element_files))
     
     

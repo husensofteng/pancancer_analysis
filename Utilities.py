@@ -175,7 +175,7 @@ def get_mean_and_sd_from_file(simulated_input_file, scores_index = 9, index_mut_
                     scores_MNPs.append(float(sl[scores_index]))
             l = simulated_infile.readline()
     
-    stats_dict = {'avg': np.mean(scores), 'std': np.std(scores)}
+    stats_dict = {'scores':scores,'avg': np.mean(scores), 'std': np.std(scores)}
     if not report_overlall_score:
         if len(scores_SNPs)>0:
             stats_dict['avgSNPs'] = np.mean(scores_SNPs)
@@ -188,6 +188,8 @@ def get_mean_and_sd_from_file(simulated_input_file, scores_index = 9, index_mut_
         json.dump(stats_dict, simulated_outfile)
     
     return stats_dict
+
+
 
 def assess_stat_muts(muts_input_file, simulated_input_file, observed_output_file, observed_onlysig_output_file, score_index_observed_elements=9, score_index_sim_elements=9, index_mut_type = 6, mut_sig_threshold=0.05, stats_dict = {}):
     
@@ -281,7 +283,7 @@ def sum_fscore_motif_breaking_score(feature,fscore_index, motif_breaking_score_i
 
 def assess_stat_elements_local_domain(observed_input_file, simulated_input_files, merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 
                                       chr_lengths_file, local_domain_window=25000, 
-                                      merged_mut_sig_threshold = 0.05, score_index_observed_elements=4, score_index_sim_elements=4):
+                                      merged_mut_sig_threshold = 0.05, score_index_observed_elements=4, score_index_sim_elements=4, p_value_on_score=False):
     
     if os.path.exists(merged_elements_statspvalues) and os.path.exists(merged_elements_statspvaluesonlysig):
         return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 'NA'
@@ -333,23 +335,35 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
     n_sig = 0
     lines = []
     
-    for l in sorted(dict_lines_observed.keys()):
-        std = np.std(dict_lines_observed[l][1])
-        mean = np.mean(dict_lines_observed[l][1])
-        element_score = float(dict_lines_observed[l][0][score_index_observed_elements])
-        p_value = 1.0
-        if mean>0 and std>0:
-            p_value = get_pval(element_score, mean, std)
-        elif std<=0 and mean>0:
-            print('mean>0&sd=0', mean,std, dict_lines_observed[l])
-            if element_score > mean+(mean/2):#1.5 fold times larger
+    if p_value_on_score:
+        for l in sorted(dict_lines_observed.keys()):
+            scores_len=len(dict_lines_observed[l][1])
+            print('scores_len ',scores_len)
+            element_score = float(dict_lines_observed[l][0][score_index_observed_elements])
+            scores_higher_than_observed = [i for i in dict_lines_observed[l][1] if i >= element_score]
+            p_value= len(scores_higher_than_observed)/scores_len
+            p_values.append(p_value)
+            lines.append(dict_lines_observed[l][0])
+           
+    else: 
+        for l in sorted(dict_lines_observed.keys()):
+            std = np.std(dict_lines_observed[l][1])
+            mean = np.mean(dict_lines_observed[l][1])
+            element_score = float(dict_lines_observed[l][0][score_index_observed_elements])
+            p_value = 1.0
+            if mean>0 and std>0:
+                p_value = get_pval(element_score, mean, std)
+            elif std<=0 and mean>0:
+                print('mean>0&sd=0', mean,std, dict_lines_observed[l])
+                if element_score > mean+(mean/2):#1.5 fold times larger
+                    p_value = 0.0
+            else:
                 p_value = 0.0
-        else:
-            p_value = 0.0
-            print('mean=0&sd=0', mean,std, dict_lines_observed[l])
-            
-        p_values.append(p_value)
-        lines.append(dict_lines_observed[l][0])
+                print('mean=0&sd=0', mean,std, dict_lines_observed[l])
+                
+            p_values.append(p_value)
+            lines.append(dict_lines_observed[l][0])
+    
     del dict_lines_observed
     
     if len(p_values)>0:
@@ -369,7 +383,7 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
                          merged_elements_statspvaluesonlysig, 
                          merged_mut_sig_threshold = 0.05, 
                          score_index_observed_elements=4, 
-                         score_index_sim_elements=4):
+                         score_index_sim_elements=4, p_value_on_score=False):
     
     if os.path.exists(merged_elements_statspvalues) and os.path.exists(merged_elements_statspvaluesonlysig):
         return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 'NA'
@@ -385,13 +399,24 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
     n_sig = 0
     with open(observed_input_file, 'r') as observed_infile, open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
         l = observed_infile.readline()
-        while l:
-            sl = l.strip().split('\t')
-            #get avg and std from simulated merged elements located within w bps of this region
-            p_value = get_pval(float(sl[score_index_observed_elements]), stats_dict['avg'], stats_dict['std'])
-            p_values.append(p_value)
-            lines.append(l.strip())
-            l = observed_infile.readline()
+        
+        if p_value_on_score:
+            scores_len=len(stats_dict['scores'])
+            while l:
+                sl = l.strip().split('\t')
+                scores_higher_than_observed = [i for i in stats_dict['scores'] if i >= float(sl[score_index_observed_elements])]
+                p_value= len(scores_higher_than_observed)/scores_len
+                p_values.append(p_value)
+                lines.append(l.strip())
+                l = observed_infile.readline()
+        else:
+            while l:
+                sl = l.strip().split('\t')
+                #get avg and std from simulated merged elements located within w bps of this region
+                p_value = get_pval(float(sl[score_index_observed_elements]), stats_dict['avg'], stats_dict['std'])
+                p_values.append(p_value)
+                lines.append(l.strip())
+                l = observed_infile.readline()
         if len(p_values)>0:
             pvalues_adjusted = adjust_pvales(p_values)
         
@@ -402,6 +427,9 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
                 merged_elements_statspvaluesonlysig_outfile.write(l.strip() + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
     
     return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, n_sig
+
+
+
 
 def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index, 
                 f_score_index, motif_breaking_score_index, 
