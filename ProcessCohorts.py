@@ -361,7 +361,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                     background_window, background_window_size, 
                     filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                     distance_to_merge, 
-                    merged_mut_sig_threshold, local_domain_window, tmp_dir, n_cores_fscore):
+                    merged_mut_sig_threshold, local_domain_window, tmp_dir, n_cores_fscore, p_value_on_score):
     
     simulated_input_files = [simulated_input_dir+'/'+x for x in os.listdir(simulated_input_dir) if '_annotated.bed9' in x]
     mutation_input_files = [observed_input_file]
