@@ -992,23 +992,23 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
 
     
             #temporary file to keep the activedriver rsults
-            #active_driver_output_file = active_driver_output_file +'_merged'
+            active_driver_output_file = active_driver_output_file +'_merged'
             #run activedriver
-            #if not os.path.exists(active_driver_output_file_local_sig):
-             #   print(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file,active_driver_output_file_local_results,  n_cores])
+            if not os.path.exists(active_driver_output_file_local_sig):
+                print(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file,active_driver_output_file_local_results,  n_cores])
                 
-                #try:
-                #    subprocess.call(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, active_driver_output_file_local_results,n_cores])
+                try:
+                    subprocess.call(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, active_driver_output_file_local_results,n_cores])
 #
-               # except KeyError:
-                #    open(active_driver_output_file, 'a').close()
+                except KeyError:
+                    open(active_driver_output_file, 'a').close()
                 
                 #keep only significant elements    
-                #awk_stmt_sig = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if($15<=0.05) print $0}}' {active_driver_output_file} > {active_driver_output_file_sig} 
-                #                """).format(active_driver_output_file=active_driver_output_file, active_driver_output_file_sig = active_driver_output_file_sig)
-                #os.system(awk_stmt_sig)
+                awk_stmt_sig = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if($15<=0.05) print $0}}' {active_driver_output_file} > {active_driver_output_file_sig} 
+                                """).format(active_driver_output_file=active_driver_output_file, active_driver_output_file_sig = active_driver_output_file_sig)
+                os.system(awk_stmt_sig)
              #   print(awk_stmt_sig)
-             #   copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
+                copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
             
             with open(active_driver_output_file_local_sig) as infile:
                 for line in infile:
@@ -1409,6 +1409,7 @@ def parse_args():
 
     parser.add_argument('--background_window', action='store_const', const=True, help='Check mutation functional score significance by comparing to background window around mutation in simulated mutations, if the flag is missing it would use the whole genome as background')
     parser.add_argument('--background_window_size', type=int, default=50000, help='Background window around mutation for capturing simulated mutation to compare mutation functional score')
+    parser.add_argument('--p_value_on_score', action='store_const', const=True, help='P-value of elements computed based on the score distribution, if the flag is missing it would use the probability density function to obtain p-value')
     parser.add_argument('--elements_oncodrive', action='store_const', const=True, help='Identify significantly mutated elements using OncodriveFML if the flag is missing compare the element with the elements from the simulated mutation sets')
     parser.add_argument('--sig_thresh', type=float, default=0.05, help='Sig level threshold on mutation score level')
     parser.add_argument('--sim_sig_thresh', type=float, default=1.0, help='Sig level threshold for simulated mutations on score level')
@@ -1460,7 +1461,7 @@ if __name__ == '__main__':
         args.background_window, args.background_window_size, 
         args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
-        args.local_domain_window, args.tmp_dir, args.n_cores_fscore)
+        args.local_domain_window, args.tmp_dir, args.n_cores_fscore, args.p_value_on_score)
     
     
     
