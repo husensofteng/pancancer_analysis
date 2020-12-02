@@ -390,7 +390,7 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
         return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 'NA'
     
     stats_dict = get_mean_and_sd_from_file(simulated_input_file, scores_index=score_index_sim_elements, report_overlall_score=True)
-    print("getting pval for elements in {} using {}: {}".format(observed_input_file, simulated_input_file))
+    #print("getting pval for elements in {} using {}: {}".format(observed_input_file, simulated_input_file))
     
     #extend each merged region by wbp and combine all columns into one; intersect the entire list with the combine simulated list of elemenets, group by the column ID, take average and std from the grouping;  
     
