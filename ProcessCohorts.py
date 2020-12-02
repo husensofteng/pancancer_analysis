@@ -128,7 +128,7 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
                             output_extension, distance_to_merge, 
                             merged_mut_sig_threshold, local_domain_window, 
                             chr_lengths_file, sig_elements_output_file, 
-                            sim_sig_thresh, p_value_on_score=False):
+                            sim_sig_thresh, p_value_on_score):
     
     combined_simulated_muts_merged_output_file = cohort_full_name + output_extension + '_unified_combined' + '_merged{distance_to_merge}bp'.format(distance_to_merge=distance_to_merge) + '_combined'
 #     merged_muts_output_ext = "_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)
@@ -196,7 +196,7 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
                                    merged_elements_statspvalues=merged_elements_statspvalues, 
                                    merged_elements_statspvaluesonlysig=merged_elements_statspvaluesonlysig, 
                                    merged_mut_sig_threshold=merged_mut_sig_threshold, 
-                                   score_index_observed_elements=3, score_index_sim_elements=3, p_value_on_score=False)
+                                   score_index_observed_elements=3, score_index_sim_elements=3, p_value_on_score=p_value_on_score)
     
     #based on a local domain distribution of scores
     '''Calcuate pval for each element by comparing its score to 
@@ -211,7 +211,7 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
         merged_elements_statspvaluesonlysig=sig_elements_output_file, 
         chr_lengths_file=chr_lengths_file, local_domain_window=local_domain_window, 
         merged_mut_sig_threshold=merged_mut_sig_threshold, 
-        score_index_observed_elements=3, score_index_sim_elements=3, p_value_on_score=False)
+        score_index_observed_elements=3, score_index_sim_elements=3, p_value_on_score=p_value_on_score)
     
     #if os.path.exists(combined_simulated_muts_merged_output_file):
     #    os.remove(combined_simulated_muts_merged_output_file)
