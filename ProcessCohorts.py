@@ -324,7 +324,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     '''
     muts_per_tf_mutation_input_files  = [created_cohorts[cohort][0]+"_rand{}setsTF".format(len(mutation_input_files)-1)]
     
-    muts_per_tf_mutation_input_files.append(sig_muts_per_tf_mutation_input_files[1:])
+    muts_per_tf_mutation_input_files.extend(sig_muts_per_tf_mutation_input_files[1:])
     print(muts_per_tf_mutation_input_files)
     print(len(muts_per_tf_mutation_input_files))
     
