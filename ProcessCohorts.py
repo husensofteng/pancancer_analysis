@@ -320,6 +320,12 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
    
     
     
+    '''replace an observed regulatory mutation file with an all annotated observed mutation file
+    '''
+    muts_per_tf_mutation_input_files  = [created_cohorts[cohort][0]+"_rand{}setsTF".format(len(mutation_input_files)-1)]
+    muts_per_tf_mutation_input_files.append(sig_muts_per_tf_mutation_input_files[1:])
+    print(len(muts_per_tf_mutation_input_files))
+    
     '''Combine nearby mutations accross the cohort into one element'''
         
     
@@ -329,7 +335,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
        Make one record for mutations that overlap multiple motifs
     '''
     unified_mutation_input_files = []
-    for mutations_input_file in sig_muts_per_tf_mutation_input_files:
+    for mutations_input_file in muts_per_tf_mutation_input_files:
         unified_muts_file = mutations_input_file + output_extension + "_groupedbymut" 
         unified_muts_file_wihtmotifinfo = unified_muts_file+"withmotifinfo"
         if not os.path.exists(unified_muts_file_wihtmotifinfo):
