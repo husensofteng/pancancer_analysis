@@ -343,6 +343,8 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
             element_score = float(dict_lines_observed[l][0][score_index_observed_elements])
             scores_higher_than_observed = [i for i in dict_lines_observed[l][1] if i >= element_score]
             p_value= len(scores_higher_than_observed)/scores_len
+            if p_value==0.0:
+                    p_value=1/103
             p_values.append(p_value)
             lines.append(dict_lines_observed[l][0])
            
@@ -408,6 +410,8 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
                 sl = l.strip().split('\t')
                 scores_higher_than_observed = [i for i in stats_dict['scores'] if i >= float(sl[score_index_observed_elements])]
                 p_value= len(scores_higher_than_observed)/scores_len
+                if p_value==0.0:
+                    p_value=1/103
                 p_values.append(p_value)
                 lines.append(l.strip())
                 l = observed_infile.readline()
