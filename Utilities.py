@@ -167,7 +167,6 @@ def get_mean_and_sd_from_file(simulated_input_file, scores_index = 9, index_mut_
         while l:
             sl = l.strip().split('\t')
             scores.append(float(sl[scores_index]))
-            scores.append(float(sl[scores_index]))
             if not report_overlall_score:
                 if sl[index_mut_type]=="SNP":
                     scores_SNPs.append(float(sl[scores_index]))
@@ -339,7 +338,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
         print('p-value on score local')
         for l in sorted(dict_lines_observed.keys()):
             scores_len=len(dict_lines_observed[l][1])
-            print('scores_len ',scores_len)
+            #print('scores_len ',scores_len)
             element_score = float(dict_lines_observed[l][0][score_index_observed_elements])
             scores_higher_than_observed = [i for i in dict_lines_observed[l][1] if i >= element_score]
             p_value= len(scores_higher_than_observed)/scores_len
@@ -381,6 +380,15 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
     cleanup()
     return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, n_sig
 
+
+def empirical_pval(sl, stats_dict_scores):
+    scores_higher_than_observed = [i for i in stats_dict_scores if i >= float(sl)]
+    
+    p_value= len(scores_higher_than_observed)/(len(stats_dict_scores))
+    if p_value==0.0:
+        p_value=1/103
+    return p_value
+
 def assess_stat_elements(observed_input_file, simulated_input_file, 
                          merged_elements_statspvalues, 
                          merged_elements_statspvaluesonlysig, 
@@ -396,26 +404,27 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
     
     #extend each merged region by wbp and combine all columns into one; intersect the entire list with the combine simulated list of elemenets, group by the column ID, take average and std from the grouping;  
     
-    p_values = []
-    lines = []
-    pvalues_adjusted = []
-    n_sig = 0
-    with open(observed_input_file, 'r') as observed_infile, open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
-        l = observed_infile.readline()
-        
-        if p_value_on_score:
-            print('p-value on score')
-            scores_len=len(stats_dict['scores'])
-            while l:
-                sl = l.strip().split('\t')
-                scores_higher_than_observed = [i for i in stats_dict['scores'] if i >= float(sl[score_index_observed_elements])]
-                p_value= len(scores_higher_than_observed)/scores_len
-                if p_value==0.0:
-                    p_value=1/103
-                p_values.append(p_value)
-                lines.append(l.strip())
-                l = observed_infile.readline()
-        else:
+    
+    if p_value_on_score:
+        observed_infile = pd.read_csv(observed_input_file,sep="\t",header=None)
+        pm = Pool(10)
+        p_values = pm.starmap(empirical_pval, product(observed_infile[3],  [stats_dict['scores']]))
+        pm.close()
+        pm.join()
+        if len(p_values)>0:
+                pvalues_adjusted = adjust_pvales(p_values)
+        observed_infile [15] = p_values
+        observed_infile [16] = pvalues_adjusted
+        observed_infile.to_csv(merged_elements_statspvalues, sep='\t', header=None)
+        #filtration on pval
+        observed_infile.loc[observed_infile[15] < merged_mut_sig_threshold].to_csv(merged_elements_statspvaluesonlysig, sep='\t', header=None)
+    else:
+        p_values = []
+        lines = []
+        pvalues_adjusted = []
+        n_sig = 0
+        with open(observed_input_file, 'r') as observed_infile, open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
+            l = observed_infile.readline()
             while l:
                 sl = l.strip().split('\t')
                 #get avg and std from simulated merged elements located within w bps of this region
@@ -423,14 +432,14 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
                 p_values.append(p_value)
                 lines.append(l.strip())
                 l = observed_infile.readline()
-        if len(p_values)>0:
-            pvalues_adjusted = adjust_pvales(p_values)
-        
-        for i,l in enumerate(lines):
-            merged_elements_statspvalues_outfile.write(l.strip() + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
-            if pvalues_adjusted[i]<merged_mut_sig_threshold:
-                n_sig+=1
-                merged_elements_statspvaluesonlysig_outfile.write(l.strip() + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
+            if len(p_values)>0:
+                pvalues_adjusted = adjust_pvales(p_values)
+            
+            for i,l in enumerate(lines):
+                merged_elements_statspvalues_outfile.write(l.strip() + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
+                if pvalues_adjusted[i]<merged_mut_sig_threshold:
+                    n_sig+=1
+                    merged_elements_statspvaluesonlysig_outfile.write(l.strip() + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
     
     return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, n_sig
 
