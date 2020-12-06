@@ -311,7 +311,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
        in the correponding motif in the simulated sets  
     '''
     sig_tfs_file, sig_tfpos_file = Utilities.get_tf_pval(
-        cohort, sig_muts_per_tf_mutation_input_files, motif_name_index, 
+        cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, motif_name_index, 
                 f_score_index, motif_breaking_score_index, 
                 filter_cond, fsep='\t', sig_tfs_file=sig_tfs_file, 
                 sig_tfpos_file=sig_tfpos_file,

@@ -373,7 +373,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
 #             p_values.append(p_value)
             lines.append(dict_lines_observed[l][0])
         
-        pm = Pool(10)
+        pm = Pool(15)
         p_values = pm.starmap(empirical_pval_local_window, [(key, dict_lines_observed) for key in dict_lines_observed.keys()])
         pm.close()
         pm.join()
@@ -407,7 +407,8 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
     with open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
         for i,l in enumerate(lines):
             merged_elements_statspvalues_outfile.write('\t'.join(l) + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
-            if pvalues_adjusted[i]<merged_mut_sig_threshold:
+            #filter after significant p_value
+            if pvalues[i]<merged_mut_sig_threshold:
                 n_sig+=1
                 merged_elements_statspvaluesonlysig_outfile.write('\t'.join(l) + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
     cleanup()
@@ -434,7 +435,7 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
     
     if p_value_on_score:
         observed_infile = pd.read_csv(observed_input_file,sep="\t",header=None)
-        pm = Pool(10)
+        pm = Pool(15)
         p_values = pm.starmap(empirical_pval, product(observed_infile[3],  [stats_dict['scores']]))
         pm.close()
         pm.join()
@@ -473,7 +474,7 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
 
 
 
-def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index, 
+def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, motif_name_index, 
                 f_score_index, motif_breaking_score_index, 
                 filter_cond, fsep, sig_tfs_file, sig_tfpos_file,
                 filter_on_signal = True, dnase_index = 24, fantom_index = 25, 
@@ -578,7 +579,10 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index,
         num_tf_sim_sd = np.std(num_tf_sim)
         if num_tf_sim_sd==0.0:
             num_tf_sim_sd = 1.0
-        tf_p_values.append(get_pval(num_tf_obs, num_tf_sim_mean, num_tf_sim_sd))
+        if p_value_on_score:
+            tf_p_values.append(empirical_pval(num_tf_obs, num_tf_sim))
+        else:
+            tf_p_values.append(get_pval(num_tf_obs, num_tf_sim_mean, num_tf_sim_sd))
     adjusted_tf_p_values = []
     if len(tf_p_values)>0:
         adjusted_tf_p_values = adjust_pvales(tf_p_values)
@@ -602,7 +606,10 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, motif_name_index,
         num_tfpos_sim_sd = np.std(num_tfpos_sim)
         if num_tfpos_sim_sd==0.0:
             num_tfpos_sim_sd = 1.0
-        tfpos_p_values.append(get_pval(num_tfpos_obs, num_tfpos_sim_mean, num_tfpos_sim_sd))
+        if p_value_on_score:
+            tfpos_p_values.append.append(empirical_pval(num_tfpos_obs, num_tfpos_sim))
+        else:
+            tfpos_p_values.append(get_pval(num_tfpos_obs, num_tfpos_sim_mean, num_tfpos_sim_sd))
     
     adjusted_tfpos_p_values = []
     if len(tfpos_p_values)>0:
