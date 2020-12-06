@@ -280,6 +280,23 @@ def sum_fscore_motif_breaking_score(feature,fscore_index, motif_breaking_score_i
         feature[fscore_index] = str(sums)
     return feature
 
+def empirical_pval(sl, stats_dict_scores):
+    scores_higher_than_observed = [i for i in stats_dict_scores if i >= float(sl)]
+    
+    p_value= len(scores_higher_than_observed)/(len(stats_dict_scores))
+    if p_value==0.0:
+        p_value=1/103
+    return p_value
+
+def empirical_pval_local_window(key, dict_lines_observed ):
+    scores_len=len(dict_lines_observed[key][1])
+    element_score = float(dict_lines_observed[key][0][3])
+    scores_higher_than_observed = [i for i in dict_lines_observed[key][1] if i >= element_score]
+    p_value= len(scores_higher_than_observed)/scores_len
+    if p_value==0.0:
+        p_value=1/103
+    return p_value
+
 def assess_stat_elements_local_domain(observed_input_file, simulated_input_files, merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 
                                       chr_lengths_file, local_domain_window=25000, 
                                       merged_mut_sig_threshold = 0.05, score_index_observed_elements=4, score_index_sim_elements=4, p_value_on_score=False):
@@ -287,25 +304,34 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
     if os.path.exists(merged_elements_statspvalues) and os.path.exists(merged_elements_statspvaluesonlysig):
         return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 'NA'
     
+    
+    
+    #extend elements size
+    "replace chr, X, Y, add Line Number to use as window ID and sort by chr,start"
+    observed_input_file_temp_file = observed_input_file+"_temp" 
+    cmd = """awk 'BEGIN{{OFS="\t"}}{{gsub("chr","",$1); gsub("X", 23, $1); gsub("Y", 24, $1); print $1,$2,$3}}' {} | bedtools slop -g /proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/chr_order_hg19.txt -b {}| sort -k1,1n -k2,2n > {}""".format(
+        observed_input_file, local_domain_window,observed_input_file_temp_file)
+    os.system(cmd)
+    
+    
     chr_lengths = get_chr_lengths(chr_lengths_file)
     
     dict_lines_observed = {}
     line_number = 1
-    observed_input_file_temp_file = observed_input_file+"_temp" 
-    with open(observed_input_file, 'r') as observed_infile, open(observed_input_file_temp_file, 'w') as observed_input_file_temp_ofile:
+    with open(observed_input_file, 'r') as observed_infile: #, open(observed_input_file_temp_file, 'w') as observed_input_file_temp_ofile:
         l = observed_infile.readline().strip().split('\t')
         while l and len(l)>3:
             dict_lines_observed[line_number] = [l,[]]
-            extended_element_start = (int(l[1])-local_domain_window)
-            extended_element_end = int(l[2])+local_domain_window
-            if extended_element_start<0:
-                extended_element_start = 0
-                extended_element_end += 0 - (int(l[1])-local_domain_window)
-            if extended_element_end>chr_lengths[int(l[0])]:
-                extended_element_end = chr_lengths[int(l[0])]
-                extended_element_start -= (int(l[2])+local_domain_window) - chr_lengths[int(l[0])]
-                
-            observed_input_file_temp_ofile.write(l[0] + '\t' + str(extended_element_start) + '\t' + str(extended_element_end) + '\t' + str(line_number) + '\n')
+#             extended_element_start = (int(l[1])-local_domain_window)
+#             extended_element_end = int(l[2])+local_domain_window
+#             if extended_element_start<0:
+#                 extended_element_start = 0
+#                 extended_element_end += 0 - (int(l[1])-local_domain_window)
+#             if extended_element_end>chr_lengths[int(l[0])]:
+#                 extended_element_end = chr_lengths[int(l[0])]
+#                 extended_element_start -= (int(l[2])+local_domain_window) - chr_lengths[int(l[0])]
+#                 
+#             observed_input_file_temp_ofile.write(l[0] + '\t' + str(extended_element_start) + '\t' + str(extended_element_end) + '\t' + str(line_number) + '\n')
             line_number+=1
             l = observed_infile.readline().strip().split('\t')
     print('observed_input_file: ', observed_input_file_temp_file)
@@ -326,8 +352,8 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
                         sim_scores.append(0.0)
                 dict_lines_observed[int(l[0])][1].extend(sim_scores)
                 l = simulated_input_file_temp_ifile.readline().strip().split('\t')
-        os.remove(simulated_input_file_temp)
-    os.remove(observed_input_file_temp_file)
+        #os.remove(simulated_input_file_temp)
+    #os.remove(observed_input_file_temp_file)
     
     p_values = []
     pvalues_adjusted = []
@@ -336,16 +362,23 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
     
     if p_value_on_score:
         print('p-value on score local')
-        for l in sorted(dict_lines_observed.keys()):
-            scores_len=len(dict_lines_observed[l][1])
-            #print('scores_len ',scores_len)
-            element_score = float(dict_lines_observed[l][0][score_index_observed_elements])
-            scores_higher_than_observed = [i for i in dict_lines_observed[l][1] if i >= element_score]
-            p_value= len(scores_higher_than_observed)/scores_len
-            if p_value==0.0:
-                    p_value=1/103
-            p_values.append(p_value)
+        for l in (dict_lines_observed.keys()):
+#             scores_len=len(dict_lines_observed[l][1])
+#             #print('scores_len ',scores_len)
+#             element_score = float(dict_lines_observed[l][0][score_index_observed_elements])
+#             scores_higher_than_observed = [i for i in dict_lines_observed[l][1] if i >= element_score]
+#             p_value= len(scores_higher_than_observed)/scores_len
+#             if p_value==0.0:
+#                     p_value=1/103
+#             p_values.append(p_value)
             lines.append(dict_lines_observed[l][0])
+        
+        pm = Pool(10)
+        p_values = pm.starmap(empirical_pval_local_window, [(key, dict_lines_observed) for key in dict_lines_observed.keys()])
+        pm.close()
+        pm.join()
+        
+        
            
     else: 
         for l in sorted(dict_lines_observed.keys()):
@@ -381,13 +414,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
     return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, n_sig
 
 
-def empirical_pval(sl, stats_dict_scores):
-    scores_higher_than_observed = [i for i in stats_dict_scores if i >= float(sl)]
-    
-    p_value= len(scores_higher_than_observed)/(len(stats_dict_scores))
-    if p_value==0.0:
-        p_value=1/103
-    return p_value
+
 
 def assess_stat_elements(observed_input_file, simulated_input_file, 
                          merged_elements_statspvalues, 
