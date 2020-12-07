@@ -443,9 +443,11 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
                 pvalues_adjusted = adjust_pvales(p_values)
         observed_infile [15] = p_values
         observed_infile [16] = pvalues_adjusted
-        observed_infile.to_csv(merged_elements_statspvalues, sep='\t', header=None)
+        observed_infile.to_csv(merged_elements_statspvalues, sep='\t', header=None, index=False, quoting=csv.QUOTE_NONE)
         #filtration on pval
-        observed_infile.loc[observed_infile[15] < merged_mut_sig_threshold].to_csv(merged_elements_statspvaluesonlysig, sep='\t', header=None)
+        observed_infile_sig = observed_infile.loc[observed_infile[15] < merged_mut_sig_threshold]
+        observed_infile_sig.to_csv(merged_elements_statspvaluesonlysig, sep='\t', header=None, index=False, quoting=csv.QUOTE_NONE)
+        n_sig = observed_infile_sig.shape[0]  
     else:
         p_values = []
         lines = []
