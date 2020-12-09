@@ -398,6 +398,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
             l+=1
         p_values=[]
         p_values=p_values_chunk[0]
+        pvalues_adjusted = p_values
            
     else: 
         for l in sorted(dict_lines_observed.keys()):
@@ -417,11 +418,12 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
                 
             p_values.append(p_value)
             lines.append(dict_lines_observed[l][0])
+        if len(p_values)>0:
+            pvalues_adjusted = adjust_pvales(p_values)
     
     del dict_lines_observed
     
-    if len(p_values)>0:
-        pvalues_adjusted = adjust_pvales(p_values.values())
+    
         
     with open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
         for l in (dict_lines_observed.keys()):
@@ -462,8 +464,7 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
         pm.join()
         #bind all p_values
         p_values= [j for i in p_values_chunks for j in i]
-        if len(p_values)>0:
-                pvalues_adjusted = adjust_pvales(p_values)
+        pvalues_adjusted = p_values
         observed_infile [15] = p_values
         observed_infile [16] = pvalues_adjusted
         observed_infile.to_csv(merged_elements_statspvalues, sep='\t', header=None, index=False, quoting=csv.QUOTE_NONE)
