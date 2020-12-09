@@ -282,21 +282,43 @@ def sum_fscore_motif_breaking_score(feature,fscore_index, motif_breaking_score_i
     return feature
 
 def empirical_pval(sl, stats_dict_scores):
-    scores_higher_than_observed = [i for i in stats_dict_scores if i >= float(sl)]
-    
-    p_value= len(scores_higher_than_observed)/(len(stats_dict_scores))
-    if p_value==0.0:
-        p_value=1/103
-    return p_value
+    p_values=[]
+    for score in sl:
+        scores_higher_than_observed = [i for i in stats_dict_scores if i >= score]
 
-def empirical_pval_local_window(key, dict_lines_observed ):
-    scores_len=len(dict_lines_observed[key][1])
-    element_score = float(dict_lines_observed[key][0][3])
-    scores_higher_than_observed = [i for i in dict_lines_observed[key][1] if i >= element_score]
-    p_value= len(scores_higher_than_observed)/scores_len
-    if p_value==0.0:
-        p_value=1/103
-    return p_value
+        p_value= len(scores_higher_than_observed)/(len(stats_dict_scores))
+        if p_value==0.0:
+            p_value=1/103
+        p_values.append(p_value)
+    return p_values
+
+def empirical_pval_local_window(dict_lines_observed_split):
+    dict_p_values={}
+    for index in dict_lines_observed_split:
+
+        simulated_score_vec=dict_lines_observed_split[index][1]
+        scores_len=len(simulated_score_vec)
+        element_score = float(dict_lines_observed_split[index][0][3])
+        scores_higher_than_observed = [i for i in simulated_score_vec if i >= element_score]
+        p_value= len(scores_higher_than_observed)/scores_len
+        if p_value==0.0:
+            p_value=1/103
+        dict_p_values[index] = p_value
+    return(dict_p_values)
+
+
+def split_dict_equally(input_dict, chunks=2):
+    # prep with empty dicts
+    return_list = [dict() for idx in range(chunks)]
+    print(return_list)
+    idx = 0
+    for k,v in input_dict.items():
+        return_list[idx][k] = v
+        if idx < chunks-1:  # indexes start at 0
+            idx += 1
+        else:
+            idx = 0
+    return return_list
 
 def assess_stat_elements_local_domain(observed_input_file, simulated_input_files, merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 
                                       chr_lengths_file, local_domain_window=25000, 
@@ -310,12 +332,12 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
     #extend elements size
     "replace chr, X, Y, add Line Number to use as window ID and sort by chr,start"
     observed_input_file_temp_file = observed_input_file+"_temp" 
-    cmd = """awk 'BEGIN{{OFS="\t"}}{{gsub("chr","",$1); gsub("X", 23, $1); gsub("Y", 24, $1); print $1,$2,$3}}' {} | bedtools slop -g /proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/chr_order_hg19.txt -b {}| sort -k1,1n -k2,2n > {}""".format(
+    cmd = """awk 'BEGIN{{OFS="\t"}}{{gsub("chr","",$1); gsub("X", 23, $1); gsub("Y", 24, $1); print $1,$2,$3,NR}}' {} | bedtools slop -g /proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/chr_order_hg19.txt -b {}| sort -k1,1n -k2,2n > {}""".format(
         observed_input_file, local_domain_window,observed_input_file_temp_file)
     os.system(cmd)
     
     
-    chr_lengths = get_chr_lengths(chr_lengths_file)
+    #chr_lengths = get_chr_lengths(chr_lengths_file)
     
     dict_lines_observed = {}
     line_number = 1
@@ -337,24 +359,27 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
             l = observed_infile.readline().strip().split('\t')
     print('observed_input_file: ', observed_input_file_temp_file)
     observed_input_file_obj = BedTool(observed_input_file_temp_file)
-    for simulated_input_file in simulated_input_files:
-        simulated_input_file_temp = simulated_input_file+"_temp"
-        #print('simulated_input_file: ', simulated_input_file)
-        simulated_input_file_obj = BedTool(simulated_input_file)
-        observed_input_file_obj.intersect(simulated_input_file_obj, loj=True).groupby(g=[4], c=8, o=['collapse']).saveas(simulated_input_file_temp)
-        with open(simulated_input_file_temp, 'r') as simulated_input_file_temp_ifile:
+    simulated_input_file_sort=simulated_input_file+'_sort'
+    os.system("""sort -k1,1n -k2,2n {} > {}""".format(simulated_input_file,simulated_input_file_sort))
+    simulated_input_file_temp = simulated_input_file+"_temp"
+    observed_input_file_obj.map(BedTool(simulated_input_file_sort), c=4, o=['collapse']).saveas(simulated_input_file_temp)
+
+    with open(simulated_input_file_temp, 'r') as simulated_input_file_temp_ifile:
+        l = simulated_input_file_temp_ifile.readline().strip().split('\t')
+        
+        while l and len(l)>1:
+            
+            sim_scores = []
+            for x in l[4].split(','):
+                try:
+                    sim_scores.append(float(x))
+                except ValueError:
+                    sim_scores.append(0.0)
+            dict_lines_observed[int(float(l[3]))][1].extend(sim_scores)
             l = simulated_input_file_temp_ifile.readline().strip().split('\t')
-            while l and len(l)>1:
-                sim_scores = []
-                for x in l[1].split(','):
-                    try:
-                        sim_scores.append(float(x))
-                    except ValueError:
-                        sim_scores.append(0.0)
-                dict_lines_observed[int(float(l[0]))][1].extend(sim_scores)
-                l = simulated_input_file_temp_ifile.readline().strip().split('\t')
-        #os.remove(simulated_input_file_temp)
-    #os.remove(observed_input_file_temp_file)
+
+    #split dictionery into chunks
+    dict_lines_observed_chunks=split_dict_equally(dict_lines_observed, 100)
     
     p_values = []
     pvalues_adjusted = []
@@ -363,23 +388,17 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
     
     if p_value_on_score:
         print('p-value on score local')
-        for l in (dict_lines_observed.keys()):
-#             scores_len=len(dict_lines_observed[l][1])
-#             #print('scores_len ',scores_len)
-#             element_score = float(dict_lines_observed[l][0][score_index_observed_elements])
-#             scores_higher_than_observed = [i for i in dict_lines_observed[l][1] if i >= element_score]
-#             p_value= len(scores_higher_than_observed)/scores_len
-#             if p_value==0.0:
-#                     p_value=1/103
-#             p_values.append(p_value)
-            lines.append(dict_lines_observed[l][0])
-        
         pm = Pool(15)
-        p_values = pm.starmap(empirical_pval_local_window, [(key, dict_lines_observed) for key in dict_lines_observed.keys()])
+        p_values_chunk = pm.starmap(empirical_pval_local_window, product(dict_lines_observed_chunks))
         pm.close()
         pm.join()
-        
-        
+        #merge p-values
+        l=1
+        while l<10:
+            p_values_chunk[0].update(p_values_chunk[l])
+            l+=1
+        p_values=[]
+        p_values=p_values_chunk[0]
            
     else: 
         for l in sorted(dict_lines_observed.keys()):
@@ -403,15 +422,15 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
     del dict_lines_observed
     
     if len(p_values)>0:
-        pvalues_adjusted = adjust_pvales(p_values)
+        pvalues_adjusted = adjust_pvales(p_values_a.values())
         
     with open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
-        for i,l in enumerate(lines):
-            merged_elements_statspvalues_outfile.write('\t'.join(l) + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
+        for l in (dict_lines_observed.keys()):
+            merged_elements_statspvalues_outfile.write('\t'.join(dict_lines_observed[l][0]) + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
             #filter after significant p_value
             if pvalues[i]<merged_mut_sig_threshold:
                 n_sig+=1
-                merged_elements_statspvaluesonlysig_outfile.write('\t'.join(l) + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
+                merged_elements_statspvaluesonlysig_outfile.write('\t'.join(dict_lines_observed[l][0]) + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
     cleanup()
     return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, n_sig
 
@@ -435,11 +454,15 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
     
     
     if p_value_on_score:
-        observed_infile = pd.read_csv(observed_input_file,sep="\t",header=None)
+        observed_infile = pd.read_csv(observed_input_file,sep="\t", header=None)
+        #split observed file into chunks
+        observed_infile_chunks = np.array_split(observed_infile[3], 1000)
         pm = Pool(15)
-        p_values = pm.starmap(empirical_pval, product(observed_infile[3],  [stats_dict['scores']]))
+        p_values_chunks = pm.starmap(empirical_pval, product(observed_infile_chunks,  [stats_dict['scores']]))
         pm.close()
         pm.join()
+        #bind all p_values
+        p_values= [j for i in p_values_chunks for j in i]
         if len(p_values)>0:
                 pvalues_adjusted = adjust_pvales(p_values)
         observed_infile [15] = p_values
