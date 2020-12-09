@@ -351,7 +351,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
                         sim_scores.append(float(x))
                     except ValueError:
                         sim_scores.append(0.0)
-                dict_lines_observed[int(l[0])][1].extend(sim_scores)
+                dict_lines_observed[int(float(l[0]))][1].extend(sim_scores)
                 l = simulated_input_file_temp_ifile.readline().strip().split('\t')
         #os.remove(simulated_input_file_temp)
     #os.remove(observed_input_file_temp_file)
