@@ -310,7 +310,6 @@ def empirical_pval_local_window(dict_lines_observed_split):
 def split_dict_equally(input_dict, chunks=2):
     # prep with empty dicts
     return_list = [dict() for idx in range(chunks)]
-    print(return_list)
     idx = 0
     for k,v in input_dict.items():
         return_list[idx][k] = v
@@ -422,7 +421,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
     del dict_lines_observed
     
     if len(p_values)>0:
-        pvalues_adjusted = adjust_pvales(p_values_a.values())
+        pvalues_adjusted = adjust_pvales(p_values.values())
         
     with open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
         for l in (dict_lines_observed.keys()):
