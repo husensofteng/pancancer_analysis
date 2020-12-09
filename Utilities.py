@@ -320,7 +320,7 @@ def split_dict_equally(input_dict, chunks=2):
             idx = 0
     return return_list
 
-def assess_stat_elements_local_domain(observed_input_file, simulated_input_files, merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 
+def assess_stat_elements_local_domain(observed_input_file, simulated_input_file, merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 
                                       chr_lengths_file, local_domain_window=25000, 
                                       merged_mut_sig_threshold = 0.05, score_index_observed_elements=4, score_index_sim_elements=4, p_value_on_score=False):
     
