@@ -310,15 +310,15 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
        For each calcualate a pvalue and qvalue based on number of mutations
        in the correponding motif in the simulated sets  
     '''
-    sig_tfs_file, sig_tfpos_file = Utilities.get_tf_pval(
-        cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, motif_name_index, 
-                f_score_index, motif_breaking_score_index, 
-                filter_cond, fsep='\t', sig_tfs_file=sig_tfs_file, 
-                sig_tfpos_file=sig_tfpos_file,
-                filter_on_signal = True, dnase_index = 24, fantom_index = 25, 
-                num_other_tfs_index = 27)
+    #sig_tfs_file, sig_tfpos_file = Utilities.get_tf_pval(
+    #    cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, motif_name_index, 
+    #            f_score_index, motif_breaking_score_index, 
+    #            filter_cond, fsep='\t', sig_tfs_file=sig_tfs_file, 
+    #            sig_tfpos_file=sig_tfpos_file,
+    #            filter_on_signal = True, dnase_index = 24, fantom_index = 25, 
+   #             num_other_tfs_index = 27)
    
-    
+    #
     
     '''replace an observed regulatory mutation file with an all annotated observed mutation file
     '''
