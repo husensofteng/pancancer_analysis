@@ -285,7 +285,6 @@ def empirical_pval(sl, stats_dict_scores):
     p_values=[]
     for score in sl:
         scores_higher_than_observed = [i for i in stats_dict_scores if i >= score]
-
         p_value= len(scores_higher_than_observed)/(len(stats_dict_scores))
         if p_value==0.0:
             p_value=1/103
@@ -421,7 +420,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         if len(p_values)>0:
             pvalues_adjusted = adjust_pvales(p_values)
     
-    del dict_lines_observed
+    
     
     
         
@@ -432,6 +431,8 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
             if pvalues[i]<merged_mut_sig_threshold:
                 n_sig+=1
                 merged_elements_statspvaluesonlysig_outfile.write('\t'.join(dict_lines_observed[l][0]) + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
+    
+    del dict_lines_observed
     cleanup()
     return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, n_sig
 
@@ -457,7 +458,7 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
     if p_value_on_score:
         observed_infile = pd.read_csv(observed_input_file,sep="\t", header=None)
         #split observed file into chunks
-        observed_infile_chunks = np.array_split(observed_infile[3], 1000)
+        observed_infile_chunks = np.split(observed_infile[3], 1000)
         pm = Pool(15)
         p_values_chunks = pm.starmap(empirical_pval, product(observed_infile_chunks,  [stats_dict['scores']]))
         pm.close()
