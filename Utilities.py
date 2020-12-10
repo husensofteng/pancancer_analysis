@@ -458,7 +458,7 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
     if p_value_on_score:
         observed_infile = pd.read_csv(observed_input_file,sep="\t", header=None)
         #split observed file into chunks
-        observed_infile_chunks = np.split(observed_infile[3], 1000)
+        observed_infile_chunks = np.array_split(observed_infile[3], 1000)
         pm = Pool(15)
         p_values_chunks = pm.starmap(empirical_pval, product(observed_infile_chunks,  [stats_dict['scores']]))
         pm.close()
