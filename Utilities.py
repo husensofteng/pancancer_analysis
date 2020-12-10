@@ -398,6 +398,13 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         p_values=[]
         p_values=p_values_chunk[0]
         pvalues_adjusted = p_values
+        
+        lambda_factor=np.median(scipy.stats.chi2.isf(p_values,1))/scipy.stats.chi2.ppf(0.5, 1)
+        lambda_values_file='lambda_values_local_window_'+str(local_domain_window)+'.txt'
+        lambda_file=open(lambda_values_file, "a+")
+        lambda_file.write(observed_input_file.split('_')[0] + '\t' + lambda_factor)
+        lambda_file.close()
+        
            
     else: 
         for l in sorted(dict_lines_observed.keys()):
@@ -456,9 +463,10 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
     
     
     if p_value_on_score:
-        observed_infile = pd.read_csv(observed_input_file,sep="\t", header=None)
+        #read score values for observed mutations
+        observed_score_infile = pd.read_csv(observed_input_file,sep="\t", header=None, usecols=[3], squeeze=True)
         #split observed file into chunks
-        observed_infile_chunks = np.array_split(observed_infile[3], 1000)
+        observed_infile_chunks = np.array_split(observed_score_infile, 1000)
         pm = Pool(15)
         p_values_chunks = pm.starmap(empirical_pval, product(observed_infile_chunks,  [stats_dict['scores']]))
         pm.close()
@@ -466,13 +474,25 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
         #bind all p_values
         p_values= [j for i in p_values_chunks for j in i]
         pvalues_adjusted = p_values
-        observed_infile [15] = p_values
-        observed_infile [16] = pvalues_adjusted
-        observed_infile.to_csv(merged_elements_statspvalues, sep='\t', header=None, index=False, quoting=csv.QUOTE_NONE)
-        #filtration on pval
-        observed_infile_sig = observed_infile.loc[observed_infile[15] < merged_mut_sig_threshold]
-        observed_infile_sig.to_csv(merged_elements_statspvaluesonlysig, sep='\t', header=None, index=False, quoting=csv.QUOTE_NONE)
-        n_sig = observed_infile_sig.shape[0]  
+        
+        lambda_factor=np.median(scipy.stats.chi2.isf(p_values,1))/scipy.stats.chi2.ppf(0.5, 1)
+        lambda_file=open("lambda_values_whole_genome.txt", "a+")
+        lambda_file.write(observed_input_file.split('_')[0] + '\t' + lambda_factor)
+        lambda_file.close()
+        
+        lines = []
+        n_sig = 0
+        with open(observed_input_file, 'r') as observed_infile, open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
+            l = observed_infile.readline()
+            l_number=0
+            while l:
+                sl = l.strip().split('\t')
+                merged_elements_statspvalues_outfile.write(sl + '\t' + str(p_values[l_number]) + '\t' + str(pvalues_adjusted[l_number]) + '\n')
+                if pvalues_adjusted[l_number]<merged_mut_sig_threshold:
+                    n_sig+=1
+                    merged_elements_statspvaluesonlysig_outfile.write(sl + '\t' + str(p_values[l_number]) + '\t' + str(pvalues_adjusted[l_number]) + '\n')
+                l_number+=1
+        
     else:
         p_values = []
         lines = []

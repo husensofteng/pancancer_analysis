@@ -159,7 +159,7 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
     motif_col_index=14
     distance_to_merge=distance_to_merge
 
-    pm = Pool(10)
+    pm = Pool(15)
     merged_simulated_element_files = pm.starmap(Utilities.merge_muts, product(
         unified_mutation_input_files[1:], [merged_muts_output_ext], [filter_mut_motifs], 
         [filter_col_index], [filter_value], [mut_score_index], [motifs_col_index], [ref_alt_col_index], [mutpos_col_index], 
@@ -241,70 +241,70 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     '''Calculate std, nummotifs and mean of the scores per TF-motif in the simulation sets
        The first file in each created_cohorts[cohort] is the observed set, so skip it
     '''
-    dict_simulated_mean_sd_per_TF_motif_output_file = cohort_full_name + "_meansdrand{}sets.dict".format(len(mutation_input_files)-1)
-    print(dict_simulated_mean_sd_per_TF_motif_output_file)
+    #dict_simulated_mean_sd_per_TF_motif_output_file = cohort_full_name + "_meansdrand{}sets.dict".format(len(mutation_input_files)-1)
+    #print(dict_simulated_mean_sd_per_TF_motif_output_file)
     
     '''As background consider simulated mutations in provided bacground window size around mutation
     '''
 
     
-    if background_window:
-        #print(background_window_size)
-        dict_type_mean_std_scores = Utilities.get_simulated_mean_sd_per_TF_motif_background_window(
-            cohort_full_name = cohort_full_name,
-            annotated_input_file = created_cohorts[cohort][0],
-            simulated_annotated_input_files=created_cohorts[cohort][1:],
-            mutations_cohorts_dir = mutations_cohorts_dir,
-            cohort_mean_sd_per_tf_overall_output_dict_file= dict_simulated_mean_sd_per_TF_motif_output_file, 
-            chr_lengths_file = chr_lengths_file,
-            background_window_size = background_window_size, 
-            motif_name_index = motif_name_index, f_score_index = f_score_index, 
-            motif_breaking_score_index = motif_breaking_score_index,
-            chromatin_cat_index = chromatin_cat_index, tmp_dir = tmp_dir, n_cores_fscore=n_cores_fscore)
-    else:
-        '''As background consider whole genome
-        '''
-        dict_type_mean_std_scores = Utilities.get_simulated_mean_sd_per_TF_motif(
-            simulated_annotated_input_files=created_cohorts[cohort][1:], 
-            cohort_mean_sd_per_tf_overall_output_dict_file= dict_simulated_mean_sd_per_TF_motif_output_file, 
-            motif_name_index = motif_name_index, f_score_index = f_score_index, 
-            motif_breaking_score_index = motif_breaking_score_index)
-    
-    '''For each mutation in the observed set created_cohorts[cohort][0]
-       calculate pval and qval by comparing its score to the std and mean
-       scores in the corresponding TF motif.
-       Filter out mutations that don't have a sig score or dont' pass other filters
-    '''
-    muts_sig_per_TF_file = Utilities.get_muts_sig_per_TF(
-        annoted_input_file=created_cohorts[cohort][0], 
-        dict_type_mean_std_scores=dict_type_mean_std_scores, 
-        annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), 
-        annoted_output_file_extension_onlysig="_rand{}setsTFsigQval{}".format(
-            len(mutation_input_files)-1, sig_thresh),
-        background_window = background_window,
-        motif_name_index = motif_name_index, f_score_index = f_score_index, 
-        motif_breaking_score_index = motif_breaking_score_index, 
-        filter_on_qval=filter_on_qval, sig_cat=sig_category, 
-        sig_thresh=sig_thresh,
-        filter_on_signal = True, dnase_index = 24, fantom_index = 25, num_other_tfs_index = 27)
-    sig_muts_per_tf_mutation_input_files = [muts_sig_per_TF_file]
-    
-    '''repeat the same process to keep only sig muts from the simulated, but use sim_sig_thresh
-    if sim_sig_thresh >=1.0 no sig is performed and all muts are written to the output'''
-    for mutations_input_file in created_cohorts[cohort][1:]: 
-        muts_sig_per_TF_file = Utilities.get_muts_sig_per_TF(
-            annoted_input_file=mutations_input_file, 
-            dict_type_mean_std_scores=dict_type_mean_std_scores,
-            annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), 
-            annoted_output_file_extension_onlysig=sim_output_extension,
-            background_window = background_window,
-            motif_name_index = motif_name_index, f_score_index = f_score_index, 
-            motif_breaking_score_index = motif_breaking_score_index,
-            filter_on_qval=filter_on_qval, sig_cat=sig_category, 
-            sig_thresh=sim_sig_thresh
-            )
-        sig_muts_per_tf_mutation_input_files.append(muts_sig_per_TF_file)
-    
+#     if background_window:
+#         #print(background_window_size)
+#         dict_type_mean_std_scores = Utilities.get_simulated_mean_sd_per_TF_motif_background_window(
+#             cohort_full_name = cohort_full_name,
+#             annotated_input_file = created_cohorts[cohort][0],
+#             simulated_annotated_input_files=created_cohorts[cohort][1:],
+#             mutations_cohorts_dir = mutations_cohorts_dir,
+#             cohort_mean_sd_per_tf_overall_output_dict_file= dict_simulated_mean_sd_per_TF_motif_output_file, 
+#             chr_lengths_file = chr_lengths_file,
+#             background_window_size = background_window_size, 
+#             motif_name_index = motif_name_index, f_score_index = f_score_index, 
+#             motif_breaking_score_index = motif_breaking_score_index,
+#             chromatin_cat_index = chromatin_cat_index, tmp_dir = tmp_dir, n_cores_fscore=n_cores_fscore)
+#     else:
+#         '''As background consider whole genome
+#         '''
+#         dict_type_mean_std_scores = Utilities.get_simulated_mean_sd_per_TF_motif(
+#             simulated_annotated_input_files=created_cohorts[cohort][1:], 
+#             cohort_mean_sd_per_tf_overall_output_dict_file= dict_simulated_mean_sd_per_TF_motif_output_file, 
+#             motif_name_index = motif_name_index, f_score_index = f_score_index, 
+#             motif_breaking_score_index = motif_breaking_score_index)
+#     
+#     '''For each mutation in the observed set created_cohorts[cohort][0]
+#        calculate pval and qval by comparing its score to the std and mean
+#        scores in the corresponding TF motif.
+#        Filter out mutations that don't have a sig score or dont' pass other filters
+#     '''
+#     muts_sig_per_TF_file = Utilities.get_muts_sig_per_TF(
+#         annoted_input_file=created_cohorts[cohort][0], 
+#         dict_type_mean_std_scores=dict_type_mean_std_scores, 
+#         annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), 
+#         annoted_output_file_extension_onlysig="_rand{}setsTFsigQval{}".format(
+#             len(mutation_input_files)-1, sig_thresh),
+#         background_window = background_window,
+#         motif_name_index = motif_name_index, f_score_index = f_score_index, 
+#         motif_breaking_score_index = motif_breaking_score_index, 
+#         filter_on_qval=filter_on_qval, sig_cat=sig_category, 
+#         sig_thresh=sig_thresh,
+#         filter_on_signal = True, dnase_index = 24, fantom_index = 25, num_other_tfs_index = 27)
+#     sig_muts_per_tf_mutation_input_files = [muts_sig_per_TF_file]
+#     
+#     '''repeat the same process to keep only sig muts from the simulated, but use sim_sig_thresh
+#     if sim_sig_thresh >=1.0 no sig is performed and all muts are written to the output'''
+#     for mutations_input_file in created_cohorts[cohort][1:]: 
+#         muts_sig_per_TF_file = Utilities.get_muts_sig_per_TF(
+#             annoted_input_file=mutations_input_file, 
+#             dict_type_mean_std_scores=dict_type_mean_std_scores,
+#             annoted_output_file_extension="_rand{}setsTF".format(len(mutation_input_files)-1), 
+#             annoted_output_file_extension_onlysig=sim_output_extension,
+#             background_window = background_window,
+#             motif_name_index = motif_name_index, f_score_index = f_score_index, 
+#             motif_breaking_score_index = motif_breaking_score_index,
+#             filter_on_qval=filter_on_qval, sig_cat=sig_category, 
+#             sig_thresh=sim_sig_thresh
+#             )
+#         sig_muts_per_tf_mutation_input_files.append(muts_sig_per_TF_file)
+#     
     '''Based on the mutations that have a significant score (specify if qval should be used)
        Count number of mutations per TF motif and per TF motif position
        For each calcualate a pvalue and qvalue based on number of mutations
@@ -322,11 +322,11 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     
     '''replace an observed regulatory mutation file with an all annotated observed mutation file
     '''
-    muts_per_tf_mutation_input_files  = [created_cohorts[cohort][0]+"_rand{}setsTF".format(len(mutation_input_files)-1)]
+    #muts_per_tf_mutation_input_files  = [created_cohorts[cohort][0]+"_rand{}setsTF".format(len(mutation_input_files)-1)]
     
-    muts_per_tf_mutation_input_files.extend(sig_muts_per_tf_mutation_input_files[1:])
-    print(muts_per_tf_mutation_input_files)
-    print(len(muts_per_tf_mutation_input_files))
+    #muts_per_tf_mutation_input_files.extend(sig_muts_per_tf_mutation_input_files[1:])
+    #print(muts_per_tf_mutation_input_files)
+    #print(len(muts_per_tf_mutation_input_files))
     
     '''Combine nearby mutations accross the cohort into one element'''
         
@@ -337,7 +337,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
        Make one record for mutations that overlap multiple motifs
     '''
     unified_mutation_input_files = []
-    for mutations_input_file in muts_per_tf_mutation_input_files:
+    for mutations_input_file in created_cohorts[cohort]:
         unified_muts_file = mutations_input_file + output_extension + "_groupedbymut" 
         unified_muts_file_wihtmotifinfo = unified_muts_file+"withmotifinfo"
         if not os.path.exists(unified_muts_file_wihtmotifinfo):
@@ -356,7 +356,8 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
        - number of mutations in the element 
     '''
     get_sig_merged_elements(unified_mutation_input_files, cohort_full_name, 
-                            sim_output_extension+output_extension, 
+                            output_extension,
+                            #sim_output_extension+output_extension, 
                             distance_to_merge, merged_mut_sig_threshold, 
                             local_domain_window, chr_lengths_file, 
                                 sig_elements_output_file, sim_sig_thresh, p_value_on_score=p_value_on_score)
