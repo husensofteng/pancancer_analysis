@@ -408,7 +408,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
         lambda_values_file=cohort = observed_input_file.split('/')[0]+"lambda_values_local_window_"+str(local_domain_window)+'.txt'
         lambda_file=open(lambda_values_file, "a+")
-        lambda_file.write(cohort = observed_input_file.split('/')[-1] + '\t' + str(lambda_factor)+'\n')
+        lambda_file.write(observed_input_file.split('/')[-1] + '\t' + str(lambda_factor)+'\n')
         lambda_file.close()
         
            
@@ -484,7 +484,7 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
         lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
         print(observed_input_file.split('/')[0]+ "lambda_values_whole_genome.txt")
         lambda_file=open(observed_input_file.split('/')[0]+ "lambda_values_whole_genome.txt", "a+")
-        lambda_file.write(cohort = observed_input_file.split('/')[-1] + '\t' + str(lambda_factor)+'\n')
+        lambda_file.write(observed_input_file.split('/')[-1] + '\t' + str(lambda_factor)+'\n')
         lambda_file.close()
         
         lines = []
