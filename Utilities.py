@@ -20,7 +20,6 @@ from shutil import copyfile
 from multiprocessing import Pool
 from itertools import product
 import csv
-from scipy import stats
 import math
 #from score_motifs_tissuepertable import open_connection, close_connection
 
@@ -404,7 +403,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         p_values=p_values_chunk[0]
         pvalues_adjusted = p_values
         
-        lambda_factor=np.median(scipy.stats.chi2.isf(p_values,1))/scipy.stats.chi2.ppf(0.5, 1)
+        lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
         lambda_values_file='lambda_values_local_window_'+str(local_domain_window)+'.txt'
         lambda_file=open(lambda_values_file, "a+")
         lambda_file.write(observed_input_file.split('_')[0] + '\t' + lambda_factor)
@@ -480,7 +479,7 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
         p_values= [j for i in p_values_chunks for j in i]
         pvalues_adjusted = p_values
         
-        lambda_factor=np.median(scipy.stats.chi2.isf(p_values,1))/scipy.stats.chi2.ppf(0.5, 1)
+        lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
         lambda_file=open("lambda_values_whole_genome.txt", "a+")
         lambda_file.write(observed_input_file.split('_')[0] + '\t' + lambda_factor)
         lambda_file.close()
