@@ -341,8 +341,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     unified_muts_files=[]
     p=Pool(15)
     for mutations_input_file in created_cohorts[cohort]:
-        unified_muts_file=p.apply_async(Utilities.unify_muts, args=(mutations_input_file, mutations_input_file + output_extension + "_groupedbymut",
-                                              filter_mut_motifs=True, filter_cond=filter_cond, operation_on_unify=operation_on_unify ))
+        unified_muts_file=p.apply_async(Utilities.unify_muts, args=(mutations_input_file, mutations_input_file + output_extension + "_groupedbymut", True, filter_cond, operation_on_unify ))
         unified_muts_files.append(unified_muts_file)
     p.close()
     p.join()
