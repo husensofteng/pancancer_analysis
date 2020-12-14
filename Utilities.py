@@ -404,9 +404,9 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         pvalues_adjusted = p_values
         
         lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
-        lambda_values_file='lambda_values_local_window_'+str(local_domain_window)+'.txt'
+        lambda_values_file=cohort = cohort_full_name.split('/')[0]+"lambda_values_local_window_"+str(local_domain_window)+'.txt'
         lambda_file=open(lambda_values_file, "a+")
-        lambda_file.write(observed_input_file.split('_')[0] + '\t' + str(lambda_factor)+'\n')
+        lambda_file.write(cohort = cohort_full_name.split('/')[-1] + '\t' + str(lambda_factor)+'\n')
         lambda_file.close()
         
            
@@ -480,8 +480,8 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
         pvalues_adjusted = p_values
         
         lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
-        lambda_file=open("lambda_values_whole_genome.txt", "a+")
-        lambda_file.write(observed_input_file.split('_')[0] + '\t' + str(lambda_factor)+'\n')
+        lambda_file=open(cohort_full_name.split('/')[0]+ "lambda_values_whole_genome.txt", "a+")
+        lambda_file.write(cohort = cohort_full_name.split('/')[-1] + '\t' + str(lambda_factor)+'\n')
         lambda_file.close()
         
         lines = []
@@ -490,11 +490,11 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
             l = observed_infile.readline()
             l_number=0
             while l:
-                sl = l.strip().split('\t')
-                merged_elements_statspvalues_outfile.write(sl + '\t' + str(p_values[l_number]) + '\t' + str(pvalues_adjusted[l_number]) + '\n')
+                #sl = l.strip().split('\t')
+                merged_elements_statspvalues_outfile.write(l.strip() + '\t' + str(p_values[l_number]) + '\t' + str(pvalues_adjusted[l_number]) + '\n')
                 if pvalues_adjusted[l_number]<merged_mut_sig_threshold:
                     n_sig+=1
-                    merged_elements_statspvaluesonlysig_outfile.write(sl + '\t' + str(p_values[l_number]) + '\t' + str(pvalues_adjusted[l_number]) + '\n')
+                    merged_elements_statspvaluesonlysig_outfile.write(l.strip() + '\t' + str(p_values[l_number]) + '\t' + str(pvalues_adjusted[l_number]) + '\n')
                 l_number+=1
         
     else:
