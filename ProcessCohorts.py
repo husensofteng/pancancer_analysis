@@ -17,6 +17,7 @@ from multiprocessing import Pool
 from itertools import product
 
 
+
 import Utilities
 
 def generate_cohorts(mutation_input_files, cohorts, 
@@ -336,20 +337,42 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     '''Unify the mutations that have significant scores accross the cohorts
        Make one record for mutations that overlap multiple motifs
     '''
-    unified_mutation_input_files = []
+    
+    unified_muts_files=[]
+    p=Pool(15)
     for mutations_input_file in created_cohorts[cohort]:
-        unified_muts_file = mutations_input_file + output_extension + "_groupedbymut" 
-        unified_muts_file_wihtmotifinfo = unified_muts_file+"withmotifinfo"
-        if not os.path.exists(unified_muts_file_wihtmotifinfo):
-            print("Unifying: ", mutations_input_file)
-            Utilities.unify_muts(mutations_input_file, unified_muts_file, 
-                                 filter_mut_motifs=True, filter_cond=filter_cond, 
-                                 operation_on_unify=operation_on_unify)
-            Utilities.get_max_motif_in_grouped_muts(
-                annotated_mutations_grouped_file=unified_muts_file, 
-                annotated_mutations_grouped_output_file=unified_muts_file_wihtmotifinfo)
-            os.remove(unified_muts_file)
+        unified_muts_file=p.apply_async(Utilities.unify_muts, args=(mutations_input_file, mutations_input_file + output_extension + "_groupedbymut",
+                                              filter_mut_motifs=True, filter_cond=filter_cond, operation_on_unify=operation_on_unify ))
+        unified_muts_files.append(unified_muts_file)
+    p.close()
+    p.join()
+    
+    unified_mutation_input_files = []
+    p=Pool(15)
+    for unified_muts_file in unified_muts_files:
+        unified_muts_file_wihtmotifinfo=p.apply_async(Utilities.get_max_motif_in_grouped_muts, args=(unified_muts_file, unified_muts_file+"withmotifinfo"))
         unified_mutation_input_files.append(unified_muts_file_wihtmotifinfo)
+        os.remove(unified_muts_file)
+    
+    p.close()
+    p.join()
+    
+    
+    
+#     unified_mutation_input_files = []
+#     for mutations_input_file in created_cohorts[cohort]:
+#         unified_muts_file = mutations_input_file + output_extension + "_groupedbymut" 
+#         unified_muts_file_wihtmotifinfo = unified_muts_file+"withmotifinfo"
+#         if not os.path.exists(unified_muts_file_wihtmotifinfo):
+#             print("Unifying: ", mutations_input_file)
+#             Utilities.unify_muts(mutations_input_file, unified_muts_file_ext, 
+#                                  filter_mut_motifs=True, filter_cond=filter_cond, 
+#                                  operation_on_unify=operation_on_unify)
+#             Utilities.get_max_motif_in_grouped_muts(
+#                 annotated_mutations_grouped_file=unified_muts_file, 
+#                 annotated_mutations_grouped_output_file=unified_muts_file_wihtmotifinfo)
+#             os.remove(unified_muts_file)
+#         unified_mutation_input_files.append(unified_muts_file_wihtmotifinfo)
 #    print('Unified mutations input files: ', unified_mutation_input_files)
     '''   Evaluate the significance of each element based on: 
        - the element score (sum of the score of its mutations)
@@ -375,7 +398,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
     simulated_input_files = [simulated_input_dir+'/'+x for x in os.listdir(simulated_input_dir) if '_annotated.bed9' in x]
     mutation_input_files = [observed_input_file]
     mutation_input_files.extend(simulated_input_files)
-    
+    print(mutation_input_files)
     motif_name_index = 17
     f_score_index = 9
     motif_breaking_score_index = 10

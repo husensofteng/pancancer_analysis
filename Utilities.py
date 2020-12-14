@@ -20,6 +20,8 @@ from shutil import copyfile
 from multiprocessing import Pool
 from itertools import product
 import csv
+from scipy import stats
+import math
 #from score_motifs_tissuepertable import open_connection, close_connection
 
 #import matplotlib.backends.backend_pdf
@@ -34,6 +36,7 @@ import csv
 
 
 def unify_muts(annotated_mutations_input_file, annotated_mutations_grouped_file, filter_mut_motifs=True, filter_cond = "", operation_on_unify='mean'):
+    
     
     fsep = '\t'
     vsep = '#'
