@@ -205,7 +205,7 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
        the std and mean of scores in elements within local_domain_window
     '''
     merged_elements_statspvalues_local = merged_elements_statspvalues+"_statspvalueslocalw{local_domain_window}".format(local_domain_window=local_domain_window)
-    sig_elements_output_file= merged_elements_statspvalues_local+"onlysig"+merged_mut_sig_threshold
+    sig_elements_output_file= merged_elements_statspvalues_local+"onlysig"+str(merged_mut_sig_threshold)
     #sig_elements_output_file = merged_elements_statspvalues+"_statspvalueslocalw{local_domain_window}onlysig{merged_mut_sig_threshold}".format(local_domain_window=local_domain_window, merged_mut_sig_threshold=merged_mut_sig_threshold)
     Utilities.assess_stat_elements_local_domain(
         observed_input_file=merged_elements_statspvalues, 
