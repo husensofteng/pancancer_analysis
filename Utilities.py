@@ -396,7 +396,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         pm.join()
         #merge p-values
         l=1
-        while l<100:
+        while l<=100:
             p_values_chunk[0].update(p_values_chunk[l])
             l+=1
         p_values=[]
@@ -406,7 +406,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         print(stats.chi2.isf(p_values,1))
         
         lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
-        lambda_values_file=cohort = observed_input_file.split('/')[0]+"lambda_values_local_window_"+str(local_domain_window)+'.txt'
+        lambda_values_file=observed_input_file+"_lambda_values_local_window_"+str(local_domain_window)+'.txt'
         lambda_file=open(lambda_values_file, "a+")
         lambda_file.write(observed_input_file.split('/')[-1] + '\t' + str(lambda_factor)+'\n')
         lambda_file.close()
@@ -480,10 +480,11 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
         #bind all p_values
         p_values= [j for i in p_values_chunks for j in i]
         pvalues_adjusted = p_values
+        print(p_values)
         
         lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
-        print(observed_input_file.split('/')[0]+ "lambda_values_whole_genome.txt")
-        lambda_file=open(observed_input_file.split('/')[0]+ "lambda_values_whole_genome.txt", "a+")
+        print(observed_input_file+ "_lambda_values_whole_genome.txt")
+        lambda_file=open(observed_input_file+ "_lambda_values_whole_genome.txt", "a+")
         lambda_file.write(observed_input_file.split('/')[-1] + '\t' + str(lambda_factor)+'\n')
         lambda_file.close()
         
@@ -494,11 +495,12 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
             l_number=0
             while l:
                 #sl = l.strip().split('\t')
-                print(l.strip())
+                #print(l.strip())
                 merged_elements_statspvalues_outfile.write(l.strip() + '\t' + str(p_values[l_number]) + '\t' + str(pvalues_adjusted[l_number]) + '\n')
                 if pvalues_adjusted[l_number]<merged_mut_sig_threshold:
                     n_sig+=1
                     merged_elements_statspvaluesonlysig_outfile.write(l.strip() + '\t' + str(p_values[l_number]) + '\t' + str(pvalues_adjusted[l_number]) + '\n')
+                l = observed_infile.readline()
                 l_number+=1
         
     else:
