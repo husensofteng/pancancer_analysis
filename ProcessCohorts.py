@@ -338,25 +338,27 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
        Make one record for mutations that overlap multiple motifs
     '''
     
-    unified_muts_files=[]
+    unified_muts_files_obj=[]
     p=Pool(15)
     for mutations_input_file in created_cohorts[cohort]:
         unified_muts_file=p.apply_async(Utilities.unify_muts, args=(mutations_input_file, True, filter_cond, operation_on_unify))
-        unified_muts_files.append(unified_muts_file)
+        unified_muts_files_obj.append(unified_muts_file)
     p.close()
     p.join()
+    unified_muts_files = [p.get() for p in unified_muts_files_obj]
     
-    unified_mutation_input_files = []
+    
+    unified_mutation_input_files_obj = []
     p=Pool(15)
     for unified_muts_file in unified_muts_files:
         print(unified_muts_file)
         unified_muts_file_wihtmotifinfo=p.apply_async(Utilities.get_max_motif_in_grouped_muts, args=(unified_muts_file))
-        unified_mutation_input_files.append(unified_muts_file_wihtmotifinfo)
+        unified_mutation_input_files_obj.append(unified_muts_file_wihtmotifinfo)
         #os.remove(unified_muts_file)
     
     p.close()
     p.join()
-    
+    unified_mutation_input_files = [p.get() for p in unified_mutation_input_files_obj]
     
     
 #     unified_mutation_input_files = []
