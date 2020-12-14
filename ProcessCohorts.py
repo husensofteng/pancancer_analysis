@@ -15,7 +15,8 @@ from pybedtools import BedTool, set_tempdir, cleanup
 from decimal import Decimal
 from multiprocessing import Pool
 from itertools import product
-
+from scipy import stats
+import math
 
 
 import Utilities
