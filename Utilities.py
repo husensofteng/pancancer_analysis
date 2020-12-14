@@ -443,7 +443,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         for l in (dict_lines_observed.keys()):
             merged_elements_statspvalues_outfile.write('\t'.join(dict_lines_observed[l][0]) + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
             #filter after significant p_value
-            if pvalues[i]<merged_mut_sig_threshold:
+            if p_values[i]<merged_mut_sig_threshold:
                 n_sig+=1
                 merged_elements_statspvaluesonlysig_outfile.write('\t'.join(dict_lines_observed[l][0]) + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
             i+=1
