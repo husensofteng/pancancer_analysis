@@ -439,13 +439,14 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
     
         
     with open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
+        i=0
         for l in (dict_lines_observed.keys()):
             merged_elements_statspvalues_outfile.write('\t'.join(dict_lines_observed[l][0]) + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
             #filter after significant p_value
             if pvalues[i]<merged_mut_sig_threshold:
                 n_sig+=1
                 merged_elements_statspvaluesonlysig_outfile.write('\t'.join(dict_lines_observed[l][0]) + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
-    
+            i+=1
     del dict_lines_observed
     cleanup()
     return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, n_sig
