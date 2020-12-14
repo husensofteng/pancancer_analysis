@@ -401,7 +401,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
             p_values_chunk[0].update(p_values_chunk[l])
             l+=1
         p_values=[]
-        p_values=p_values_chunk[0]
+        p_values=list(p_values_chunk[0].values())
         pvalues_adjusted = p_values
         print(p_values)
         print(stats.chi2.isf(p_values,1))
