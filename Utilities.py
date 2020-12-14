@@ -35,9 +35,9 @@ import math
 #temp_dir = tmp_dir
 
 
-def unify_muts(annotated_mutations_input_file, annotated_mutations_grouped_file, filter_mut_motifs=True, filter_cond = "", operation_on_unify='mean'):
+def unify_muts(annotated_mutations_input_file, filter_mut_motifs=True, filter_cond = "", operation_on_unify='mean'):
     
-    
+    annotated_mutations_grouped_file=mutations_input_file + output_extension + "_groupedbymut"
     fsep = '\t'
     vsep = '#'
     if not os.path.exists(annotated_mutations_grouped_file):
@@ -52,7 +52,9 @@ def unify_muts(annotated_mutations_input_file, annotated_mutations_grouped_file,
     
     return annotated_mutations_grouped_file
     
-def get_max_motif_in_grouped_muts(annotated_mutations_grouped_file, annotated_mutations_grouped_output_file):
+def get_max_motif_in_grouped_muts(annotated_mutations_grouped_file):
+    
+    annotated_mutations_grouped_output_file=annotated_mutations_grouped_output_file+"withmotifinfo"
     fsep = '\t'
     vsep = '#'
     if os.path.exists(annotated_mutations_grouped_output_file):
