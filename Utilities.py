@@ -396,7 +396,8 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         pm.join()
         #merge p-values
         l=1
-        while l<=len(dict_lines_observed_chunks):
+        print(len(dict_lines_observed_chunks))
+        while l<len(dict_lines_observed_chunks):
             p_values_chunk[0].update(p_values_chunk[l])
             l+=1
         p_values=[]
