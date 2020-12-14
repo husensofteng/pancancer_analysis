@@ -364,7 +364,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
     simulated_input_file_sort=simulated_input_file+'_sort'
     os.system("""sort -k1,1n -k2,2n {} > {}""".format(simulated_input_file,simulated_input_file_sort))
     simulated_input_file_temp = simulated_input_file+"_temp"
-    observed_input_file_obj.map(BedTool(simulated_input_file_sort), c=4, o=['collapse']).saveas(simulated_input_file_temp)
+    observed_input_file_obj.map(BedTool(simulated_input_file_sort), c=4, o=['collapse'], g='/proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/chr_order_hg19.txt').saveas(simulated_input_file_temp)
 
     with open(simulated_input_file_temp, 'r') as simulated_input_file_temp_ifile:
         l = simulated_input_file_temp_ifile.readline().strip().split('\t')
