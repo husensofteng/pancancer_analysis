@@ -341,7 +341,8 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     unified_muts_files=[]
     p=Pool(15)
     for mutations_input_file in created_cohorts[cohort]:
-        unified_muts_file=p.apply_async(Utilities.unify_muts, args=(mutations_input_file, mutations_input_file + output_extension + "_groupedbymut", True, filter_cond, operation_on_unify ))
+        annotated_mutations_grouped_file=mutations_input_file + output_extension + "_groupedbymut"
+        unified_muts_file=p.apply_async(Utilities.unify_muts, args=(mutations_input_file, annotated_mutations_grouped_file, True, filter_cond, operation_on_unify ))
         unified_muts_files.append(unified_muts_file)
     p.close()
     p.join()
@@ -349,7 +350,8 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     unified_mutation_input_files = []
     p=Pool(15)
     for unified_muts_file in unified_muts_files:
-        unified_muts_file_wihtmotifinfo=p.apply_async(Utilities.get_max_motif_in_grouped_muts, args=(unified_muts_file, unified_muts_file+"withmotifinfo"))
+        annotated_mutations_grouped_output_file=unified_muts_file+"withmotifinfo"
+        unified_muts_file_wihtmotifinfo=p.apply_async(Utilities.get_max_motif_in_grouped_muts, args=(unified_muts_file, annotated_mutations_grouped_output_file))
         unified_mutation_input_files.append(unified_muts_file_wihtmotifinfo)
         os.remove(unified_muts_file)
     
