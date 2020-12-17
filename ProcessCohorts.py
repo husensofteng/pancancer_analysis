@@ -396,7 +396,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     
     active_driver_results = sig_elements_output_file + '_ActiveDriver_results'
     active_driver_results_sig = active_driver_results + '_sig'
-    active_driver_output_file = cohort_mut_grouped_file_local + '_ActiveDriver'
+    active_driver_output_file = sig_elements_output_file + '_ActiveDriver'
     active_driver_output_file_sig = active_driver_output_file + '_sig'
     
     if not os.path.exists(active_driver_output_file_sig):
