@@ -1074,7 +1074,7 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
     #replace with slop
     with open(extended_output_file_tmp, 'w') as ofile:
         for line in aggregated_lines:
-            print(line)
+            #print(line)
             ofile.write(str(line[0])+ '\t' + str(line[1]) + '\t' + str(line[2])+ '\t' + str(line[3]) + '\n')
 
     #create an extended output file 
@@ -1099,9 +1099,8 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
     genesets_genes_dict = generate_genesets_genes_dict(cosmic_genes_file, kegg_pathways_file, pcawg_drivers_file)
     enrichment_regions_genes_dict, genes_all, genes_all_per_side, enriched_genesets_dict_overall, enriched_genesets_dict = get_enriched_gene_geneset(
                                                                                                                         regions_genes_dict, genesets_genes_dict)
-    print(enrichment_regions_genes_dict)
+
     summary_dicts_to_write = {"All genes:": genes_all, "All genes per dir:": genes_all_per_side ,"Enriched genes:": enriched_genesets_dict_overall, "Enriched genes per dir:": enriched_genesets_dict}
-    print(summary_dicts_to_write)
     summary_info_to_write = {'Element Info': summaries_dict}
     gencode_output_file = gencode_input_file + "_extractedinfo"
     if not os.path.exists(gencode_output_file):
