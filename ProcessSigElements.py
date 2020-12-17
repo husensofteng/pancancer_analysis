@@ -290,12 +290,12 @@ def aggregate_results(regions_input_file):
                          '#Muts':0, '#Samples':0, 'Cancer-Types:#Muts':[], 'Cancer-Types:#Samples':[],
                          'StatsMuts':[],'StatsSamples':[],
                          'RegMuts':[],'Muts':[], 'Mutated-Moitfs':[],'Mutated-Motifs-All':[], 'Max-RegMotif': [],
-                         'SamplesMuts':[], 'ElementPval':[], 'ELementFDR':[]}
+                         'SamplesMuts':[]}#, 'ElementPval':[], 'ELementFDR':[]}
             
 
 
-            cols_dict['ElementPval']=l[13]
-            cols_dict['ELementFDR']=l[14]
+            #cols_dict['ElementPval']=l[13]
+            #cols_dict['ELementFDR']=l[14]
 
             
             
@@ -311,10 +311,10 @@ def aggregate_results(regions_input_file):
             mutations_in_cohorts = []
             cohorts_info = [x.strip().split('~') for x in l[10].split(',')]
             
-            cols_dict['FDR'] = float(cohorts_info[0][18])
+            cols_dict['FDR'] = float(cohorts_info[0][20])
             for cohort_info in cohorts_info:
-                if float(cohort_info[18]) > cols_dict['FDR']:
-                    cols_dict['FDR'] = float(cohort_info[18])
+                if float(cohort_info[20]) > cols_dict['FDR']:
+                    cols_dict['FDR'] = float(cohort_info[20])
                 
                 mutations_in_cohorts.extend(cohort_info[14].split('|'))
             muts_per_cancer_type = {}
@@ -547,8 +547,8 @@ def aggregate_results(regions_input_file):
                              #'Nearby-Genes(Downstream/Upstream:Distance;COSMIC;KEGG;PCAWG)'
                              ','.join(cols_dict['StatsMuts']),','.join(cols_dict['StatsSamples']),
                              ','.join(cols_dict['RegMuts']), ','.join(cols_dict['Muts']), ','.join(cols_dict['Mutated-Moitfs']), ','.join(cols_dict['Max-RegMotif']),
-                             ','.join(cols_dict['SamplesMuts']), cols_dict['ElementPval'],
-                             cols_dict['ELementFDR']
+                             ','.join(cols_dict['SamplesMuts'])#, cols_dict['ElementPval'],
+                             #cols_dict['ELementFDR']
                              ]
             aggregated_lines.append(cols_to_write)
             
@@ -1047,7 +1047,7 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
                      '#RegMuts', '#Samples(RegMuts)', 'Cancer-Types:#RegMuts', 'Cancer-Types:#Samples(RegMuts)',
                      '#Muts', '#Samples', 'Cancer-Types:#Muts', 'Cancer-Types:#Samples','StatsMuts', 'StatsSamples',
                      'RegMuts','Muts', 'Mutated-Moitfs', 'Max-RegMotif', 
-                     'SamplesMuts', 'ElementPval', 'ELementFDR',
+                     'SamplesMuts', #'ElementPval', 'ELementFDR',
                      'Nearby-Genes(Name::ID::O|U|Ddistance::COSMIC|KCP|PCD)',
                      'Feature_type'
                      ]
@@ -1327,7 +1327,7 @@ def getSigElements_oncodrive(generated_sig_merged_element_files, active_driver_s
                      '#RegMuts', '#Samples(RegMuts)', 'Cancer-Types:#RegMuts', 'Cancer-Types:#Samples(RegMuts)',
                      '#Muts', '#Samples', 'Cancer-Types:#Muts', 'Cancer-Types:#Samples','StatsMuts', 'StatsSamples',
                      'RegMuts','Muts', 'Mutated-Moitfs', 'Max-RegMotif', 
-                     'SamplesMuts', 'ElementPval', 'ELementFDR',
+                     'SamplesMuts', #'ElementPval', 'ELementFDR',
                      'Nearby-Genes(Name::ID::O|U|Ddistance::COSMIC|KCP|PCD)',
                      'Feature_type'
                      ]
