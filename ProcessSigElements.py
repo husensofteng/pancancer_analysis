@@ -930,15 +930,15 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
             #cohort name
             cohort_name = cohort_sigregions_file.split('/')[-1].split('_')[0]
             
-            cohort_mut_grouped_file = tmp_dir+'/'+ cohort_name +'_combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
-            #cohort_mut_grouped_file_local = output_dir+'/'+ cohort_name +'_combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
+            #cohort_mut_grouped_file = tmp_dir+'/'+ cohort_name +'_combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
+            cohort_mut_grouped_file = output_dir+'/'+ cohort_name +'_combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
             observed_mutations_cohort = mutations_cohorts_outdir + '/' + cohort_name + '_' + annotated_motifs.split('/')[-1]
     
             if not os.path.exists(cohort_mut_grouped_file):
                 #elements extended by 200bp
                 cohort_mut_grouped_file_tmp = cohort_mut_grouped_file+'_temp'
     
-                cohort_sigregions_file_extend_elements = tmp_dir + '/'+ cohort_name +'_extend_elements'
+                cohort_sigregions_file_extend_elements = output_dir + '/'+ cohort_name +'_extend_elements'
                 #tmp file
                 cohort_sigregions_file_extend_elements_tmp =  cohort_sigregions_file_extend_elements + '_tmp'      
                 with open(cohort_mut_grouped_file_tmp, 'w') as regions_input_ofile:
