@@ -1020,7 +1020,7 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
     #merged all elements into one file
     aggregated_output_file_merged = aggregated_output_file+ '_merged'
     
-    awk_stm_activedriver = """sort -k1,1 -k2,2n {aggregated_output_file_tmp} | mergeBed -i stdin -c 4,5,6,7,8,9,10,11,12,13,14,15 -o sum,collapse,sum,sum,collapse,collapse,collapse,collapse,collapse,collapse,collapse,collapse > {aggregated_output_file}""".format(
+    awk_stm_activedriver = """sort -k1,1 -k2,2n {aggregated_output_file_tmp} | mergeBed -i stdin -c 4,5,6,7,8,9,10,11,12,13 -o sum,collapse,sum,sum,collapse,collapse,collapse,collapse,collapse,collapse > {aggregated_output_file}""".format(
                                                 aggregated_output_file_tmp=aggregated_output_file_tmp,
                                               aggregated_output_file=aggregated_output_file_merged)
 
