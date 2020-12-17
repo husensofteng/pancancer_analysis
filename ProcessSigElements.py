@@ -895,7 +895,7 @@ def get_sample_pathways(calculated_p_value_sig_out_file, output_file, total_numb
         
     return
 
-def getSigElements(generated_sig_merged_element_files, active_driver_script_dir, active_driver_min_mut, n_cores,
+def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir, active_driver_min_mut, n_cores,
                    n, max_dist, window, output_dir,
                    annotated_motifs, tracks_dir, observed_mutations_all, chr_lengths_file,
                    genes_input_file, gencode_input_file, 
@@ -924,17 +924,17 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     #regions_input_file = output_dir+'/combined_onlysig_merged_intersectedmuts_grouped_recurrent.col12'
     #per cohort
     #extend the elemtents to 200bp, intersect with all observed mutations, aggregate all mut information per element, run activedriver to obtain p-value of element
-    active_driver_output_local_sig_all_tmp = aggregated_output_file + '_tmp'
-    with open(active_driver_output_local_sig_all_tmp, 'w') as active_driver_output_local_sig_all_ofile:
+    aggregated_output_file_tmp = aggregated_output_file + '_tmp'
+    with open(aggregated_output_file_tmp, 'w') as aggregated_output_file_ofile:
         for cohort_sigregions_file in generated_sig_merged_element_files:  
             #cohort name
             cohort_name = cohort_sigregions_file.split('/')[-1].split('_')[0]
             
             cohort_mut_grouped_file = tmp_dir+'/'+ cohort_name +'_combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
-            cohort_mut_grouped_file_local = output_dir+'/'+ cohort_name +'_combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
+            #cohort_mut_grouped_file_local = output_dir+'/'+ cohort_name +'_combined{ext}_merged_intersectedmuts_grouped_recurrent.col12'.format(ext=ext)
             observed_mutations_cohort = mutations_cohorts_outdir + '/' + cohort_name + '_' + annotated_motifs.split('/')[-1]
     
-            if not os.path.exists(cohort_mut_grouped_file_local):
+            if not os.path.exists(cohort_mut_grouped_file):
                 #elements extended by 200bp
                 cohort_mut_grouped_file_tmp = cohort_mut_grouped_file+'_temp'
     
@@ -967,7 +967,7 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
                 cohort_mut_grouped_file_with_annotated_muts = cohort_mut_grouped_file + "_withannotatedmuts"
                 print("Combining results")
                 awk_stmt = ("""intersectBed -wo -loj -a {cohort_file_all_merged} -b {observed_mutations_all} | 
-                            awk 'BEGIN{{FS=OFS="\t"}}{{print $1,$2,$3,$4,$5,$10">"$11,$12,$15,$6,$7":"$8"-"$9"#"$10">"$11"#"$12"#"$13"#"$14"#"$15"#"$16}}' | 
+                            awk 'BEGIN{{FS=OFS="\t"}}{{print $1,$2,$3,$4,$5,$10">"$11,$12,$15,$6,$7":"$8"-"$9"#"$10">"$11"#"$12"#"$13"#"$14"#"$15"#"$16"#"$17"#"$18"#"$19"#"$20"#"$21}}' | 
                             groupBy -g 1-5 -c 8,8,8,6,7,9,10 -o count,count_distinct,collapse,collapse,collapse,distinct,collapse > {cohort_mut_grouped_file_with_annotated_muts}""".format(
                             cohort_file_all_merged=cohort_file_all_merged, observed_mutations_all=muts_overlapping_cohort_file_all_annotated, cohort_mut_grouped_file_with_annotated_muts=cohort_mut_grouped_file_with_annotated_muts))
                 os.system(awk_stmt)#awk '$7>1'
@@ -981,38 +981,38 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
                             cohort_mut_grouped_file_with_annotated_muts_with_motifs=cohort_mut_grouped_file,
                             motif_cols = '"#"'.join(["$"+str(x) for x in range(13,45)])))#motif cols are starting from col12 and end in col44
                 os.system(awk_stmt)
-                copyfile(cohort_mut_grouped_file, cohort_mut_grouped_file_local)
-            else: 
-                copyfile(cohort_mut_grouped_file_local, cohort_mut_grouped_file)
+                #copyfile(cohort_mut_grouped_file, cohort_mut_grouped_file_local)
+            #else: 
+                #copyfile(cohort_mut_grouped_file_local, cohort_mut_grouped_file)
             #activedriver results file
-            active_driver_output_file = cohort_mut_grouped_file + '_ActiveDriver'
-            active_driver_output_file_sig = active_driver_output_file + '_sig'
-            active_driver_output_file_local_sig = cohort_mut_grouped_file_local + '_ActiveDriver_sig'
-            active_driver_output_file_local_results = cohort_mut_grouped_file_local + '_ActiveDriver_results'
-
-    
-            #temporary file to keep the activedriver rsults
-            active_driver_output_file = active_driver_output_file +'_merged'
-            #run activedriver
-            if not os.path.exists(active_driver_output_file_local_sig):
-                print(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file,active_driver_output_file_local_results,  n_cores])
-                
-                try:
-                    subprocess.call(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, active_driver_output_file_local_results,n_cores])
-#
-                except KeyError:
-                    open(active_driver_output_file, 'a').close()
-                
-                #keep only significant elements    
-                awk_stmt_sig = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if($15<=0.05) print $0}}' {active_driver_output_file} > {active_driver_output_file_sig} 
-                                """).format(active_driver_output_file=active_driver_output_file, active_driver_output_file_sig = active_driver_output_file_sig)
-                os.system(awk_stmt_sig)
-             #   print(awk_stmt_sig)
-                copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
+#             active_driver_output_file = cohort_mut_grouped_file + '_ActiveDriver'
+#             active_driver_output_file_sig = active_driver_output_file + '_sig'
+#             active_driver_output_file_local_sig = cohort_mut_grouped_file_local + '_ActiveDriver_sig'
+#             active_driver_output_file_local_results = cohort_mut_grouped_file_local + '_ActiveDriver_results'
+# 
+#     
+#             #temporary file to keep the activedriver rsults
+#             active_driver_output_file = active_driver_output_file +'_merged'
+#             #run activedriver
+#             if not os.path.exists(active_driver_output_file_local_sig):
+#                 print(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file,active_driver_output_file_local_results,  n_cores])
+#                 
+#                 try:
+#                     subprocess.call(['Rscript', active_driver_script_dir, cohort_mut_grouped_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, active_driver_output_file_local_results,n_cores])
+# #
+#                 except KeyError:
+#                     open(active_driver_output_file, 'a').close()
+#                 
+#                 #keep only significant elements    
+#                 awk_stmt_sig = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if($15<=0.05) print $0}}' {active_driver_output_file} > {active_driver_output_file_sig} 
+#                                 """).format(active_driver_output_file=active_driver_output_file, active_driver_output_file_sig = active_driver_output_file_sig)
+#                 os.system(awk_stmt_sig)
+#              #   print(awk_stmt_sig)
+#                 copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
             
-            with open(active_driver_output_file_local_sig) as infile:
+            with open(cohort_mut_grouped_file) as infile:
                 for line in infile:
-                    active_driver_output_local_sig_all_ofile.write(line)
+                    aggregated_output_file_ofile.write(line)
             
 
 
@@ -1020,8 +1020,8 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     #merged all elements into one file
     aggregated_output_file_merged = aggregated_output_file+ '_merged'
     
-    awk_stm_activedriver = """sort -k1,1 -k2,2n {active_driver_output_local_sig_all_tmp} | mergeBed -i stdin -c 4,5,6,7,8,9,10,11,12,13,14,15 -o sum,collapse,sum,sum,collapse,collapse,collapse,collapse,collapse,collapse,collapse,collapse > {aggregated_output_file}""".format(
-                                                active_driver_output_local_sig_all_tmp=active_driver_output_local_sig_all_tmp,
+    awk_stm_activedriver = """sort -k1,1 -k2,2n {aggregated_output_file_tmp} | mergeBed -i stdin -c 4,5,6,7,8,9,10,11,12,13,14,15 -o sum,collapse,sum,sum,collapse,collapse,collapse,collapse,collapse,collapse,collapse,collapse > {aggregated_output_file}""".format(
+                                                aggregated_output_file_tmp=aggregated_output_file_tmp,
                                               aggregated_output_file=aggregated_output_file_merged)
 
     os.system(awk_stm_activedriver)
@@ -1080,8 +1080,8 @@ def getSigElements(generated_sig_merged_element_files, active_driver_script_dir,
     os.system("""sort -k1,1V -k2,2n -k3,3n {} > {}""".format(
         extended_output_file_tmp, extended_output_file_tmp_sorted))
     #-1K + 5kb around the gene
-    extended_output_file_obj = BedTool(extended_output_file_tmp_sorted).slop(l=1000, r=5000, genome='hg19').saveas(extended_output_file)
-    #extended_output_file_obj = BedTool(extended_output_file_tmp_sorted).slop(b=window,genome='hg19').saveas(extended_output_file)
+    #extended_output_file_obj = BedTool(extended_output_file_tmp_sorted).slop(l=2000, r=2000, genome='hg19').saveas(extended_output_file)
+    extended_output_file_obj = BedTool(extended_output_file_tmp_sorted).slop(b=window,genome='hg19').saveas(extended_output_file)
 
     #extended_output_file = generate_extended_regions(regions=aggregated_lines, extended_output_file=extended_output_file, chr_lengths=chr_lengths, window=window)
     
@@ -1455,13 +1455,14 @@ if __name__ == '__main__':
         os.makedirs(args.output_dir)
     
     print("Generated significant elements")
-    generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
+    generated_sig_merged_element_files_50kb, generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
         args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
         args.simulated_input_dir, args.chr_lengths_file, args.num_cores, 
         args.background_window, args.background_window_size, 
         args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
-        args.local_domain_window, args.tmp_dir, args.n_cores_fscore, args.p_value_on_score)
+        args.local_domain_window, args.tmp_dir, args.n_cores_fscore, args.p_value_on_score,
+        args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver)
     
     
     
@@ -1491,9 +1492,30 @@ if __name__ == '__main__':
     print(merged_elements_files)
     
     
-    if args.elements_oncodrive:
-         aggregated_output_file = getSigElements_oncodrive(
-                    merged_elements_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+#     if args.elements_oncodrive:
+#          aggregated_output_file = getSigElements_oncodrive(
+#                     merged_elements_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+#                     args.n, args.max_dist, args.window, 
+#                     args.output_dir,
+#                     args.observed_input_file, args.tracks_dir, 
+#                     args.observed_mutations_all, args.chr_lengths_file,
+#                     args.genes_input_file, 
+#                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
+#                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
+#                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'All')
+#          aggregated_output_file_ATELM = getSigElements_oncodrive(
+#                      ATELM_generated_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+#                      args.n, args.max_dist, args.window, 
+#                      args.output_dir,
+#                      args.observed_input_file, args.tracks_dir, 
+#                      args.observed_mutations_all, args.chr_lengths_file,
+#                      args.genes_input_file, 
+#                      args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
+#                      args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
+#                      args.tmp_dir, args.mutations_cohorts_outdir, cohorts = args.cohort_sig_test)
+#     else:
+    aggregated_output_file = getSigElements(
+                    merged_elements_files,  #args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
                     args.n, args.max_dist, args.window, 
                     args.output_dir,
                     args.observed_input_file, args.tracks_dir, 
@@ -1502,38 +1524,17 @@ if __name__ == '__main__':
                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'All')
-         aggregated_output_file_ATELM = getSigElements_oncodrive(
-                     ATELM_generated_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
-                     args.n, args.max_dist, args.window, 
-                     args.output_dir,
-                     args.observed_input_file, args.tracks_dir, 
-                     args.observed_mutations_all, args.chr_lengths_file,
-                     args.genes_input_file, 
-                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
-                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
-                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = args.cohort_sig_test)
-    else:
-        aggregated_output_file = getSigElements(
-                        merged_elements_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
-                        args.n, args.max_dist, args.window, 
-                        args.output_dir,
-                        args.observed_input_file, args.tracks_dir, 
-                        args.observed_mutations_all, args.chr_lengths_file,
-                        args.genes_input_file, 
-                        args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
-                        args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
-                        args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'All')
-        aggregated_output_file_ATELM = getSigElements(
-                     ATELM_generated_merged_element_files,  args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
-                     args.n, args.max_dist, args.window, 
-                     args.output_dir,
-                     args.observed_input_file, args.tracks_dir, 
-                     args.observed_mutations_all, args.chr_lengths_file,
-                     args.genes_input_file, 
-                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
-                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
-                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = args.cohort_sig_test)
-        
+    aggregated_output_file_ATELM = getSigElements(
+                 ATELM_generated_merged_element_files,  #args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
+                 args.n, args.max_dist, args.window, 
+                 args.output_dir,
+                 args.observed_input_file, args.tracks_dir, 
+                 args.observed_mutations_all, args.chr_lengths_file,
+                 args.genes_input_file, 
+                 args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
+                 args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
+                 args.tmp_dir, args.mutations_cohorts_outdir, cohorts = args.cohort_sig_test)
+    
     
     
     

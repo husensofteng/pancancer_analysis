@@ -356,7 +356,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     for unified_muts_file in unified_muts_files:
         unified_muts_file_wihtmotifinfo=p.apply_async(Utilities.get_max_motif_in_grouped_muts, args=(unified_muts_file,))
         unified_mutation_input_files_obj.append(unified_muts_file_wihtmotifinfo)
-        os.remove(unified_muts_file)
+        #os.remove(unified_muts_file)
     
     p.close()
     p.join()
@@ -449,6 +449,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
     #filter_cond = 'if(($31>0 || $31~"nan")  && ($32>0 || $32~"nan") && $11>=0.3)'
     
     generated_sig_merged_element_files = []
+    generated_sig_merged_elements_active_files = []
     sig_tfs_files = []
     sig_tfpos_files = []
     if num_cores>1:
@@ -484,10 +485,12 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
         sig_elements_output_file = mutations_cohorts_dir + '/' + cohort + "_{}".format(observed_input_file.split('/')[-1]) + output_extension + "_groupedbymut"+"withmotifinfo"+"_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+"_statspvaluesSimSig"+str(sim_sig_thresh_pval)+"_statspvalueslocalw{local_domain_window}onlysig{merged_mut_sig_threshold}".format(local_domain_window=local_domain_window, merged_mut_sig_threshold=merged_mut_sig_threshold)
         #sig_elements_output_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + output_extension + "_groupedbymut"+"withmotifinfo"+"_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+"_statspvaluesonlysig{merged_mut_sig_threshold}".format(
         #    merged_mut_sig_threshold=merged_mut_sig_threshold)
+        sig_elements_active_output_file=sig_elements_output_file+'_ActiveDriver_sig'
         sig_tfs_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + '_sigTFs_{}'.format(sig_thresh) 
         sig_tfpos_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + '_sigTFpos_{}'.format(sig_thresh)
-        if os.path.exists(sig_elements_output_file) and os.path.exists(sig_tfs_file) and os.path.exists(sig_tfpos_file):
+        if os.path.exists(sig_elements_output_file) and os.path.exists(sig_tfs_file) and os.path.exists(sig_tfpos_file) and os.path.exists(sig_elements_active_output_file):
             generated_sig_merged_element_files.append(sig_elements_output_file)
+            generated_sig_merged_elements_active_files.append(sig_elements_active_output_file)
             sig_tfs_files.append(sig_tfs_file)
             sig_tfpos_files.append(sig_tfpos_file)
             continue
@@ -521,6 +524,8 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                        active_driver_script_dir, active_driver_min_mut, n_cores)
         
         generated_sig_merged_element_files.append(sig_elements_output_file)
+        generated_sig_merged_elements_active_files.append(sig_elements_active_output_file)
+
         sig_tfs_files.append(sig_tfs_file)
         sig_tfpos_files.append(sig_tfpos_file)
         print("Generated for cohort ({}): {}".format(cohort, sig_elements_output_file))
@@ -529,7 +534,7 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
         p.close()
         p.join()
     
-    return generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files
+    return generated_sig_merged_element_files, generated_sig_merged_elements_active_files, sig_tfs_files, sig_tfpos_files
     
 #awk 'BEGIN{FS=OFS="\t"}{if($18<0.05) sig="element_sig"; else sig="element_notsig";  print $4,"Observed", sig}' mutations_cohorts_output/All-tumors_observed_annotated.bed9_simulated6setsmaxTFExprTFBindMotifBreaking03Filters_groupedbymutwithmotifinfo_statmutsonlysig0.1_mergedmuts20bp_statspvalues >> ../analysis/All-tumors_6setsobs_simulated6setsmaxTFExprTFBindMotifBreaking03Filters_scores.col3
 
