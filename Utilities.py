@@ -473,8 +473,9 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
     if p_value_on_score:
         #read score values for observed mutations
         observed_score_infile = pd.read_csv(observed_input_file,sep="\t", header=None, usecols=[3], squeeze=True)
+        
         #split observed file into chunks
-        observed_infile_chunks = np.array_split(observed_score_infile, 1000)
+        observed_infile_chunks = np.array_split(observed_score_infile, round(observed_score_infile.count()/100))
         pm = Pool(15)
         p_values_chunks = pm.starmap(empirical_pval, product(observed_infile_chunks,  [stats_dict['scores']]))
         pm.close()
@@ -639,14 +640,16 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
         if num_tf_sim_sd==0.0:
             num_tf_sim_sd = 1.0
         if p_value_on_score:
-            tf_p_values.append(empirical_pval(num_tf_obs, num_tf_sim))
+            tf_p_values.append(empirical_pval((num_tf_obs,), num_tf_sim))
+            adjusted_tf_p_values = []
+            adjusted_tf_p_values = tf_p_values
         else:
             tf_p_values.append(get_pval(num_tf_obs, num_tf_sim_mean, num_tf_sim_sd))
-    adjusted_tf_p_values = []
-    if len(tf_p_values)>0:
-        adjusted_tf_p_values = adjust_pvales(tf_p_values)
-    else:
-        print('tf_p_values nothing:', tf_p_values)
+            adjusted_tf_p_values = []
+            if len(tf_p_values)>0:
+                adjusted_tf_p_values = adjust_pvales(tf_p_values)
+            else:
+                print('tf_p_values nothing:', tf_p_values)
     with open(sig_tfs_file, 'w') as ofile:
         for i,tf in enumerate(tf_names):
             ofile.write(tf + '\t' + str(tf_p_values[i]) + '\t' + str(adjusted_tf_p_values[i]) + '\t' + str(tf_counts_in_sim_sets[tf][0]) + '\t' + str(np.mean(tf_counts_in_sim_sets[tf][1:])) + '\t' + ','.join([str(x) for x in tf_counts_in_sim_sets[tf][1:]])+ '\n')

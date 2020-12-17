@@ -232,7 +232,8 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                filter_cond, operation_on_unify, output_extension, 
                distance_to_merge, merged_mut_sig_threshold,
                local_domain_window, chr_lengths_file,
-               sig_elements_output_file, sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore, p_value_on_score):    
+               sig_elements_output_file, sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore, p_value_on_score,active_driver_script_dir,
+               active_driver_min_mut, n_cores):    
     
     "get the cohort name to use for output file names"
     cohort_full_name = created_cohorts[cohort][0].split('_')[0]
@@ -388,7 +389,36 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                             local_domain_window, chr_lengths_file, 
                                 sig_elements_output_file, sim_sig_thresh, p_value_on_score=p_value_on_score)
     
-    return sig_elements_output_file, sig_tfs_file, sig_tfpos_file
+    
+    
+    
+    #ActiveDriverWGS
+    
+    active_driver_results = sig_elements_output_file + '_ActiveDriver_results'
+    active_driver_results_sig = active_driver_results + '_sig'
+    active_driver_output_file = cohort_mut_grouped_file_local + '_ActiveDriver'
+    active_driver_output_file_sig = active_driver_output_file + '_sig'
+    
+    if not os.path.exists(active_driver_output_file_sig):
+            print(['Rscript', active_driver_script_dir, sig_elements_output_file,  observed_mutations_cohort, active_driver_min_mut, active_driver_output_file, active_driver_output_file_sig, active_driver_results,  n_cores])
+            
+            try:
+                subprocess.call(['Rscript', active_driver_script_dir, sig_elements_output_file,  created_cohorts[cohort][0], active_driver_min_mut, active_driver_output_file, active_driver_output_file_sig,  active_driver_results, n_cores])
+
+            except KeyError:
+                open(active_driver_output_file_sig, 'a').close()
+            
+    #sig_tfs_file, sig_tfpos_file = Utilities.get_tf_pval(
+    #    cohort, sig_elements_output_file, p_value_on_score, motif_name_index, 
+    #            f_score_index, motif_breaking_score_index, 
+   #            filter_cond, fsep='\t', sig_tfs_file=sig_tfs_file, 
+   #             sig_tfpos_file=sig_tfpos_file,
+   #             filter_on_signal = True, dnase_index = 24, fantom_index = 25, 
+    #            num_other_tfs_index = 27)
+    
+    
+    
+    return sig_elements_output_file, active_driver_output_file_sig, sig_tfs_file, sig_tfpos_file
     
 def process_cohorts(cohort_names_input, mutations_cohorts_dir, 
                     observed_input_file, simulated_input_dir,
@@ -396,7 +426,8 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                     background_window, background_window_size, 
                     filter_on_qval, sig_category, sig_thresh, sim_sig_thresh_pval,
                     distance_to_merge, 
-                    merged_mut_sig_threshold, local_domain_window, tmp_dir, n_cores_fscore, p_value_on_score):
+                    merged_mut_sig_threshold, local_domain_window, tmp_dir, n_cores_fscore, p_value_on_score, active_driver_script_dir,
+                    active_driver_min_mut, n_cores):
     
     simulated_input_files = [simulated_input_dir+'/'+x for x in os.listdir(simulated_input_dir) if '_annotated.bed9' in x]
     mutation_input_files = [observed_input_file]
@@ -474,7 +505,8 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                     filter_cond, operation_on_unify, output_extension, 
                     distance_to_merge, merged_mut_sig_threshold,
                     local_domain_window, chr_lengths_file, sig_elements_output_file, 
-                    sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore, p_value_on_score))#, callback=generated_sig_merged_element_files.append)
+                    sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore, p_value_on_score,
+                    active_driver_script_dir, active_driver_min_mut, n_cores))#, callback=generated_sig_merged_element_files.append)
         else:
             run_cohort(cohort, created_cohorts, 
                        mutation_input_files, mutations_cohorts_dir, motif_name_index, 
@@ -485,7 +517,8 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
                        filter_cond, operation_on_unify, output_extension, 
                        distance_to_merge, merged_mut_sig_threshold,
                        local_domain_window, chr_lengths_file, sig_elements_output_file, 
-                       sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore, p_value_on_score)
+                       sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore, p_value_on_score,
+                       active_driver_script_dir, active_driver_min_mut, n_cores)
         
         generated_sig_merged_element_files.append(sig_elements_output_file)
         sig_tfs_files.append(sig_tfs_file)
@@ -524,7 +557,9 @@ def parse_args():
     parser.add_argument('--num_cores', type=int, default=10, help='number of cores (cpus) to use in parallel')
     parser.add_argument('--tmp_dir', default='$SNIC_TMP', help='')
     parser.add_argument('--n_cores_fscore', type=int, default=10, help='number of cores (cpus) to use in parallel to obtain fscore')
-    
+    parser.add_argument('--active_driver_script_dir', default='', help='')
+    parser.add_argument('--active_driver_min_mut', default=1, help='n')
+    parser.add_argument('--num_cores_activedriver',  default=10, help='Number of cores to run ActiveDriverWGS')
 
     
     return parser.parse_args(sys.argv[1:])
@@ -547,7 +582,8 @@ if __name__ == '__main__':
         args.background_window, args.background_window_size, 
         args.filter_on_qval, args.sig_category, args.sig_thresh, args.sim_sig_thresh,  
         args.distance_to_merge, args.merged_mut_sig_threshold,
-        args.local_domain_window, args.tmp_dir, args.n_cores_fscore, args.p_value_on_score)
+        args.local_domain_window, args.tmp_dir, args.n_cores_fscore, args.p_value_on_score,
+        args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver)
     #print("Generated Sig. Element Sets: \n", '\n'.join(generated_sig_merged_element_files))
     
     
