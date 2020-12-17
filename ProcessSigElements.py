@@ -1560,7 +1560,7 @@ if __name__ == '__main__':
         elements_input_file_ATELM = aggregated_output_file_ATELM
         elements_output_file_ATELM_Genes=elements_input_file_ATELM+"_GenesInclCDS.tsv"
         
-        
+    print(elements_input_file)
     elements_output_file = get_gene_enrichments(
         elements_input_file=elements_input_file, 
         elements_output_file=elements_output_file_Genes, 
@@ -1582,8 +1582,8 @@ if __name__ == '__main__':
  
  
     
-    combine_sig_TFs(sig_tfs_files, output_dir=args.output_dir)
-    combine_sig_TFs(sig_tfpos_files, tf_label='TF Positions', output_dir=args.output_dir)
+    #combine_sig_TFs(sig_tfs_files, output_dir=args.output_dir)
+    #combine_sig_TFs(sig_tfpos_files, tf_label='TF Positions', output_dir=args.output_dir)
 
     
     elements_output_file_ATELM = get_gene_enrichments(
