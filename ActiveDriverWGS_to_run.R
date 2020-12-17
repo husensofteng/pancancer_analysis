@@ -56,9 +56,12 @@ if(dim(data_my_2mut)[1] >0){
   colnames(result)[1] = 'id'
   colnames(data_my)[15] = 'id'
   result_join <- left_join(data_my,result, by= 'id' ) %>%  dplyr::select(-c(element_muts_obs:site_enriched, fdr_site:has_site_mutations))
-  no_pval_id<=which(is.na(result_join$pp_element))
-  result_join$pp_element[no_pval_id]=1.0
-  result_join$fdr_element[no_pval_id]=1.0
+  no_pval_id<-which(is.na(result_join$pp_element))
+  if(length(no_pval_id)>0){
+    result_join$pp_element[no_pval_id]=1.0
+    result_join$fdr_element[no_pval_id]=1.0
+  }
+ 
   result_join_sig=result_join[which(result_join$fdr_element<0.05),]
 }else{
   result_join = NULL
