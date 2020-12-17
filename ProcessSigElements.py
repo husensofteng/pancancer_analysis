@@ -238,6 +238,7 @@ def get_nearby_genes(regions_input_file, regions_input_file_obj, genes_input_fil
     os.remove(regions_input_file_intersect_genes)
     os.remove(regions_input_file_closest_genes )
     #os.remove(genes_input_file_local)
+    print(regions_genes_dict)
     return regions_genes_dict
 
 def aggregate_results(regions_input_file):
