@@ -1103,8 +1103,6 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
     summary_dicts_to_write = {"All genes:": genes_all, "All genes per dir:": genes_all_per_side ,"Enriched genes:": enriched_genesets_dict_overall, "Enriched genes per dir:": enriched_genesets_dict}
     print(summary_dicts_to_write)
     summary_info_to_write = {'Element Info': summaries_dict}
-    print(summaries_dict)
-    print(1106)
     gencode_output_file = gencode_input_file + "_extractedinfo"
     if not os.path.exists(gencode_output_file):
         get_features_from_gencode(gencode_input_file, gencode_output_file)
@@ -1118,8 +1116,6 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
     region_types_dict = get_region_type(aggregated_lines=aggregated_lines, genes_segments_input_file=gencode_output_file, 
                                         gene_types_to_consider=gene_types_to_consider, gene_status_to_consider=gene_status_to_consider,
                                         feature_types_to_consider=feature_types_to_consider)
-    print(region_types_dict)
-    print(1121)
     write_aggregated_lines_to_outfile(aggregated_lines, cols_to_write, 
                                       enrichment_regions_genes_dict, summary_info_to_write, summary_dicts_to_write, 
                                       region_types_dict,
@@ -1547,12 +1543,12 @@ if __name__ == '__main__':
     
     if args.skip_exon_elements:
         aggregated_output_file_exclCDS = aggregated_output_file+'_exclCDS'
-        os.system(("""awk -F"\t" '{{if($27!="CDS") print $0}}' {} > {}""").format(aggregated_output_file, aggregated_output_file_exclCDS))
+        os.system(("""awk -F"\t" '{{if($25!="CDS") print $0}}' {} > {}""").format(aggregated_output_file, aggregated_output_file_exclCDS))
         elements_input_file = aggregated_output_file_exclCDS
         elements_output_file_Genes=elements_input_file+"_Genes.tsv"
         
         aggregated_output_file_ATELM_exclCDS = aggregated_output_file_ATELM+'_exclCDS'
-        os.system(("""awk -F"\t" '{{if($27!="CDS") print $0}}' {} > {}""").format(aggregated_output_file_ATELM, aggregated_output_file_ATELM_exclCDS))
+        os.system(("""awk -F"\t" '{{if($25!="CDS") print $0}}' {} > {}""").format(aggregated_output_file_ATELM, aggregated_output_file_ATELM_exclCDS))
         elements_input_file_ATELM = aggregated_output_file_ATELM_exclCDS
         elements_output_file_ATELM_Genes=elements_input_file_ATELM+"_Genes.tsv"
 
