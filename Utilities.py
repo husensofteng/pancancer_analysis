@@ -397,15 +397,13 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         pm.join()
         #merge p-values
         l=1
-        print(len(dict_lines_observed_chunks))
+
         while l<len(dict_lines_observed_chunks):
             p_values_chunk[0].update(p_values_chunk[l])
             l+=1
         p_values=[]
         p_values=list(p_values_chunk[0].values())
         pvalues_adjusted = p_values
-        print(p_values)
-        print(stats.chi2.isf(p_values,1))
         
         lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
         lambda_values_file=observed_input_file+"_lambda_values_local_window_"+str(local_domain_window)+'.txt'
@@ -484,7 +482,6 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
         #bind all p_values
         p_values= [j for i in p_values_chunks for j in i]
         pvalues_adjusted = p_values
-        print(p_values)
         
         lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
         print(observed_input_file+ "_lambda_values_whole_genome.txt")
