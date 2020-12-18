@@ -37,9 +37,10 @@ import math
 def unify_muts(annotated_mutations_input_file, output_extension, filter_mut_motifs=True, filter_cond = "", operation_on_unify='mean'):
     
     annotated_mutations_grouped_file=annotated_mutations_input_file + output_extension + "_groupedbymut"
+    annotated_mutations_grouped_output_file=annotated_mutations_grouped_file+"withmotifinfo"
     fsep = '\t'
     vsep = '#'
-    if not os.path.exists(annotated_mutations_grouped_file):
+    if not os.path.exists(annotated_mutations_grouped_output_file):
         awk_stmt = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond} {{gsub("X","23",$1); gsub("Y","24",$1);gsub("MT","25",$1);gsub("M","25",$1);gsub("chr","",$1); $2=($2/1)*1; $3=($3/1)*1;   
         print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10+$11,$10+$11"{vsep}"$10"{vsep}"$11"{vsep}"$12"{vsep}"$13"{vsep}"$14"{vsep}"$15"{vsep}"$16"{vsep}"$17"{vsep}"$18"{vsep}"$19"{vsep}"$20"{vsep}"$21"{vsep}"$22"{vsep}"$23"{vsep}"$24"{vsep}"$25"{vsep}"$26"{vsep}"$27"{vsep}"$28"{vsep}"$29"{vsep}"$30"{vsep}"$31"{vsep}"$32}}}}' {infile} | 
         sort -k1,1n -k2,2n -k3,3n -k4 -k5 -k6 -k7 -k8 -k9 | 
