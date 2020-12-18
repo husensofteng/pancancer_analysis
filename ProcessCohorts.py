@@ -362,9 +362,9 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     p.join()
     unified_mutation_input_files = [p.get() for p in unified_mutation_input_files_obj]
     
-    for unified_muts_file in unified_muts_files:
-            if os.path.exists(unified_muts_file):
-                os.remove(unified_muts_file)
+    #for unified_muts_file in unified_muts_files:
+    #        if os.path.exists(unified_muts_file):
+    #            os.remove(unified_muts_file)
     
 #     unified_mutation_input_files = []
 #     for mutations_input_file in created_cohorts[cohort]:
