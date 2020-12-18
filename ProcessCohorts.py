@@ -232,7 +232,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                filter_cond, operation_on_unify, output_extension, 
                distance_to_merge, merged_mut_sig_threshold,
                local_domain_window, chr_lengths_file,
-               sig_elements_output_file, sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore, p_value_on_score,active_driver_script_dir,
+               sig_elements_output_file, sig_tfs_file, sig_tfpos_file, tmp_dir, n_cores_fscore, p_value_on_score, active_driver_script_dir,
                active_driver_min_mut, n_cores):    
     
     "get the cohort name to use for output file names"
@@ -584,7 +584,7 @@ if __name__ == '__main__':
     if not os.path.exists(args.mutations_cohorts_outdir):
         os.makedirs(args.mutations_cohorts_outdir)
     
-    generated_sig_merged_element_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
+    generated_sig_merged_element_files, generated_sig_merged_elements_active_files, sig_tfs_files, sig_tfpos_files = process_cohorts(
         args.cohort_names_input, args.mutations_cohorts_outdir, args.observed_input_file, 
         args.simulated_input_dir, args.chr_lengths_file, args.num_cores, 
         args.background_window, args.background_window_size, 
