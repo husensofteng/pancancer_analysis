@@ -402,14 +402,14 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     active_driver_output_file = sig_elements_output_file + '_ActiveDriver'
     active_driver_output_file_sig = active_driver_output_file + '_sig'
     
-    if not os.path.exists(active_driver_output_file_sig):
-            print(['Rscript', active_driver_script_dir, sig_elements_output_file,  created_cohorts[cohort][0], active_driver_min_mut, active_driver_output_file, active_driver_output_file_sig, active_driver_results,  n_cores])
-            
-            try:
-                subprocess.call(['Rscript', active_driver_script_dir, sig_elements_output_file,  created_cohorts[cohort][0], str(active_driver_min_mut), active_driver_output_file, active_driver_output_file_sig,  active_driver_results, str(n_cores)])
-
-            except KeyError:
-                open(active_driver_output_file_sig, 'a').close()
+    #if not os.path.exists(active_driver_output_file_sig):
+    #        print(['Rscript', active_driver_script_dir, sig_elements_output_file,  created_cohorts[cohort][0], active_driver_min_mut, active_driver_output_file, active_driver_output_file_sig, active_driver_results,  n_cores])
+    #        
+    #        try:
+    #           # subprocess.call(['Rscript', active_driver_script_dir, sig_elements_output_file,  created_cohorts[cohort][0], str(active_driver_min_mut), active_driver_output_file, active_driver_output_file_sig,  active_driver_results, str(n_cores)])
+#
+    #        except KeyError:
+    #            open(active_driver_output_file_sig, 'a').close()
             
     #sig_tfs_file, sig_tfpos_file = Utilities.get_tf_pval(
     #    cohort, sig_elements_output_file, p_value_on_score, motif_name_index, 
