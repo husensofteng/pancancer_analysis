@@ -565,9 +565,9 @@ def parse_args():
     parser.add_argument('--num_cores', type=int, default=10, help='number of cores (cpus) to use in parallel')
     parser.add_argument('--tmp_dir', default='$SNIC_TMP', help='')
     parser.add_argument('--n_cores_fscore', type=int, default=10, help='number of cores (cpus) to use in parallel to obtain fscore')
-    parser.add_argument('--active_driver_script_dir', default='', help='')
+    parser.add_argument('--active_driver_script_dir', default='/proj/snic2020-16-50/nobackup/pancananalysis/pancancer_analysis_KS/pancancer_analysis/ActiveDriverWGS_to_run.R', help='')
     parser.add_argument('--active_driver_min_mut', default=1, help='n')
-    parser.add_argument('--num_cores_activedriver',  default=10, help='Number of cores to run ActiveDriverWGS')
+    parser.add_argument('--num_cores_activedriver',  default=15, help='Number of cores to run ActiveDriverWGS')
 
     
     return parser.parse_args(sys.argv[1:])
