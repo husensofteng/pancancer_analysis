@@ -478,8 +478,9 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
         
         #split observed file into chunks
         observed_infile_chunks = np.array_split(observed_score_infile, round(observed_score_infile.count()/100))
+        pval_file=observed_input_file+'_elem_pval'
         pm = Pool(15)
-        p_values_chunks = pm.starmap(empirical_pval, product(observed_infile_chunks,  [stats_dict['scores']]))
+        p_values_chunks = pm.starmap(empirical_pval, product(observed_infile_chunks,  [stats_dict['scores']], [pval_file]))
         pm.close()
         pm.join()
         #bind all p_values
