@@ -667,7 +667,7 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
         if num_tfpos_sim_sd==0.0:
             num_tfpos_sim_sd = 1.0
         if p_value_on_score:
-            tfpos_p_values.append(empirical_pval(num_tfpos_obs, num_tfpos_sim))
+            tfpos_p_values.append(empirical_pval((num_tfpos_obs,), num_tfpos_sim))
         else:
             tfpos_p_values.append(get_pval(num_tfpos_obs, num_tfpos_sim_mean, num_tfpos_sim_sd))
     
