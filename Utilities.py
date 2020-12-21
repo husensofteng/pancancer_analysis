@@ -547,6 +547,11 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
     print('Calculating pval for TFs in ', cohort)
     '''filter the mutations by motif-breaking score and gene-expression as given in filter_cond
         the mutations in the input file are already checked for signicance (or TF binding>0)'''
+    print("""awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond}{{print ${motif_name_index},${f_score_index}+${mut_break_score_index}}}}}' {observed_mut_motifs} | sort -k1 | groupBy -g 1 -c 2 -o min > {observed_mut_motifs_temp}""".format(
+                        filter_cond=filter_cond, observed_mut_motifs=observed_mut_motifs, 
+                        motif_name_index=motif_name_index+1, f_score_index=f_score_index+1, 
+                        mut_break_score_index=motif_breaking_score_index+1, 
+                        observed_mut_motifs_temp=observed_mut_motifs_temp, fsep=fsep))
     os.system("""awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond}{{print ${motif_name_index},${f_score_index}+${mut_break_score_index}}}}}' {observed_mut_motifs} | sort -k1 | groupBy -g 1 -c 2 -o min > {observed_mut_motifs_temp}""".format(
                         filter_cond=filter_cond, observed_mut_motifs=observed_mut_motifs, 
                         motif_name_index=motif_name_index+1, f_score_index=f_score_index+1, 
