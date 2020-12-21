@@ -409,11 +409,10 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                 subprocess.call(['Rscript', active_driver_script_dir, sig_elements_output_file,  created_cohorts[cohort][0], str(active_driver_min_mut), active_driver_output_file, active_driver_output_file_sig,  active_driver_results, str(n_cores)])
             except KeyError:
                 open(active_driver_output_file_sig, 'a').close()
-    sig_muts_file=created_cohorts[cohort][0]+"_sig"
     
     active_driver_output_file_sig_tmp=active_driver_output_file_sig+'_tmp'
     os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print "chr"$0}}' {}>{}""".format(active_driver_output_file_sig,active_driver_output_file_sig_tmp ))
-    sig_muts_file=created_cohorts+"_sig"
+    sig_muts_file=created_cohorts[cohort][0]+"_sig"
     sig_muts_file_tmp=sig_muts_file+"_tmp"
     
     BedTool(active_driver_output_file_sig_tmp).intersect(BedTool(created_cohorts[cohort][0]), wb=True).saveas(sig_muts_file_tmp)
