@@ -295,7 +295,7 @@ def empirical_pval(sl, stats_dict_scores, pval_file):
             if p_value==0.0:
                 p_value=1/103
             p_values.append(p_value)
-            pval_ifile.write(score + '\t' + score+'\n')
+            pval_ifile.write(str(score) + '\t' + str(p_values)+'\n')
     
     return p_values
 
