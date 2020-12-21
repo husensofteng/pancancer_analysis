@@ -676,12 +676,12 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
         else:
             tfpos_p_values.append(get_pval(num_tfpos_obs, num_tfpos_sim_mean, num_tfpos_sim_sd))
     
-    adjusted_tfpos_p_values = []
-    if len(tfpos_p_values)>0:
-        adjusted_tfpos_p_values = adjust_pvales(tfpos_p_values)
+            adjusted_tfpos_p_values = []
+            if len(tfpos_p_values)>0:
+                adjusted_tfpos_p_values = adjust_pvales(tfpos_p_values)
     with open(sig_tfpos_file, 'w') as ofile:
         for i,tfpos in enumerate(tfpos_names):
-            ofile.write(tfpos + '\t' + str(tfpos_p_values[i]) + '\t' + str(adjusted_tfpos_p_values[i]) + '\t' + str(tfpos_counts_in_sim_sets[tfpos][0]) + '\t' + str(np.mean(tfpos_counts_in_sim_sets[tfpos][1:])) + '\t' + ','.join([str(x) for x in tfpos_counts_in_sim_sets[tfpos][1:]])+ '\n')
+            ofile.write(tfpos + '\t' + str(tfpos_p_values[i]) + '\t' + str(tfpos_p_values[i]) + '\t' + str(tfpos_counts_in_sim_sets[tfpos][0]) + '\t' + str(np.mean(tfpos_counts_in_sim_sets[tfpos][1:])) + '\t' + ','.join([str(x) for x in tfpos_counts_in_sim_sets[tfpos][1:]])+ '\n')
     if os.path.exists(observed_mut_motifs_temp):
         os.remove(observed_mut_motifs_temp)
     return sig_tfs_file, sig_tfpos_file
