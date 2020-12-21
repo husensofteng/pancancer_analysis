@@ -644,8 +644,8 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
             num_tf_sim_sd = 1.0
         if p_value_on_score:
             tf_p_values.append(empirical_pval((num_tf_obs,), num_tf_sim))
-            adjusted_tf_p_values = []
-            adjusted_tf_p_values = tf_p_values
+            #adjusted_tf_p_values = []
+            #adjusted_tf_p_values = tf_p_values
         else:
             tf_p_values.append(get_pval(num_tf_obs, num_tf_sim_mean, num_tf_sim_sd))
             adjusted_tf_p_values = []
@@ -655,7 +655,7 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
                 print('tf_p_values nothing:', tf_p_values)
     with open(sig_tfs_file, 'w') as ofile:
         for i,tf in enumerate(tf_names):
-            ofile.write(tf + '\t' + str(tf_p_values[i]) + '\t' + str(adjusted_tf_p_values[i]) + '\t' + str(tf_counts_in_sim_sets[tf][0]) + '\t' + str(np.mean(tf_counts_in_sim_sets[tf][1:])) + '\t' + ','.join([str(x) for x in tf_counts_in_sim_sets[tf][1:]])+ '\n')
+            ofile.write(tf + '\t' + str(tf_p_values[i]) + '\t' + str(tf_p_values[i]) + '\t' + str(tf_counts_in_sim_sets[tf][0]) + '\t' + str(np.mean(tf_counts_in_sim_sets[tf][1:])) + '\t' + ','.join([str(x) for x in tf_counts_in_sim_sets[tf][1:]])+ '\n')
     
     tfpos_p_values = []
     tfpos_names = []
