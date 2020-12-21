@@ -418,8 +418,16 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     BedTool(active_driver_output_file_sig_tmp).intersect(BedTool(created_cohorts[cohort][0]), wb=True).saveas(sig_muts_file_tmp)
     os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{print $20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51}}' {} | sort -k1,1 -k2,2n -V | uniq -u >{}""".format(sig_muts_file_tmp,sig_muts_file))
     
+    
+    sig_muts_per_tf_mutation_input_files=[]
+    sig_muts_per_tf_mutation_input_files=[sig_muts_file]
+    for  mutations_input_file in created_cohorts[cohort][1:]: 
+       sig_muts_per_tf_mutation_input_files.append(mutations_input_file) 
+        
+        
+        
     sig_tfs_file, sig_tfpos_file = Utilities.get_tf_pval(
-        cohort, sig_muts_file, p_value_on_score, motif_name_index, 
+        cohort, sig_muts_per_tf_mutation_input_filess, p_value_on_score, motif_name_index, 
                 f_score_index, motif_breaking_score_index, 
                filter_cond, fsep='\t', sig_tfs_file=sig_tfs_file, 
                 sig_tfpos_file=sig_tfpos_file,
