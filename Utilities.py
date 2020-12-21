@@ -286,14 +286,17 @@ def sum_fscore_motif_breaking_score(feature,fscore_index, motif_breaking_score_i
         feature[fscore_index] = str(sums)
     return feature
 
-def empirical_pval(sl, stats_dict_scores):
+def empirical_pval(sl, stats_dict_scores, pval_file):
     p_values=[]
-    for score in sl:
-        scores_higher_than_observed = [i for i in stats_dict_scores if i >= score]
-        p_value= len(scores_higher_than_observed)/(len(stats_dict_scores))
-        if p_value==0.0:
-            p_value=1/103
-        p_values.append(p_value)
+    with open(pval_file, 'w') as pval_ifile:
+        for score in sl:
+            scores_higher_than_observed = [i for i in stats_dict_scores if i >= score]
+            p_value= len(scores_higher_than_observed)/(len(stats_dict_scores))
+            if p_value==0.0:
+                p_value=1/103
+            p_values.append(p_value)
+            pval_ifile.write(score + '\t' + score+'\n')
+    
     return p_values
 
 def empirical_pval_local_window(dict_lines_observed_split):
