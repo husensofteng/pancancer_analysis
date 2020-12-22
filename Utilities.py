@@ -321,7 +321,7 @@ def empirical_pval_local_window(dict_lines_observed_split, pval_file):
             if p_value==0.0:
                 p_value=1/103
             pval_ifile.write(str(index) + '\t' + str(p_value)+'\n')
-    return(pval_file)
+    return pval_file
 
 
 def split_dict_equally(input_dict, chunks=2):
@@ -462,7 +462,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         l_number=1
         while l:
             sl = l.strip().split('\t')
-            print(dict_pvals[l_number])
+            #print(dict_pvals[l_number])
             #print(l.strip())
             merged_elements_statspvalues_outfile.write(l.strip() + '\t' + str(dict_pvals[l_number]) + '\t' + str(dict_pvals[l_number]) + '\n')
             if dict_pvals[l_number]<merged_mut_sig_threshold:
