@@ -431,6 +431,9 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         lambda_file.write(observed_input_file.split('/')[-1] + '\t' + str(lambda_factor)+'\n')
         lambda_file.close()
         
+        if os.path.exists(pval_file):
+            os.remove(pval_file)
+        
            
     else: 
         for l in sorted(dict_lines_observed.keys()):
@@ -527,7 +530,7 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
                 
         lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
         #print(observed_input_file+ "_lambda_values_whole_genome.txt")
-        lambda_file=open(observed_input_file+ "_lambda_values_whole_genome.txt", "a+")
+        lambda_file=open(observed_input_file+ "_lambda_values_whole_genome.txt", "w")
         lambda_file.write(observed_input_file.split('/')[-1] + '\t' + str(lambda_factor)+'\n')
         lambda_file.close()    
         
@@ -539,7 +542,7 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
             l_number=1
             while l:
                 sl = l.strip().split('\t')
-                print(dict_pvals[l_number])
+                #print(dict_pvals[l_number])
                 #print(l.strip())
                 merged_elements_statspvalues_outfile.write(l.strip() + '\t' + str(dict_pvals[l_number]) + '\t' + str(dict_pvals[l_number]) + '\n')
                 if dict_pvals[l_number]<merged_mut_sig_threshold:
@@ -547,6 +550,9 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
                     merged_elements_statspvaluesonlysig_outfile.write(l.strip() + '\t' + str(dict_pvals[l_number]) + '\t' + str(dict_pvals[l_number]) + '\n')
                 l = observed_infile.readline()
                 l_number+=1
+        
+        if os.path.exists(pval_file):
+            os.remove(pval_file)
             
     else:
         p_values = []
@@ -570,6 +576,7 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
                 if pvalues_adjusted[i]<merged_mut_sig_threshold:
                     n_sig+=1
                     merged_elements_statspvaluesonlysig_outfile.write(l.strip() + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
+    
     
     return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, n_sig
 
