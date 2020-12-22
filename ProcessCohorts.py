@@ -433,8 +433,9 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                 sig_tfpos_file=sig_tfpos_file,
                 filter_on_signal = True, dnase_index = 24, fantom_index = 25, 
                 num_other_tfs_index = 27)
-     
-    
+    os.remove(active_driver_output_file_sig_tmp)
+    os.remove(sig_muts_file_tmp)
+
     
     return sig_elements_output_file, active_driver_output_file_sig, sig_tfs_file, sig_tfpos_file
     

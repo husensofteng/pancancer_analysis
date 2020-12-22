@@ -286,32 +286,42 @@ def sum_fscore_motif_breaking_score(feature,fscore_index, motif_breaking_score_i
         feature[fscore_index] = str(sums)
     return feature
 
-def empirical_pval(sl, stats_dict_scores, pval_file):
+def empirical_pval(sl, stats_dict_scores):
     p_values=[]
-    with open(pval_file, 'w') as pval_ifile:
-        for score in sl:
+    for score in sl:
+        scores_higher_than_observed = [i for i in stats_dict_scores if i >= score]
+        p_value= len(scores_higher_than_observed)/(len(stats_dict_scores))
+        if p_value==0.0:
+            p_value=1/103
+        p_values.append(p_value)
+    
+    return p_values
+
+def empirical_pval_global(dict_lines_observed_split, stats_dict_scores, pval_file):
+    with open(pval_file, 'a') as pval_ifile:
+        for index in dict_lines_observed_split:
+            score = dict_lines_observed_split[index]
             scores_higher_than_observed = [i for i in stats_dict_scores if i >= score]
             p_value= len(scores_higher_than_observed)/(len(stats_dict_scores))
             if p_value==0.0:
                 p_value=1/103
-            p_values.append(p_value)
-            pval_ifile.write(str(score) + '\t' + str(p_values)+'\n')
+            pval_ifile.write(str(index) + '\t' + str(p_value)+'\n')
+    return pval_file
+
+def empirical_pval_local_window(dict_lines_observed_split, pval_file):
+   # dict_p_values={}
+    with open(pval_file, 'a') as pval_ifile:
+        for index in dict_lines_observed_split:
     
-    return p_values
-
-def empirical_pval_local_window(dict_lines_observed_split):
-    dict_p_values={}
-    for index in dict_lines_observed_split:
-
-        simulated_score_vec=dict_lines_observed_split[index][1]
-        scores_len=len(simulated_score_vec)
-        element_score = float(dict_lines_observed_split[index][0][3])
-        scores_higher_than_observed = [i for i in simulated_score_vec if i >= element_score]
-        p_value= len(scores_higher_than_observed)/scores_len
-        if p_value==0.0:
-            p_value=1/103
-        dict_p_values[index] = p_value
-    return(dict_p_values)
+            simulated_score_vec=dict_lines_observed_split[index][1]
+            scores_len=len(simulated_score_vec)
+            element_score = float(dict_lines_observed_split[index][0])
+            scores_higher_than_observed = [i for i in simulated_score_vec if i >= element_score]
+            p_value= len(scores_higher_than_observed)/scores_len
+            if p_value==0.0:
+                p_value=1/103
+            pval_ifile.write(str(index) + '\t' + str(p_value)+'\n')
+    return(pval_file)
 
 
 def split_dict_equally(input_dict, chunks=2):
@@ -350,17 +360,17 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
     with open(observed_input_file, 'r') as observed_infile: #, open(observed_input_file_temp_file, 'w') as observed_input_file_temp_ofile:
         l = observed_infile.readline().strip().split('\t')
         while l and len(l)>3:
-            dict_lines_observed[line_number] = [l,[]]
-#             extended_element_start = (int(l[1])-local_domain_window)
-#             extended_element_end = int(l[2])+local_domain_window
-#             if extended_element_start<0:
-#                 extended_element_start = 0
-#                 extended_element_end += 0 - (int(l[1])-local_domain_window)
-#             if extended_element_end>chr_lengths[int(l[0])]:
-#                 extended_element_end = chr_lengths[int(l[0])]
-#                 extended_element_start -= (int(l[2])+local_domain_window) - chr_lengths[int(l[0])]
-#                 
-#             observed_input_file_temp_ofile.write(l[0] + '\t' + str(extended_element_start) + '\t' + str(extended_element_end) + '\t' + str(line_number) + '\n')
+            dict_lines_observed[line_number] = [l[3],[]]
+    #             extended_element_start = (int(l[1])-local_domain_window)
+    #             extended_element_end = int(l[2])+local_domain_window
+    #             if extended_element_start<0:
+    #                 extended_element_start = 0
+    #                 extended_element_end += 0 - (int(l[1])-local_domain_window)
+    #             if extended_element_end>chr_lengths[int(l[0])]:
+    #                 extended_element_end = chr_lengths[int(l[0])]
+    #                 extended_element_start -= (int(l[2])+local_domain_window) - chr_lengths[int(l[0])]
+    #                 
+    #             observed_input_file_temp_ofile.write(l[0] + '\t' + str(extended_element_start) + '\t' + str(extended_element_end) + '\t' + str(line_number) + '\n')
             line_number+=1
             l = observed_infile.readline().strip().split('\t')
     print('observed_input_file: ', observed_input_file_temp_file)
@@ -393,24 +403,31 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
     lines = []
     
     if p_value_on_score:
+        pval_file=observed_input_file+'_elem_pval_local'+str(local_domain_window)
+        if os.path.exists(pval_file):
+            os.remove(pval_file)
         print('p-value on score local')
         pm = Pool(15)
-        p_values_chunk = pm.starmap(empirical_pval_local_window, product(dict_lines_observed_chunks))
+        pm.starmap(empirical_pval_local_window, product(dict_lines_observed_chunks, [pval_file]))
         pm.close()
         pm.join()
         #merge p-values
         l=1
 
-        while l<len(dict_lines_observed_chunks):
-            p_values_chunk[0].update(p_values_chunk[l])
-            l+=1
+        dict_pvals={}
         p_values=[]
-        p_values=list(p_values_chunk[0].values())
+        with open(pval_file, 'r') as pval_ifile:
+            l = pval_ifile.readline().strip().split('\t')
+    
+            while l and len(l)>1:
+                p_values.append(float(l[1]))
+                dict_pvals[int(float(l[0]))]=float(l[1])
+                l = pval_ifile.readline().strip().split('\t')
         pvalues_adjusted = p_values
-        
+    
         lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
         lambda_values_file=observed_input_file+"_lambda_values_local_window_"+str(local_domain_window)+'.txt'
-        lambda_file=open(lambda_values_file, "a+")
+        lambda_file=open(lambda_values_file, "w")
         lambda_file.write(observed_input_file.split('/')[-1] + '\t' + str(lambda_factor)+'\n')
         lambda_file.close()
         
@@ -440,17 +457,22 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
     
     
         
-    with open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
-        i=0
-        for l in (dict_lines_observed.keys()):
-            merged_elements_statspvalues_outfile.write('\t'.join(dict_lines_observed[l][0]) + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
-            #filter after significant p_value
-            if p_values[i]<merged_mut_sig_threshold:
+    with open(observed_input_file, 'r') as observed_infile, open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
+        l = observed_infile.readline()
+        l_number=1
+        while l:
+            sl = l.strip().split('\t')
+            print(dict_pvals[l_number])
+            #print(l.strip())
+            merged_elements_statspvalues_outfile.write(l.strip() + '\t' + str(dict_pvals[l_number]) + '\t' + str(dict_pvals[l_number]) + '\n')
+            if dict_pvals[l_number]<merged_mut_sig_threshold:
                 n_sig+=1
-                merged_elements_statspvaluesonlysig_outfile.write('\t'.join(dict_lines_observed[l][0]) + '\t' + str(p_values[i]) + '\t' + str(pvalues_adjusted[i]) + '\n')
-            i+=1
-    del dict_lines_observed
+                merged_elements_statspvaluesonlysig_outfile.write(l.strip() + '\t' + str(dict_pvals[l_number]) + '\t' + str(dict_pvals[l_number]) + '\n')
+            l = observed_infile.readline()
+            l_number+=1 
+    
     cleanup()
+
     return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, n_sig
 
 
@@ -473,41 +495,59 @@ def assess_stat_elements(observed_input_file, simulated_input_file,
     
     
     if p_value_on_score:
-        #read score values for observed mutations
-        observed_score_infile = pd.read_csv(observed_input_file,sep="\t", header=None, usecols=[3], squeeze=True)
         
-        #split observed file into chunks
-        observed_infile_chunks = np.array_split(observed_score_infile, round(observed_score_infile.count()/100))
+        dict_lines_observed_score = {}
+        line_number = 1
+        with open(observed_input_file, 'r') as observed_infile: #, open(observed_input_file_temp_file, 'w') as observed_input_file_temp_ofile:
+            l = observed_infile.readline().strip().split('\t')
+            while l and len(l)>3:
+                dict_lines_observed_score[line_number] = float(l[3])
+                line_number+=1
+                l = observed_infile.readline().strip().split('\t')
+        dict_lines_observed_chunks=split_dict_equally(dict_lines_observed_score, 100)
+        
         pval_file=observed_input_file+'_elem_pval'
+        if os.path.exists(pval_file):
+            os.remove(pval_file)
         pm = Pool(15)
-        p_values_chunks = pm.starmap(empirical_pval, product(observed_infile_chunks,  [stats_dict['scores']], [pval_file]))
+        pm.starmap(empirical_pval_global, product(dict_lines_observed_chunks,  [stats_dict['scores']], [pval_file]))
         pm.close()
         pm.join()
-        #bind all p_values
-        p_values= [j for i in p_values_chunks for j in i]
-        pvalues_adjusted = p_values
         
+        dict_pvals={}
+        p_values=[]
+        with open(pval_file, 'r') as pval_ifile:
+            l = pval_ifile.readline().strip().split('\t')
+        
+            while l and len(l)>1:
+                p_values.append(float(l[1]))
+                dict_pvals[int(float(l[0]))]=float(l[1])
+                l = pval_ifile.readline().strip().split('\t')
+        pvalues_adjusted = p_values
+                
         lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
-        print(observed_input_file+ "_lambda_values_whole_genome.txt")
+        #print(observed_input_file+ "_lambda_values_whole_genome.txt")
         lambda_file=open(observed_input_file+ "_lambda_values_whole_genome.txt", "a+")
         lambda_file.write(observed_input_file.split('/')[-1] + '\t' + str(lambda_factor)+'\n')
-        lambda_file.close()
+        lambda_file.close()    
+        
         
         lines = []
         n_sig = 0
         with open(observed_input_file, 'r') as observed_infile, open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
             l = observed_infile.readline()
-            l_number=0
+            l_number=1
             while l:
-                #sl = l.strip().split('\t')
+                sl = l.strip().split('\t')
+                print(dict_pvals[l_number])
                 #print(l.strip())
-                merged_elements_statspvalues_outfile.write(l.strip() + '\t' + str(p_values[l_number]) + '\t' + str(pvalues_adjusted[l_number]) + '\n')
-                if pvalues_adjusted[l_number]<merged_mut_sig_threshold:
+                merged_elements_statspvalues_outfile.write(l.strip() + '\t' + str(dict_pvals[l_number]) + '\t' + str(dict_pvals[l_number]) + '\n')
+                if dict_pvals[l_number]<merged_mut_sig_threshold:
                     n_sig+=1
-                    merged_elements_statspvaluesonlysig_outfile.write(l.strip() + '\t' + str(p_values[l_number]) + '\t' + str(pvalues_adjusted[l_number]) + '\n')
+                    merged_elements_statspvaluesonlysig_outfile.write(l.strip() + '\t' + str(dict_pvals[l_number]) + '\t' + str(dict_pvals[l_number]) + '\n')
                 l = observed_infile.readline()
                 l_number+=1
-        
+            
     else:
         p_values = []
         lines = []
@@ -551,11 +591,7 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
     print('Calculating pval for TFs in ', cohort)
     '''filter the mutations by motif-breaking score and gene-expression as given in filter_cond
         the mutations in the input file are already checked for signicance (or TF binding>0)'''
-    print("""awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond}{{print ${motif_name_index},${f_score_index}+${mut_break_score_index}}}}}' {observed_mut_motifs} | sort -k1 | groupBy -g 1 -c 2 -o min > {observed_mut_motifs_temp}""".format(
-                        filter_cond=filter_cond, observed_mut_motifs=observed_mut_motifs, 
-                        motif_name_index=motif_name_index+1, f_score_index=f_score_index+1, 
-                        mut_break_score_index=motif_breaking_score_index+1, 
-                        observed_mut_motifs_temp=observed_mut_motifs_temp, fsep=fsep))
+    
     os.system("""awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond}{{print ${motif_name_index},${f_score_index}+${mut_break_score_index}}}}}' {observed_mut_motifs} | sort -k1 | groupBy -g 1 -c 2 -o min > {observed_mut_motifs_temp}""".format(
                         filter_cond=filter_cond, observed_mut_motifs=observed_mut_motifs, 
                         motif_name_index=motif_name_index+1, f_score_index=f_score_index+1, 
