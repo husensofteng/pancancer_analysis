@@ -193,12 +193,23 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
     '''
     merged_elements_statspvalues = merged_muts_output_file+"_statspvaluesSimSig" + str(sim_sig_thresh)
     merged_elements_statspvaluesonlysig = merged_muts_output_file+"_statspvaluesSimSig{simulated_mut_motif_sig_val}onlysig{merged_mut_sig_threshold}".format(simulated_mut_motif_sig_val=sim_sig_thresh, merged_mut_sig_threshold=merged_mut_sig_threshold)
-    Utilities.assess_stat_elements(observed_input_file=merged_muts_output_file, 
-                                   simulated_input_file=combined_simulated_muts_merged_output_file, 
-                                   merged_elements_statspvalues=merged_elements_statspvalues, 
-                                   merged_elements_statspvaluesonlysig=merged_elements_statspvaluesonlysig, 
-                                   merged_mut_sig_threshold=merged_mut_sig_threshold, 
-                                   score_index_observed_elements=3, score_index_sim_elements=3, p_value_on_score=p_value_on_score)
+#     Utilities.assess_stat_elements(observed_input_file=merged_muts_output_file, 
+#                                    simulated_input_file=combined_simulated_muts_merged_output_file, 
+#                                    merged_elements_statspvalues=merged_elements_statspvalues, 
+#                                    merged_elements_statspvaluesonlysig=merged_elements_statspvaluesonlysig, 
+#                                    merged_mut_sig_threshold=merged_mut_sig_threshold, 
+#                                    score_index_observed_elements=3, score_index_sim_elements=3, p_value_on_score=p_value_on_score)
+    
+    
+    #tmp to omit comparison to the background
+    with open(merged_muts_output_file, 'r') as observed_infile, open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile:
+        l = observed_infile.readline()
+        while l:
+            sl = l.strip().split('\t')
+            #print(dict_pvals[l_number])
+            #print(l.strip())
+            merged_elements_statspvalues_outfile.write(l.strip() + '\t' + '1.0' + '\t' + '1.0' + '\n')
+            l = observed_infile.readline()
     
     #based on a local domain distribution of scores
     '''Calcuate pval for each element by comparing its score to 
