@@ -132,6 +132,11 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
                             chr_lengths_file, sig_elements_output_file, 
                             sim_sig_thresh, p_value_on_score):
     
+    if os.path.exists(sig_elements_output_file):
+        return sig_elements_output_file
+    
+    
+    
     combined_simulated_muts_merged_output_file = cohort_full_name + output_extension + '_unified_combined' + '_merged{distance_to_merge}bp'.format(distance_to_merge=distance_to_merge) + '_combined'
 #     merged_muts_output_ext = "_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)
 # #    "Merge the simluated mutations into elements"
