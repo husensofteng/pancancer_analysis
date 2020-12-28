@@ -400,7 +400,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
             l = simulated_input_file_temp_ifile.readline().strip().split('\t')
 
     #split dictionery into chunks
-    dict_lines_observed_chunks=split_dict_equally(dict_lines_observed, 100)
+    dict_lines_observed_chunks=split_dict_equally(dict_lines_observed, 1000)
     
     p_values = []
     pvalues_adjusted = []
