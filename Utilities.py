@@ -390,6 +390,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
         observed_input_file_obj.map(BedTool(simulated_input_file), c=4, o=['collapse'], g='/proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/chr_order_hg19.txt').saveas(simulated_input_file_temp)
     
         dict_lines_sim=[]
+        dict_lines_sim = dict_lines_observed(dict1)
         with open(simulated_input_file_temp, 'r') as simulated_input_file_temp_ifile:
             l = simulated_input_file_temp_ifile.readline().strip().split('\t')
             
@@ -401,7 +402,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
                         sim_scores.append(float(x))
                     except ValueError:
                         sim_scores.append(0.0)
-                dict_lines_sim[int(float(l[3]))].extend(sim_scores)
+                dict_lines_sim[int(float(l[3]))][1].extend(sim_scores)
                 l = simulated_input_file_temp_ifile.readline().strip().split('\t')
     
         #split dictionery into chunks
