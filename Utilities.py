@@ -366,7 +366,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         with open(observed_input_file_temp_file_per_chr, 'r') as observed_infile: #, open(observed_input_file_temp_file, 'w') as observed_input_file_temp_ofile:
             l = observed_infile.readline().strip().split('\t')
             while l and len(l)>3:
-                dict_lines_observed[line_number] = [l[3],[]]
+                dict_lines_observed[str(line_number)] = [l[3],[]]
         #             extended_element_start = (int(l[1])-local_domain_window)
         #             extended_element_end = int(l[2])+local_domain_window
         #             if extended_element_start<0:
@@ -418,7 +418,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
                         sim_scores.append(float(x))
                     except ValueError:
                         sim_scores.append(0.0)
-                dict_lines_observed[int(float(l[3]))][1].extend(sim_scores)
+                dict_lines_observed[str(l[3])][1].extend(sim_scores)
                 l = simulated_input_file_temp_ifile.readline().strip().split('\t')
 
         #split dictionery into chunks
