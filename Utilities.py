@@ -354,10 +354,10 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
     
     os.system("""awk '{{print $0>>"{}""_"$1".bed"}}' {}""".format(
        observed_input_file_temp_file, observed_input_file_temp_file))
-        
+    print(glob.glob(observed_input_file_temp_file+'_*.bed'))
     pval_files=[]
     for observed_input_file_temp_file_per_chr in glob.glob(observed_input_file_temp_file+'_*.bed'):
-        print observed_input_file_temp_file_per_chr
+        print(observed_input_file_temp_file_per_chr)
     #chr_lengths = get_chr_lengths(chr_lengths_file)
     
         dict_lines_observed = {}
