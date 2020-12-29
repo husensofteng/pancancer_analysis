@@ -313,7 +313,7 @@ def empirical_pval_local_window(dict_lines_observed_split, dict_lines_sim, pval_
     with open(pval_file, 'a') as pval_ifile:
         for index in dict_lines_observed_split:
     
-            simulated_score_vec=dict_lines_sim[index]
+            simulated_score_vec=float(dict_lines_sim[index])
             scores_len=len(simulated_score_vec)
             element_score = float(dict_lines_observed_split[index][0])
             scores_higher_than_observed = [i for i in simulated_score_vec if i >= element_score]
