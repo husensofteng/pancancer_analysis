@@ -385,7 +385,6 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
                 line_number+=1
                 l = observed_infile.readline().strip().split('\t')
         print('observed_input_file: ', observed_input_file_temp_file_per_chr)
-        print(dict_lines_observed)
         observed_input_file_temp_file_per_chr_sort=observed_input_file_temp_file_per_chr+'_sort'
 
         if not os.path.exists(observed_input_file_temp_file_per_chr_sort):
@@ -419,7 +418,6 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
                     except ValueError:
                         sim_scores.append(0.0)
                 dict_lines_observed[int(float(l[3]))][1].extend(sim_scores)
-                print(dict_lines_observed[int(float(l[3]))])
                 l = simulated_input_file_temp_ifile.readline().strip().split('\t')
 
         #split dictionery into chunks
@@ -465,7 +463,6 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
             dict_pvals[int(float(l[0]))]=float(l[1])
             l = combined_pval_ifile.readline().strip().split('\t')
                         
-    print(p_values)
 
   
     
