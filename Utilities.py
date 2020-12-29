@@ -383,10 +383,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
 #     
 #     if not os.path.exists(simulated_input_file_sort):
 #         os.system("""sort -k1,1n -k2,2n {} > {}""".format(simulated_input_file,simulated_input_file_sort))
-    pval_file=observed_input_file+'_elem_pval_local'+str(local_domain_window)
-        
-    if os.path.exists(pval_file):
-        os.remove(pval_file)
+    pval_files=[]
             
     for simulated_input_file in simulated_input_files:
         simulated_input_file_temp = simulated_input_file+"_temp"
@@ -409,7 +406,10 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
         #split dictionery into chunks
         dict_lines_observed_chunks=split_dict_equally(dict_lines_observed, 100)
         
+        pval_file=simulated_input_file+'_elem_pval_local'+str(local_domain_window)
         
+        if os.path.exists(pval_file):
+            os.remove(pval_file)
         
 
         
@@ -419,9 +419,19 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
         pm.close()
         pm.join()
         
-        os.remove(simulated_input_file_temp)
-        
-    pval_df=pd.read_csv(pval_file, sep="\t",  header=None) 
+        #os.remove(simulated_input_file_temp)
+        pval_files.append(pval_file)
+    
+    
+    combined_pval_file=observed_input_file+'_elem_pval_local'+str(local_domain_window)
+    
+    if not os.path.exists(combined_pval_file):
+        with open(combined_pval_file, 'w') as combined_pval_outfile:
+            for pval_file in pval_files:
+                with open(pval_file, 'r') as pval_ifiles:
+                    combined_pval_outfile.write(pval_ifiles.read())
+                    
+    pval_df=pd.read_csv(combined_pval_file, sep="\t",  header=None) 
     pval_df.columns =['NR', 'higher_than', 'total'] 
   
 
