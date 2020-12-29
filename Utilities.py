@@ -421,13 +421,17 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
         
         os.remove(simulated_input_file_temp)
         
-    pval_df=pd.read_csv(pval_file, sep="\t",  header=None)   
+    pval_df=pd.read_csv(pval_file, sep="\t",  header=None) 
+    pval_df.columns =['NR', 'higher_than', 'total'] 
+  
+
+  
     print(pval_df)
-    pval_df_group=pval_df.groupby([0]).assign(pval=lambda x: x[1].sum()/x[2].sum())
+    pval_df_group=pval_df.groupby(['NR']).agg({'higher_than': 'sum','total':'sum'}).eval(pval='higher_than / total')
     print(pval_df_group)
     #merge p-values
     
-    dict_pvals = dict(zip(pval_df_group[0], pval_df_group['pval']))
+    dict_pvals = dict(zip(pval_df_group['NR'], pval_df_group['pval']))
     p_values=pval_df['pval']
     print(p_values)
     
