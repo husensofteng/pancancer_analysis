@@ -308,12 +308,12 @@ def empirical_pval_global(dict_lines_observed_split, stats_dict_scores, pval_fil
             pval_ifile.write(str(index) + '\t' + str(p_value)+'\n')
     return pval_file
 
-def empirical_pval_local_window(dict_lines_observed_split, pval_file):
+def empirical_pval_local_window(dict_lines_observed_split, dict_lines_sim, pval_file):
    # dict_p_values={}
     with open(pval_file, 'a') as pval_ifile:
         for index in dict_lines_observed_split:
     
-            simulated_score_vec=dict_lines_observed_split[index][1]
+            simulated_score_vec=dict_lines_sim[index]
             scores_len=len(simulated_score_vec)
             element_score = float(dict_lines_observed_split[index][0])
             scores_higher_than_observed = [i for i in simulated_score_vec if i >= element_score]
@@ -389,6 +389,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
         simulated_input_file_temp = simulated_input_file+"_temp"
         observed_input_file_obj.map(BedTool(simulated_input_file), c=4, o=['collapse'], g='/proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/chr_order_hg19.txt').saveas(simulated_input_file_temp)
     
+        dict_lines_sim=[]
         with open(simulated_input_file_temp, 'r') as simulated_input_file_temp_ifile:
             l = simulated_input_file_temp_ifile.readline().strip().split('\t')
             
@@ -400,7 +401,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
                         sim_scores.append(float(x))
                     except ValueError:
                         sim_scores.append(0.0)
-                dict_lines_observed[int(float(l[3]))][1].extend(sim_scores)
+                dict_lines_sim[int(float(l[3]))].extend(sim_scores)
                 l = simulated_input_file_temp_ifile.readline().strip().split('\t')
     
         #split dictionery into chunks
@@ -415,7 +416,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
         
         #print('p-value on score local')
         pm = Pool(15)
-        pm.starmap(empirical_pval_local_window, product(dict_lines_observed_chunks, [pval_file]))
+        pm.starmap(empirical_pval_local_window, product(dict_lines_observed_chunks,[dict_lines_sim], [pval_file]))
         pm.close()
         pm.join()
         
