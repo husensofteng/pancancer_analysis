@@ -452,8 +452,8 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
     if not os.path.exists(combined_pval_file):
         with open(combined_pval_file, 'w') as combined_pval_outfile:
             for pval_file in pval_files:
-                with open(pval_file, 'r') as pval_ifiles:
-                    combined_pval_outfile.write(pval_ifiles.read())
+                with open(pval_file, 'r') as pval_ifile:
+                    combined_pval_outfile.write(pval_ifile.read())
                     l = pval_ifile.readline().strip().split('\t')
 # 
                     while l and len(l)>1:
