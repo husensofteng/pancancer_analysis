@@ -349,7 +349,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
     #extend elements size
     "replace chr, X, Y, add Line Number to use as window ID and sort by chr,start"
     observed_input_file_temp_file = observed_input_file+"_temp" 
-    cmd = """awk 'BEGIN{{OFS="\t"}}{{gsub("chr","",$1); gsub("X", 23, $1); gsub("Y", 24, $1); print $1,$2,$3,NR}}' {} | bedtools slop -g /proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/chr_order_hg19.txt -b {}| sort -k1,1n -k2,2n > {}""".format(
+    cmd = """awk 'BEGIN{{OFS="\t"}}{{gsub("chr","",$1); gsub("X", 23, $1); gsub("Y", 24, $1); print $1,$2,$3,NR,$4}}' {} | bedtools slop -g /proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/chr_order_hg19.txt -b {}| sort -k1,1n -k2,2n > {}""".format(
         observed_input_file, local_domain_window,observed_input_file_temp_file)
     os.system(cmd)
     
@@ -366,7 +366,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         with open(observed_input_file_temp_file_per_chr, 'r') as observed_infile: #, open(observed_input_file_temp_file, 'w') as observed_input_file_temp_ofile:
             l = observed_infile.readline().strip().split('\t')
             while l and len(l)>3:
-                dict_lines_observed[str(line_number)] = [l[3],[]]
+                dict_lines_observed[l[4]] = [l[3],[]]
         #             extended_element_start = (int(l[1])-local_domain_window)
         #             extended_element_end = int(l[2])+local_domain_window
         #             if extended_element_start<0:
@@ -418,7 +418,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
                         sim_scores.append(float(x))
                     except ValueError:
                         sim_scores.append(0.0)
-                dict_lines_observed[str(l[3])][1].extend(sim_scores)
+                dict_lines_observed[l[3]][1].extend(sim_scores)
                 l = simulated_input_file_temp_ifile.readline().strip().split('\t')
 
         #split dictionery into chunks
