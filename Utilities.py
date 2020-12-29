@@ -415,18 +415,21 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
         
         print('p-value on score local')
         pm = Pool(15)
-        pm.starmap(empirical_pval_local_window, product(dict_lines_observed, [pval_file]))
+        pm.starmap(empirical_pval_local_window, product(dict_lines_observed_chunks, [pval_file]))
         pm.close()
         pm.join()
         
         os.remove(simulated_input_file_temp)
         
     pval_df=pd.read_csv(pval_file, sep="\t",  header=None)   
+    print(head(pval_df))
     pval_df.groupby([0]).apply(lambda x: x[1].sum()/x[2].sum())
+    print(head(pval_df))
     #merge p-values
     
     dict_pvals = dict(zip(pval_df[0], pval_df[1]))
     p_values=pval_df[1]
+    print(head(p_values))
     
     #l=1
 
