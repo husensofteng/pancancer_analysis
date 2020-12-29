@@ -223,9 +223,17 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
     merged_elements_statspvalues_local = merged_elements_statspvalues+"_statspvalueslocalw{local_domain_window}".format(local_domain_window=local_domain_window)
     sig_elements_output_file= merged_elements_statspvalues_local+"onlysig"+str(merged_mut_sig_threshold)
     #sig_elements_output_file = merged_elements_statspvalues+"_statspvalueslocalw{local_domain_window}onlysig{merged_mut_sig_threshold}".format(local_domain_window=local_domain_window, merged_mut_sig_threshold=merged_mut_sig_threshold)
+#     Utilities.assess_stat_elements_local_domain(
+#         observed_input_file=merged_elements_statspvalues, 
+#         simulated_input_file=combined_simulated_muts_merged_output_file, 
+#         merged_elements_statspvalues=merged_elements_statspvalues_local, 
+#         merged_elements_statspvaluesonlysig=sig_elements_output_file, 
+#         chr_lengths_file=chr_lengths_file, local_domain_window=local_domain_window, 
+#         merged_mut_sig_threshold=merged_mut_sig_threshold, 
+#         score_index_observed_elements=3, score_index_sim_elements=3, p_value_on_score=p_value_on_score)
     Utilities.assess_stat_elements_local_domain(
         observed_input_file=merged_elements_statspvalues, 
-        simulated_input_file=combined_simulated_muts_merged_output_file, 
+        simulated_input_files=merged_simulated_element_files, 
         merged_elements_statspvalues=merged_elements_statspvalues_local, 
         merged_elements_statspvaluesonlysig=sig_elements_output_file, 
         chr_lengths_file=chr_lengths_file, local_domain_window=local_domain_window, 
@@ -418,39 +426,39 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
     active_driver_output_file = sig_elements_output_file + '_ActiveDriver'
     active_driver_output_file_sig = active_driver_output_file + '_sig'
     
-    if not os.path.exists(active_driver_output_file_sig):
-            print(['Rscript', active_driver_script_dir, sig_elements_output_file,  created_cohorts[cohort][0], active_driver_min_mut, active_driver_output_file, active_driver_output_file_sig, active_driver_results,  n_cores])
-              
-            try:
-                subprocess.call(['Rscript', active_driver_script_dir, sig_elements_output_file,  created_cohorts[cohort][0], str(active_driver_min_mut), active_driver_output_file, active_driver_output_file_sig,  active_driver_results, str(n_cores)])
-            except KeyError:
-                open(active_driver_output_file_sig, 'a').close()
-      
-    active_driver_output_file_sig_tmp=active_driver_output_file_sig+'_tmp'
-    os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print "chr"$0}}' {}>{}""".format(active_driver_output_file_sig,active_driver_output_file_sig_tmp ))
-    sig_muts_file=created_cohorts[cohort][0]+"_sig"
-    sig_muts_file_tmp=sig_muts_file+"_tmp"
-      
-    BedTool(active_driver_output_file_sig_tmp).intersect(BedTool(created_cohorts[cohort][0]), wb=True).saveas(sig_muts_file_tmp)
-    os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{print $22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53}}' {} | sort -k1,1 -k2,2n -V | uniq -u >{}""".format(sig_muts_file_tmp,sig_muts_file))
-      
-      
-    sig_muts_per_tf_mutation_input_files=[]
-    sig_muts_per_tf_mutation_input_files=[sig_muts_file]
-    for  mutations_input_file in created_cohorts[cohort][1:]: 
-       sig_muts_per_tf_mutation_input_files.append(mutations_input_file) 
-          
-          
-          
-    sig_tfs_file, sig_tfpos_file = Utilities.get_tf_pval(
-        cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, motif_name_index, 
-                f_score_index, motif_breaking_score_index, 
-               filter_cond, fsep='\t', sig_tfs_file=sig_tfs_file, 
-                sig_tfpos_file=sig_tfpos_file,
-                filter_on_signal = True, dnase_index = 24, fantom_index = 25, 
-                num_other_tfs_index = 27)
-    os.remove(active_driver_output_file_sig_tmp)
-    os.remove(sig_muts_file_tmp)
+#     if not os.path.exists(active_driver_output_file_sig):
+#             print(['Rscript', active_driver_script_dir, sig_elements_output_file,  created_cohorts[cohort][0], active_driver_min_mut, active_driver_output_file, active_driver_output_file_sig, active_driver_results,  n_cores])
+#               
+#             try:
+#                 subprocess.call(['Rscript', active_driver_script_dir, sig_elements_output_file,  created_cohorts[cohort][0], str(active_driver_min_mut), active_driver_output_file, active_driver_output_file_sig,  active_driver_results, str(n_cores)])
+#             except KeyError:
+#                 open(active_driver_output_file_sig, 'a').close()
+#       
+#     active_driver_output_file_sig_tmp=active_driver_output_file_sig+'_tmp'
+#     os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print "chr"$0}}' {}>{}""".format(active_driver_output_file_sig,active_driver_output_file_sig_tmp ))
+#     sig_muts_file=created_cohorts[cohort][0]+"_sig"
+#     sig_muts_file_tmp=sig_muts_file+"_tmp"
+#       
+#     BedTool(active_driver_output_file_sig_tmp).intersect(BedTool(created_cohorts[cohort][0]), wb=True).saveas(sig_muts_file_tmp)
+#     os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{print $22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53}}' {} | sort -k1,1 -k2,2n -V | uniq -u >{}""".format(sig_muts_file_tmp,sig_muts_file))
+#       
+#       
+#     sig_muts_per_tf_mutation_input_files=[]
+#     sig_muts_per_tf_mutation_input_files=[sig_muts_file]
+#     for  mutations_input_file in created_cohorts[cohort][1:]: 
+#        sig_muts_per_tf_mutation_input_files.append(mutations_input_file) 
+#           
+#           
+#           
+#     sig_tfs_file, sig_tfpos_file = Utilities.get_tf_pval(
+#         cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, motif_name_index, 
+#                 f_score_index, motif_breaking_score_index, 
+#                filter_cond, fsep='\t', sig_tfs_file=sig_tfs_file, 
+#                 sig_tfpos_file=sig_tfpos_file,
+#                 filter_on_signal = True, dnase_index = 24, fantom_index = 25, 
+#                 num_other_tfs_index = 27)
+#     os.remove(active_driver_output_file_sig_tmp)
+#     os.remove(sig_muts_file_tmp)
 
     
     return sig_elements_output_file, active_driver_output_file_sig, sig_tfs_file, sig_tfpos_file

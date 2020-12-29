@@ -317,10 +317,10 @@ def empirical_pval_local_window(dict_lines_observed_split, pval_file):
             scores_len=len(simulated_score_vec)
             element_score = float(dict_lines_observed_split[index][0])
             scores_higher_than_observed = [i for i in simulated_score_vec if i >= element_score]
-            p_value= len(scores_higher_than_observed)/scores_len
-            if p_value==0.0:
-                p_value=1/103
-            pval_ifile.write(str(index) + '\t' + str(p_value)+'\n')
+            #p_value= len(scores_higher_than_observed)/scores_len
+           # if p_value==0.0:
+            #    p_value=1/103
+            pval_ifile.write(str(index) + '\t' + str(len(scores_higher_than_observed))+ '\t' + str(scores_len) +'\n')
     return pval_file
 
 
@@ -336,7 +336,7 @@ def split_dict_equally(input_dict, chunks=2):
             idx = 0
     return return_list
 
-def assess_stat_elements_local_domain(observed_input_file, simulated_input_file, merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 
+def assess_stat_elements_local_domain(observed_input_file, simulated_input_files, merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 
                                       chr_lengths_file, local_domain_window=25000, 
                                       merged_mut_sig_threshold = 0.05, score_index_observed_elements=4, score_index_sim_elements=4, p_value_on_score=False):
     
@@ -375,96 +375,92 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
             l = observed_infile.readline().strip().split('\t')
     print('observed_input_file: ', observed_input_file_temp_file)
     observed_input_file_obj = BedTool(observed_input_file_temp_file)
-    simulated_input_file_sort=simulated_input_file+'_sort'
     
     
-    
-    if not os.path.exists(simulated_input_file_sort):
-        os.system("""sort -k1,1n -k2,2n {} > {}""".format(simulated_input_file,simulated_input_file_sort))
-    
-    simulated_input_file_temp = simulated_input_file+"_temp"
-    observed_input_file_obj.map(BedTool(simulated_input_file_sort), c=4, o=['collapse'], g='/proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/chr_order_hg19.txt').saveas(simulated_input_file_temp)
-
-    with open(simulated_input_file_temp, 'r') as simulated_input_file_temp_ifile:
-        l = simulated_input_file_temp_ifile.readline().strip().split('\t')
+#     simulated_input_file_sort=simulated_input_file+'_sort'
+#     
+#     
+#     
+#     if not os.path.exists(simulated_input_file_sort):
+#         os.system("""sort -k1,1n -k2,2n {} > {}""".format(simulated_input_file,simulated_input_file_sort))
+    pval_file=observed_input_file+'_elem_pval_local'+str(local_domain_window)
         
-        while l and len(l)>1:
+    if os.path.exists(pval_file):
+        os.remove(pval_file)
             
-            sim_scores = []
-            for x in l[4].split(','):
-                try:
-                    sim_scores.append(float(x))
-                except ValueError:
-                    sim_scores.append(0.0)
-            dict_lines_observed[int(float(l[3]))][1].extend(sim_scores)
+    for simulated_input_file in simulated_input_files:
+        simulated_input_file_temp = simulated_input_file+"_temp"
+        observed_input_file_obj.map(BedTool(simulated_input_file), c=4, o=['collapse'], g='/proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/chr_order_hg19.txt').saveas(simulated_input_file_temp)
+    
+        with open(simulated_input_file_temp, 'r') as simulated_input_file_temp_ifile:
             l = simulated_input_file_temp_ifile.readline().strip().split('\t')
+            
+            while l and len(l)>1:
+                
+                sim_scores = []
+                for x in l[4].split(','):
+                    try:
+                        sim_scores.append(float(x))
+                    except ValueError:
+                        sim_scores.append(0.0)
+                dict_lines_observed[int(float(l[3]))][1].extend(sim_scores)
+                l = simulated_input_file_temp_ifile.readline().strip().split('\t')
+    
+        #split dictionery into chunks
+        dict_lines_observed_chunks=split_dict_equally(dict_lines_observed, 100)
+        
+        
+        
 
-    #split dictionery into chunks
-    dict_lines_observed_chunks=split_dict_equally(dict_lines_observed, 1000)
-    
-    p_values = []
-    pvalues_adjusted = []
-    n_sig = 0
-    lines = []
-    
-    if p_value_on_score:
-        pval_file=observed_input_file+'_elem_pval_local'+str(local_domain_window)
-        if os.path.exists(pval_file):
-            os.remove(pval_file)
+        
         print('p-value on score local')
         pm = Pool(15)
-        pm.starmap(empirical_pval_local_window, product(dict_lines_observed_chunks, [pval_file]))
+        pm.starmap(empirical_pval_local_window, product(dict_lines_observed, [pval_file]))
         pm.close()
         pm.join()
-        #merge p-values
-        l=1
-
-        dict_pvals={}
-        p_values=[]
-        with open(pval_file, 'r') as pval_ifile:
-            l = pval_ifile.readline().strip().split('\t')
-    
-            while l and len(l)>1:
-                p_values.append(float(l[1]))
-                dict_pvals[int(float(l[0]))]=float(l[1])
-                l = pval_ifile.readline().strip().split('\t')
-        pvalues_adjusted = p_values
-    
-        lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
-        lambda_values_file=observed_input_file+"_lambda_values_local_window_"+str(local_domain_window)+'.txt'
-        lambda_file=open(lambda_values_file, "w")
-        lambda_file.write(observed_input_file.split('/')[-1] + '\t' + str(lambda_factor)+'\n')
-        lambda_file.close()
         
-        if os.path.exists(pval_file):
-            os.remove(pval_file)
+        os.remove(simulated_input_file_temp)
+        
+    pval_df=pd.read_csv(pval_file, sep="\t",  header=None)   
+    pval_df.groupby([0]).apply(lambda x: x[1].sum()/x[2].sum())
+    #merge p-values
+    
+    dict_pvals = dict(zip(pval_df[0], pval_df[1]))
+    p_values=pval_df[1]
+    
+    #l=1
+
+
+#     p_values = []
+#     pvalues_adjusted = []
+#     n_sig = 0
+#     lines = []
+#     dict_pvals={}
+#     p_values=pval_df[1]
+#     with open(pval_file, 'r') as pval_ifile:
+#         l = pval_ifile.readline().strip().split('\t')
+# 
+#         while l and len(l)>1:
+#             p_values.append(float(l[1]))
+#             dict_pvals[int(float(l[0]))]=float(l[1])
+#             l = pval_ifile.readline().strip().split('\t')
+    pvalues_adjusted = p_values
+
+    lambda_factor=np.median(stats.chi2.isf(p_values,1))/stats.chi2.ppf(0.5, 1)
+    lambda_values_file=observed_input_file+"_lambda_values_local_window_"+str(local_domain_window)+'.txt'
+    lambda_file=open(lambda_values_file, "w")
+    lambda_file.write(observed_input_file.split('/')[-1] + '\t' + str(lambda_factor)+'\n')
+    lambda_file.close()
+    
+    #if os.path.exists(pval_file):
+    #    os.remove(pval_file)
         
            
-    else: 
-        for l in sorted(dict_lines_observed.keys()):
-            std = np.std(dict_lines_observed[l][1])
-            mean = np.mean(dict_lines_observed[l][1])
-            element_score = float(dict_lines_observed[l][0][score_index_observed_elements])
-            p_value = 1.0
-            if mean>0 and std>0:
-                p_value = get_pval(element_score, mean, std)
-            elif std<=0 and mean>0:
-                print('mean>0&sd=0', mean,std, dict_lines_observed[l])
-                if element_score > mean+(mean/2):#1.5 fold times larger
-                    p_value = 0.0
-            else:
-                p_value = 0.0
-                print('mean=0&sd=0', mean,std, dict_lines_observed[l])
-                
-            p_values.append(p_value)
-            lines.append(dict_lines_observed[l][0])
-        if len(p_values)>0:
-            pvalues_adjusted = adjust_pvales(p_values)
     
     
     
     
-        
+    l=1 
     with open(observed_input_file, 'r') as observed_infile, open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
         l = observed_infile.readline()
         l_number=1
