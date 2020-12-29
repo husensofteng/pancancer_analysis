@@ -384,7 +384,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         observed_input_file_temp_file_per_chr_sort=observed_input_file_temp_file_per_chr+'_sort'
 
         if not os.path.exists(observed_input_file_temp_file_per_chr_sort):
-            os.system("""sort -k1,1n -k2,2n {} > {}""".format(observed_input_file_temp_file_per_chr_sort))
+            os.system("""sort -k1,1n -k2,2n {} > {}""".format(observed_input_file_temp_file_per_chr, observed_input_file_temp_file_per_chr_sort))
         observed_input_file_obj = BedTool(observed_input_file_temp_file_per_chr_sort)
         
         
