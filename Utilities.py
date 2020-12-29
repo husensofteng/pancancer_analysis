@@ -353,7 +353,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         observed_input_file, local_domain_window,observed_input_file_temp_file)
     os.system(cmd)
     
-    os.system("""awk '{{print $0>>"{}""_"$1".bed"}}' {}""".format(
+    os.system("""awk '{{print $0>"{}""_"$1".bed"}}' {}""".format(
        observed_input_file_temp_file, observed_input_file_temp_file))
     print(glob.glob(observed_input_file_temp_file+'*.bed'))
     pval_files=[]
