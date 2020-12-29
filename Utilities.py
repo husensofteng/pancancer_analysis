@@ -423,12 +423,12 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
         
     pval_df=pd.read_csv(pval_file, sep="\t",  header=None)   
     print(pval_df)
-    pval_df_group=pval_df.groupby([0]).apply(lambda x: x[1].sum()/x[2].sum())
+    pval_df_group=pval_df.groupby([0]).assign(pval=lambda x: x[1].sum()/x[2].sum())
     print(pval_df_group)
     #merge p-values
     
-    dict_pvals = dict(zip(pval_df_group[0], pval_df_group[1]))
-    p_values=pval_df[1]
+    dict_pvals = dict(zip(pval_df_group[0], pval_df_group['pval']))
+    p_values=pval_df['pval']
     print(p_values)
     
     #l=1
