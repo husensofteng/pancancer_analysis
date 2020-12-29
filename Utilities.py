@@ -464,6 +464,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
     
     
     l=1 
+    n_sig = 0
     with open(observed_input_file, 'r') as observed_infile, open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
         l = observed_infile.readline()
         l_number=1
