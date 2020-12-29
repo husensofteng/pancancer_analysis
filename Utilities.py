@@ -440,9 +440,10 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         
         
    
-        #os.remove(simulated_input_file_temp)
+        os.remove(simulated_input_file_temp)
+        os.remove(observed_input_file_temp_file_per_chr_sort)
         pval_files.append(pval_file)
-
+        
 
     combined_pval_file=observed_input_file+'_elem_pval_local'+str(local_domain_window)
     
@@ -454,7 +455,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
             for pval_file in pval_files:
                 with open(pval_file, 'r') as pval_ifile:
                     combined_pval_outfile.write(pval_ifile.read())
-                    
+                    os.remove(pval_file)
                     
     with open(combined_pval_file, 'r') as combined_pval_ifile:                
         l = combined_pval_ifile.readline().strip().split('\t')
