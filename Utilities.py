@@ -427,7 +427,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
 
   
     print(pval_df)
-    pval_df_group=pval_df.groupby(['NR']).agg({'higher_than': 'sum','total':'sum'}).eval(pval='higher_than / total')
+    pval_df_group=pval_df.groupby(['NR']).agg({'higher_than': 'sum','total':'sum'}).assign(pval=lambda x: x['higher_than']/x['total'])
     print(pval_df_group)
     #merge p-values
     
