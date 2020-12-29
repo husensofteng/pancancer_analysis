@@ -355,7 +355,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
     
     os.system("""awk '{{print $0>>"{}""_"$1".bed"}}' {}""".format(
        observed_input_file_temp_file, observed_input_file_temp_file))
-    print(glob.glob(observed_input_file_temp_file+'_*.bed'))
+    print(glob.glob(observed_input_file_temp_file+'*.bed'))
     pval_files=[]
     for observed_input_file_temp_file_per_chr in glob.glob(observed_input_file_temp_file+'_*.bed'):
         print(observed_input_file_temp_file_per_chr)
@@ -391,7 +391,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
             os.system("""sort -k1,1n -k2,2n {} > {}""".format(simulated_input_file,simulated_input_file_sort))
             
         simulated_input_file_temp = simulated_input_file+"_temp"
-        observed_input_file_obj.map(BedTool(simulated_input_file), c=4, o=['collapse'], g='/proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/chr_order_hg19.txt').saveas(simulated_input_file_temp)
+        observed_input_file_obj.map(BedTool(simulated_input_file_sort), c=4, o=['collapse'], g='/proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/chr_order_hg19.txt').saveas(simulated_input_file_temp)
        
        
     
