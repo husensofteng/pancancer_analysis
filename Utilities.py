@@ -370,8 +370,8 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         line_number = 1
         with open(observed_input_file_temp_file_per_chr, 'r') as observed_infile: #, open(observed_input_file_temp_file, 'w') as observed_input_file_temp_ofile:
             l = observed_infile.readline().strip().split('\t')
-            while l and len(l)>3:
-                dict_lines_observed[int(float(l[4]))] = [l[3],[]]
+            while l and len(l)>2:
+                dict_lines_observed[int(float(l[3]))] = [l[4],[]]
         #             extended_element_start = (int(l[1])-local_domain_window)
         #             extended_element_end = int(l[2])+local_domain_window
         #             if extended_element_start<0:
