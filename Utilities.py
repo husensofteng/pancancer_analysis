@@ -344,7 +344,12 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
     if os.path.exists(merged_elements_statspvalues) and os.path.exists(merged_elements_statspvaluesonlysig):
         return merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 'NA'
     
-    
+    simulated_input_file_sort=simulated_input_file+'_sort'
+         
+         
+         
+    if not os.path.exists(simulated_input_file_sort):
+            os.system("""sort -k1,1n -k2,2n {} > {}""".format(simulated_input_file,simulated_input_file_sort))
     
     #extend elements size
     "replace chr, X, Y, add Line Number to use as window ID and sort by chr,start"
@@ -388,12 +393,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
         observed_input_file_obj = BedTool(observed_input_file_temp_file_per_chr_sort)
         
         
-        simulated_input_file_sort=simulated_input_file+'_sort'
-         
-         
-         
-        if not os.path.exists(simulated_input_file_sort):
-            os.system("""sort -k1,1n -k2,2n {} > {}""".format(simulated_input_file,simulated_input_file_sort))
+
             
             
         simulated_input_file_temp = simulated_input_file+"_temp"
@@ -413,7 +413,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
             while l and len(l)>1:
                 
                 sim_scores = []
-                for x in l[4].split(','):
+                for x in l[5].split(','):
                     try:
                         sim_scores.append(float(x))
                     except ValueError:
