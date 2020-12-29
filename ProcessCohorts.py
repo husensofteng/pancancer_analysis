@@ -17,6 +17,7 @@ from multiprocessing import Pool
 from itertools import product
 from scipy import stats
 import math
+import glob
 
 
 import Utilities
@@ -223,23 +224,15 @@ def get_sig_merged_elements(unified_mutation_input_files, cohort_full_name,
     merged_elements_statspvalues_local = merged_elements_statspvalues+"_statspvalueslocalw{local_domain_window}".format(local_domain_window=local_domain_window)
     sig_elements_output_file= merged_elements_statspvalues_local+"onlysig"+str(merged_mut_sig_threshold)
     #sig_elements_output_file = merged_elements_statspvalues+"_statspvalueslocalw{local_domain_window}onlysig{merged_mut_sig_threshold}".format(local_domain_window=local_domain_window, merged_mut_sig_threshold=merged_mut_sig_threshold)
-#     Utilities.assess_stat_elements_local_domain(
-#         observed_input_file=merged_elements_statspvalues, 
-#         simulated_input_file=combined_simulated_muts_merged_output_file, 
-#         merged_elements_statspvalues=merged_elements_statspvalues_local, 
-#         merged_elements_statspvaluesonlysig=sig_elements_output_file, 
-#         chr_lengths_file=chr_lengths_file, local_domain_window=local_domain_window, 
-#         merged_mut_sig_threshold=merged_mut_sig_threshold, 
-#         score_index_observed_elements=3, score_index_sim_elements=3, p_value_on_score=p_value_on_score)
     Utilities.assess_stat_elements_local_domain(
         observed_input_file=merged_elements_statspvalues, 
-        simulated_input_files=merged_simulated_element_files, 
+        simulated_input_file=combined_simulated_muts_merged_output_file, 
         merged_elements_statspvalues=merged_elements_statspvalues_local, 
         merged_elements_statspvaluesonlysig=sig_elements_output_file, 
         chr_lengths_file=chr_lengths_file, local_domain_window=local_domain_window, 
         merged_mut_sig_threshold=merged_mut_sig_threshold, 
         score_index_observed_elements=3, score_index_sim_elements=3, p_value_on_score=p_value_on_score)
-    
+   
     #if os.path.exists(combined_simulated_muts_merged_output_file):
     #    os.remove(combined_simulated_muts_merged_output_file)
     

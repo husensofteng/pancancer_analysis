@@ -308,19 +308,19 @@ def empirical_pval_global(dict_lines_observed_split, stats_dict_scores, pval_fil
             pval_ifile.write(str(index) + '\t' + str(p_value)+'\n')
     return pval_file
 
-def empirical_pval_local_window(dict_lines_observed_split, dict_lines_sim, pval_file):
+def empirical_pval_local_window(dict_lines_observed_split, pval_file):
    # dict_p_values={}
     with open(pval_file, 'a') as pval_ifile:
         for index in dict_lines_observed_split:
     
-            simulated_score_vec=dict_lines_sim[index][1]
+            simulated_score_vec=dict_lines_observed_split[index][1]
             scores_len=len(simulated_score_vec)
             element_score = float(dict_lines_observed_split[index][0])
             scores_higher_than_observed = [i for i in simulated_score_vec if i >= element_score]
-            #p_value= len(scores_higher_than_observed)/scores_len
-           # if p_value==0.0:
-            #    p_value=1/103
-            pval_ifile.write(str(index) + '\t' + str(len(scores_higher_than_observed))+ '\t' + str(scores_len) +'\n')
+            p_value= len(scores_higher_than_observed)/scores_len
+            if p_value==0.0:
+                p_value=1/103
+            pval_ifile.write(str(index) + '\t' + str(p_value)+ '\n')
     return pval_file
 
 
@@ -336,7 +336,7 @@ def split_dict_equally(input_dict, chunks=2):
             idx = 0
     return return_list
 
-def assess_stat_elements_local_domain(observed_input_file, simulated_input_files, merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 
+def assess_stat_elements_local_domain(observed_input_file, simulated_input_file, merged_elements_statspvalues, merged_elements_statspvaluesonlysig, 
                                       chr_lengths_file, local_domain_window=25000, 
                                       merged_mut_sig_threshold = 0.05, score_index_observed_elements=4, score_index_sim_elements=4, p_value_on_score=False):
     
@@ -352,45 +352,54 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
         observed_input_file, local_domain_window,observed_input_file_temp_file)
     os.system(cmd)
     
-    
+    os.system("""awk '{{print $0>>"{}""_"$1".bed"}}' {}""".format(
+       observed_input_file_temp_file, observed_input_file_temp_file))
+        
+    pval_files=[]
+    for observed_input_file_temp_file_per_chr in glob.glob(observed_input_file_temp_file+'_*.bed'):
+        print observed_input_file_temp_file_per_chr
     #chr_lengths = get_chr_lengths(chr_lengths_file)
     
-    dict_lines_observed = {}
-    line_number = 1
-    with open(observed_input_file, 'r') as observed_infile: #, open(observed_input_file_temp_file, 'w') as observed_input_file_temp_ofile:
-        l = observed_infile.readline().strip().split('\t')
-        while l and len(l)>3:
-            dict_lines_observed[line_number] = [l[3],[]]
-    #             extended_element_start = (int(l[1])-local_domain_window)
-    #             extended_element_end = int(l[2])+local_domain_window
-    #             if extended_element_start<0:
-    #                 extended_element_start = 0
-    #                 extended_element_end += 0 - (int(l[1])-local_domain_window)
-    #             if extended_element_end>chr_lengths[int(l[0])]:
-    #                 extended_element_end = chr_lengths[int(l[0])]
-    #                 extended_element_start -= (int(l[2])+local_domain_window) - chr_lengths[int(l[0])]
-    #                 
-    #             observed_input_file_temp_ofile.write(l[0] + '\t' + str(extended_element_start) + '\t' + str(extended_element_end) + '\t' + str(line_number) + '\n')
-            line_number+=1
+        dict_lines_observed = {}
+        line_number = 1
+        with open(observed_input_file_temp_file_per_chr, 'r') as observed_infile: #, open(observed_input_file_temp_file, 'w') as observed_input_file_temp_ofile:
             l = observed_infile.readline().strip().split('\t')
-    print('observed_input_file: ', observed_input_file_temp_file)
-    observed_input_file_obj = BedTool(observed_input_file_temp_file)
-    
-    
-#     simulated_input_file_sort=simulated_input_file+'_sort'
-#     
-#     
-#     
-#     if not os.path.exists(simulated_input_file_sort):
-#         os.system("""sort -k1,1n -k2,2n {} > {}""".format(simulated_input_file,simulated_input_file_sort))
-    pval_files=[]
+            while l and len(l)>3:
+                dict_lines_observed[line_number] = [l[3],[]]
+        #             extended_element_start = (int(l[1])-local_domain_window)
+        #             extended_element_end = int(l[2])+local_domain_window
+        #             if extended_element_start<0:
+        #                 extended_element_start = 0
+        #                 extended_element_end += 0 - (int(l[1])-local_domain_window)
+        #             if extended_element_end>chr_lengths[int(l[0])]:
+        #                 extended_element_end = chr_lengths[int(l[0])]
+        #                 extended_element_start -= (int(l[2])+local_domain_window) - chr_lengths[int(l[0])]
+        #                 
+        #             observed_input_file_temp_ofile.write(l[0] + '\t' + str(extended_element_start) + '\t' + str(extended_element_end) + '\t' + str(line_number) + '\n')
+                line_number+=1
+                l = observed_infile.readline().strip().split('\t')
+        print('observed_input_file: ', observed_input_file_temp_file_per_chr)
+        observed_input_file_obj = BedTool(observed_input_file_temp_file_per_chr)
+        
+        
+        simulated_input_file_sort=simulated_input_file+'_sort'
+         
+         
+         
+        if not os.path.exists(simulated_input_file_sort):
+            os.system("""sort -k1,1n -k2,2n {} > {}""".format(simulated_input_file,simulated_input_file_sort))
             
-    for simulated_input_file in simulated_input_files:
         simulated_input_file_temp = simulated_input_file+"_temp"
         observed_input_file_obj.map(BedTool(simulated_input_file), c=4, o=['collapse'], g='/proj/snic2020-16-50/nobackup/pancananalysis/pancan12Feb2020/cancer_datafiles/chr_order_hg19.txt').saveas(simulated_input_file_temp)
+       
+       
     
-        dict_lines_sim=[]
-        dict_lines_sim = dict(dict_lines_observed)
+       
+        
+            
+
+    
+
         with open(simulated_input_file_temp, 'r') as simulated_input_file_temp_ifile:
             l = simulated_input_file_temp_ifile.readline().strip().split('\t')
             
@@ -402,50 +411,52 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_files
                         sim_scores.append(float(x))
                     except ValueError:
                         sim_scores.append(0.0)
-                dict_lines_sim[int(float(l[3]))][1].extend(sim_scores)
+                dict_lines_observed[int(float(l[3]))][1].extend(sim_scores)
                 l = simulated_input_file_temp_ifile.readline().strip().split('\t')
-    
+
         #split dictionery into chunks
         dict_lines_observed_chunks=split_dict_equally(dict_lines_observed, 100)
         
-        pval_file=simulated_input_file+'_elem_pval_local'+str(local_domain_window)
-        
+        pval_file=observed_input_file_temp_file_per_chr+'_elem_pval_local'+str(local_domain_window)
+    
         if os.path.exists(pval_file):
             os.remove(pval_file)
-        
+    
 
-        
+    
         #print('p-value on score local')
         pm = Pool(15)
-        pm.starmap(empirical_pval_local_window, product(dict_lines_observed_chunks,[dict_lines_sim], [pval_file]))
+        pm.starmap(empirical_pval_local_window, product(dict_lines_observed_chunks, [pval_file]))
         pm.close()
         pm.join()
         
+        
+   
         #os.remove(simulated_input_file_temp)
         pval_files.append(pval_file)
-    
-    
+
+
     combined_pval_file=observed_input_file+'_elem_pval_local'+str(local_domain_window)
     
+    
+    dict_pvals={}
+    p_values=[]
     if not os.path.exists(combined_pval_file):
         with open(combined_pval_file, 'w') as combined_pval_outfile:
             for pval_file in pval_files:
                 with open(pval_file, 'r') as pval_ifiles:
                     combined_pval_outfile.write(pval_ifiles.read())
+                    l = pval_ifile.readline().strip().split('\t')
+# 
+                    while l and len(l)>1:
+                        p_values.append(float(l[1]))
+                        dict_pvals[int(float(l[0]))]=float(l[1])
+                        l = pval_ifile.readline().strip().split('\t')
                     
-    pval_df=pd.read_csv(combined_pval_file, sep="\t",  header=None) 
-    pval_df.columns =['NR', 'higher_than', 'total'] 
-  
+    
 
   
-    print(pval_df)
-    pval_df_group=pval_df.groupby(['NR']).agg({'higher_than': 'sum','total':'sum'}).assign(pval=lambda x: x['higher_than']/x['total'])
-    print(pval_df_group)
-    #merge p-values
     
-    dict_pvals = dict(zip(pval_df_group['NR'], pval_df_group['pval']))
-    p_values=pval_df['pval']
-    print(p_values)
     
     #l=1
 
