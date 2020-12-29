@@ -21,6 +21,7 @@ from multiprocessing import Pool
 from itertools import product
 import csv
 import math
+import glob
 #from score_motifs_tissuepertable import open_connection, close_connection
 
 #import matplotlib.backends.backend_pdf
