@@ -454,14 +454,17 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
             for pval_file in pval_files:
                 with open(pval_file, 'r') as pval_ifile:
                     combined_pval_outfile.write(pval_ifile.read())
-                    l = pval_ifile.readline().strip().split('\t')
-# 
-                    while l and len(l)>1:
-                        p_values.append(float(l[1]))
-                        dict_pvals[int(float(l[0]))]=float(l[1])
-                        l = pval_ifile.readline().strip().split('\t')
                     
-    
+                    
+    with open(combined_pval_file, 'r') as combined_pval_ifile:                
+        l = combined_pval_ifile.readline().strip().split('\t')
+    # 
+        while l and len(l)>1:
+            p_values.append(float(l[1]))
+            dict_pvals[int(float(l[0]))]=float(l[1])
+            l = combined_pval_ifile.readline().strip().split('\t')
+                        
+    print(p_values)
 
   
     
@@ -498,7 +501,7 @@ def assess_stat_elements_local_domain(observed_input_file, simulated_input_file,
     
     
     
-    l=1 
+    #l=1 
     n_sig = 0
     with open(observed_input_file, 'r') as observed_infile, open(merged_elements_statspvalues, 'w') as merged_elements_statspvalues_outfile, open(merged_elements_statspvaluesonlysig, 'w') as merged_elements_statspvaluesonlysig_outfile:
         l = observed_infile.readline()
