@@ -257,10 +257,10 @@ def merge_muts(muts_input_file, merged_muts_output_ext, filter_mut_motifs=False,
     awk print: 1 chr, 2 start, 3 end, 4 score, 5 phenotype, 6 ref_alt, 7 mutpos, 8 motifname, 
                10 donorID, 11 mutinfo*motifsinfo*maxmotifinfo
     
-    merge (-c -o) sum(score), count(mutinfo), count(donorID), distinct: phenotype, 
+    merge (-c -o) mean(score), count(mutinfo), count(donorID), distinct: phenotype, 
     collapse: ref_alt, mutpos, motifname, score, phenotype, distinct(donorID), donorID, mut_motifs_info'''
     
-    awk_stmt = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{{cond}{{ gsub(",", "MotifInfo"); print $1,$2,$3,$10,$6,$12,$13,$14,$9,$1"{vsep}"$2"{vsep}"$3"{vsep}"$4"{vsep}"$5"{vsep}"$6"{vsep}"$7"{vsep}"$8"{vsep}"$9"{vsep}"$10"{matching_motifs_sep}"$11"{MaxMotif_sep}"$15}}}}' {muts_input_file} | sort -k1,1n -k2,2n -k3,3n | mergeBed -i stdin -d {distance_to_merge} -c 4,10,9,5,6,7,8,4,5,9,9,10 -o sum,count_distinct,count_distinct,distinct,collapse,collapse,collapse,collapse,collapse,distinct,collapse,collapse > {merged_muts_output_file}""".format(**locals()) # | awk 'BEGIN{{FS=OFS="\t"}}{{if($2!=$3){{$2=$2+1; $3=$3-1}}; if($2>$3){{$2=$2-1; $3=$3+1}}; print}}
+    awk_stmt = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{{cond}{{ gsub(",", "MotifInfo"); print $1,$2,$3,$10,$6,$12,$13,$14,$9,$1"{vsep}"$2"{vsep}"$3"{vsep}"$4"{vsep}"$5"{vsep}"$6"{vsep}"$7"{vsep}"$8"{vsep}"$9"{vsep}"$10"{matching_motifs_sep}"$11"{MaxMotif_sep}"$15}}}}' {muts_input_file} | sort -k1,1n -k2,2n -k3,3n | mergeBed -i stdin -d {distance_to_merge} -c 4,10,9,5,6,7,8,4,5,9,9,10 -o mean,count_distinct,count_distinct,distinct,collapse,collapse,collapse,collapse,collapse,distinct,collapse,collapse > {merged_muts_output_file}""".format(**locals()) # | awk 'BEGIN{{FS=OFS="\t"}}{{if($2!=$3){{$2=$2+1; $3=$3-1}}; if($2>$3){{$2=$2-1; $3=$3+1}}; print}}
     #awk_stmt = """awk 'BEGIN{{FS=OFS="{fsep}"}}{{{cond}{{ gsub(",", "MotifInfo"); print $1,$2,$3,$10,$6,$12,$13,$14,$9,$1"{vsep}"$2"{vsep}"$3"{vsep}"$4"{vsep}"$5"{vsep}"$6"{vsep}"$7"{vsep}"$8"{vsep}"$9"{vsep}"$10"{matching_motifs_sep}"$11"{MaxMotif_sep}"$15}}}}' {muts_input_file} | sort -k1,1n -k2,2n -k3,3n | intersectBed -split -wo -a stdin -b {selected_regions_file} | sort -k11,11n -k12,12n -k13,13n | groupBy -g 11,12,13 -c 4,10,9,5,6,7,8,4,5,9,9,10 -o sum,count_distinct,count_distinct,distinct,collapse,collapse,collapse,collapse,collapse,distinct,collapse,collapse > {merged_muts_output_file}""".format(**locals())
     #print(awk_stmt)
     os.system(awk_stmt)
