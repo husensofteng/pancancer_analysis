@@ -657,7 +657,38 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
     breaking_score_threshold = 0.3
     tf_counts_in_sim_sets = {}
     tfpos_counts_in_sim_sets = {}
-    for sim_file in sig_muts_per_tf_mutation_input_files: #count for all files incl. observed
+    sim_file=sig_muts_per_tf_mutation_input_files[0]
+    tf_counts_in_this_sim_set = {}
+    tfpos_counts_in_this_sim_set = {}
+    with open(sim_file) as i_sim_file:
+        l = i_sim_file.readline().strip().split('\t')
+        while l and len(l)>gene_expression_index:
+            if ((l[gene_expression_index]=='nan' or float(l[gene_expression_index])>0) and 
+                float(l[motif_breaking_score_index])>=breaking_score_threshold):
+                try:
+                    tf_counts_in_this_sim_set[l[motif_name_index]] +=1
+                except KeyError:
+                    tf_counts_in_this_sim_set[l[motif_name_index]] = 1
+                
+                try:
+                    tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
+                except KeyError:
+                    tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
+            l = i_sim_file.readline().strip().split('\t')
+    for tf in tf_counts_in_this_sim_set.keys():
+            try:
+                tf_counts_in_sim_sets[tf].append(tf_counts_in_this_sim_set[tf])
+            except KeyError:
+                tf_counts_in_sim_sets[tf] = [tf_counts_in_this_sim_set[tf]]
+        
+    for tf in tfpos_counts_in_this_sim_set.keys():
+        try:
+            tfpos_counts_in_sim_sets[tf].append(tfpos_counts_in_this_sim_set[tf])
+        except KeyError:
+            tfpos_counts_in_sim_sets[tf] = [tfpos_counts_in_this_sim_set[tf]]
+
+
+    for sim_file in sig_muts_per_tf_mutation_input_files[1:]: #count for all files incl. observed
         tf_counts_in_this_sim_set = {}
         tfpos_counts_in_this_sim_set = {}
         with open(sim_file) as i_sim_file:
@@ -665,44 +696,32 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
             while l and len(l)>gene_expression_index:
                 if ((l[gene_expression_index]=='nan' or float(l[gene_expression_index])>0) and 
                     float(l[motif_breaking_score_index])>=breaking_score_threshold):
+
                     
-                    if len(l[11].split(';'))>1: #it means sig level has been calculated and checked already
-                        #just add the count (usually for the observed set this is the case)
-                        try:
-                            tf_counts_in_this_sim_set[l[motif_name_index]] +=1
-                        except KeyError:
-                            tf_counts_in_this_sim_set[l[motif_name_index]] = 1
-                        
-                        try:
-                            tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
-                        except KeyError:
-                            tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
-                        
-                    else:
-                        '''means no fdr and signal check has been applied therefore only keep motifs that have:
-                            (f_score+breaking_score> minimum score obtained for the same motif in the obs set
-                            (instead of FDR calculations to ensure only reasonable mutations are counted)
-                            and there is dnase signal 
-                            or there is tf binindg signal 
-                            this is usually the case for sim sets. (the idea is to get mut similar to those in obs set)'''
-                        try:
-                            min_obs_score_this_motif = tf_min_scores_in_sig_obs_motifs[l[motif_name_index]]
-                        except KeyError:
-                            min_obs_score_this_motif = None
-                        
-                        if min_obs_score_this_motif:
-                            if ( ((float(l[f_score_index])+float(l[motif_breaking_score_index])) >= min_obs_score_this_motif 
-                                  and (float(l[dnase_index])>0.0)) or# or float(l[fantom_index])>0.0 or float(l[num_other_tfs_index])>0.0 
-                                 (float(l[tf_binding_index])>0 and l[tf_binding_index]!="nan")):
-                                try:
-                                    tf_counts_in_this_sim_set[l[motif_name_index]] +=1
-                                except KeyError:
-                                    tf_counts_in_this_sim_set[l[motif_name_index]] = 1
-                                
-                                try:
-                                    tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
-                                except KeyError:
-                                    tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
+                    '''means no fdr and signal check has been applied therefore only keep motifs that have:
+                        (f_score+breaking_score> minimum score obtained for the same motif in the obs set
+                        (instead of FDR calculations to ensure only reasonable mutations are counted)
+                        and there is dnase signal 
+                        or there is tf binindg signal 
+                        this is usually the case for sim sets. (the idea is to get mut similar to those in obs set)'''
+                    try:
+                        min_obs_score_this_motif = tf_min_scores_in_sig_obs_motifs[l[motif_name_index]]
+                    except KeyError:
+                        min_obs_score_this_motif = None
+                    
+                    if min_obs_score_this_motif:
+                        if ( ((float(l[f_score_index])+float(l[motif_breaking_score_index])) >= min_obs_score_this_motif 
+                              and (float(l[dnase_index])>0.0)) or# or float(l[fantom_index])>0.0 or float(l[num_other_tfs_index])>0.0 
+                             (float(l[tf_binding_index])>0 and l[tf_binding_index]!="nan")):
+                            try:
+                                tf_counts_in_this_sim_set[l[motif_name_index]] +=1
+                            except KeyError:
+                                tf_counts_in_this_sim_set[l[motif_name_index]] = 1
+                            
+                            try:
+                                tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
+                            except KeyError:
+                                tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
                     
                 l = i_sim_file.readline().strip().split('\t')
         for tf in tf_counts_in_this_sim_set.keys():
@@ -740,9 +759,12 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
                 adjusted_tf_p_values = adjust_pvales(tf_p_values)
             else:
                 print('tf_p_values nothing:', tf_p_values)
+                
+    tf_p_values_vec = [j for i in tf_p_values for j in i]
+
     with open(sig_tfs_file, 'w') as ofile:
         for i,tf in enumerate(tf_names):
-            ofile.write(tf + '\t' + str(tf_p_values[i]) + '\t' + str(tf_p_values[i]) + '\t' + str(tf_counts_in_sim_sets[tf][0]) + '\t' + str(np.mean(tf_counts_in_sim_sets[tf][1:])) + '\t' + ','.join([str(x) for x in tf_counts_in_sim_sets[tf][1:]])+ '\n')
+            ofile.write(tf + '\t' + str(tf_p_values_vec[i]) + '\t' + str(tf_p_values_vec[i]) + '\t' + str(tf_counts_in_sim_sets[tf][0]) + '\t' + str(np.mean(tf_counts_in_sim_sets[tf][1:])) + '\t' + ','.join([str(x) for x in tf_counts_in_sim_sets[tf][1:]])+ '\n')
     
     tfpos_p_values = []
     tfpos_names = []
@@ -766,9 +788,11 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
             adjusted_tfpos_p_values = []
             if len(tfpos_p_values)>0:
                 adjusted_tfpos_p_values = adjust_pvales(tfpos_p_values)
+                
+    tfpos_p_values_vec = [j for i in tfpos_p_values for j in i]
     with open(sig_tfpos_file, 'w') as ofile:
         for i,tfpos in enumerate(tfpos_names):
-            ofile.write(tfpos + '\t' + str(tfpos_p_values[i]) + '\t' + str(tfpos_p_values[i]) + '\t' + str(tfpos_counts_in_sim_sets[tfpos][0]) + '\t' + str(np.mean(tfpos_counts_in_sim_sets[tfpos][1:])) + '\t' + ','.join([str(x) for x in tfpos_counts_in_sim_sets[tfpos][1:]])+ '\n')
+            ofile.write(tfpos + '\t' + str(tfpos_p_values_vec[i]) + '\t' + str(tfpos_p_values_vec[i]) + '\t' + str(tfpos_counts_in_sim_sets[tfpos][0]) + '\t' + str(np.mean(tfpos_counts_in_sim_sets[tfpos][1:])) + '\t' + ','.join([str(x) for x in tfpos_counts_in_sim_sets[tfpos][1:]])+ '\n')
     if os.path.exists(observed_mut_motifs_temp):
         os.remove(observed_mut_motifs_temp)
     return sig_tfs_file, sig_tfpos_file
