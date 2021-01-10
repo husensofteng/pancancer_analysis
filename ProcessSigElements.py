@@ -802,7 +802,7 @@ def combine_sig_TFs(sig_tfs_files, tf_label='TFs', output_dir='.'):
 
 def get_gene_enrichments(elements_input_file, elements_output_file, header_lines_to_skip=6, skip_exon_elements=True):
     elements_input = pd.read_table(elements_input_file, sep='\t', skiprows=header_lines_to_skip, header=0)
-    elements_input_filtered = elements_input[(elements_input['#Samples(RegMuts)']>1)]
+    elements_input_filtered = elements_input[(elements_input['#Samples(RegMuts)']>2)]
     genes_dict = {}
     for i,element in elements_input_filtered.iterrows():
         if skip_exon_elements:
