@@ -1992,7 +1992,7 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
     return sig_elements_output_file
 
 
-def get_sig_muts(elements_input_file, mutations_input_file, sig_muts_file_tmp2sig_muts_file, motif_breaking_score_index, tf_binding_index, dnase_index ):
+def get_sig_muts(elements_input_file, mutations_input_file, sig_muts_file, motif_breaking_score_index, tf_binding_index, dnase_index):
     
     
     if os.path.exists(sig_muts_file):
