@@ -2006,7 +2006,7 @@ def get_sig_muts(elements_input_file, mutations_input_file, sig_muts_file, motif
     sig_muts_file_tmp=sig_muts_file+"_tmp"
 
          
-    BedTool(active_driver_output_file_sig_tmp).intersect(BedTool(mutations_input_file), wb=True).saveas(sig_muts_file_tmp)
+    BedTool(elements_input_file_tmp).intersect(BedTool(mutations_input_file), wb=True).saveas(sig_muts_file_tmp)
     os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{print $22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53}}' {} | sort -k1,1 -k2,2n -V | uniq  >{}""".format(sig_muts_file_tmp,sig_muts_file))
     
     with open(sig_muts_file_tmp, 'r') as annoted_output_ifile, open(sig_muts_file, 'w') as annoted_input_ofile_onlysig:
