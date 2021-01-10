@@ -2013,7 +2013,7 @@ def get_sig_muts(elements_input_file, mutations_input_file, sig_muts_file, motif
             l = annoted_output_ifile.readline()
             while l:
                 sl = l.strip().split('\t')
-                if (len(sl) >= 3 and (float(l[motif_breaking_score_index])>=breaking_score_threshold)):
+                if (len(sl) >= 3 and (float(sl[motif_breaking_score_index])>=breaking_score_threshold)):
                         if sl[tf_binding_index]!="nan":
                             if float(sl[tf_binding_index]) > 0:
                                 annoted_input_ofile_onlysig.write(l)
