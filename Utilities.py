@@ -1992,7 +1992,7 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
     return sig_elements_output_file
 
 
-def get_sig_muts(elements_input_file, mutations_input_file, sig_muts_file, motif_breaking_score_index, tf_binding_index, dnase_index ):
+def get_sig_muts(elements_input_file, mutations_input_file, sig_muts_file_tmp2sig_muts_file, motif_breaking_score_index, tf_binding_index, dnase_index ):
     
     
     if os.path.exists(sig_muts_file):
@@ -2004,12 +2004,12 @@ def get_sig_muts(elements_input_file, mutations_input_file, sig_muts_file, motif
     os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print "chr"$0}}' {}>{}""".format(elements_input_file,elements_input_file_tmp ))
 
     sig_muts_file_tmp=sig_muts_file+"_tmp"
-
+    sig_muts_file_tmp2=sig_muts_file_tmp+"2"
          
     BedTool(elements_input_file_tmp).intersect(BedTool(mutations_input_file), wb=True).saveas(sig_muts_file_tmp)
-    os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{print $22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53}}' {} | sort -k1,1 -k2,2n -V | uniq  >{}""".format(sig_muts_file_tmp,sig_muts_file))
+    os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{print $22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53}}' {} | sort -k1,1 -k2,2n -V | uniq  >{}""".format(sig_muts_file_tmp,sig_muts_file_tmp2))
     print('YES')
-    with open(sig_muts_file_tmp, 'r') as annoted_output_ifile, open(sig_muts_file, 'w') as annoted_input_ofile_onlysig:
+    with open(sig_muts_file_tmp2, 'r') as annoted_output_ifile, open(sig_muts_file, 'w') as annoted_input_ofile_onlysig:
             l = annoted_output_ifile.readline()
             while l:
                 sl = l.strip().split('\t')
