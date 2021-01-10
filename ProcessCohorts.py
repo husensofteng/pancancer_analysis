@@ -427,14 +427,18 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
             except KeyError:
                 open(active_driver_output_file_sig, 'a').close()
          
-    active_driver_output_file_sig_tmp=active_driver_output_file_sig+'_tmp'
-    os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print "chr"$0}}' {}>{}""".format(active_driver_output_file_sig,active_driver_output_file_sig_tmp ))
+    
     sig_muts_file=created_cohorts[cohort][0]+"_sig"
-    sig_muts_file_tmp=sig_muts_file+"_tmp"
-         
-    BedTool(active_driver_output_file_sig_tmp).intersect(BedTool(created_cohorts[cohort][0]), wb=True).saveas(sig_muts_file_tmp)
-    os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{print $22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53}}' {} | sort -k1,1 -k2,2n -V | uniq  >{}""".format(sig_muts_file_tmp,sig_muts_file))
-         
+    
+    sig_muts_file = Utilities.get_sig_muts(
+        elements_input_file=active_driver_output_file_sig,
+        mutations_input_file=created_cohorts[cohort][0],
+        sig_muts_file=sig_muts_file,
+        motif_breaking_score_index=motif_breaking_score_index,
+        tf_binding_index=30, 
+        dnase_index=24)
+    
+        
          
     sig_muts_per_tf_mutation_input_files=[]
     sig_muts_per_tf_mutation_input_files=[sig_muts_file]
@@ -450,8 +454,7 @@ def run_cohort(cohort, created_cohorts, mutation_input_files, mutations_cohorts_
                 sig_tfpos_file=sig_tfpos_file,
                 filter_on_signal = True, dnase_index = 24, fantom_index = 25, 
                 num_other_tfs_index = 27)
-    os.remove(active_driver_output_file_sig_tmp)
-    os.remove(sig_muts_file_tmp)
+    
 
     
     return sig_elements_output_file, active_driver_output_file_sig, sig_tfs_file, sig_tfpos_file

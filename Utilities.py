@@ -1990,3 +1990,41 @@ def get_sig_merged_elements_oncodrive(unified_mutation_input_files, mutation_inp
     os.remove(element_file_oncodrive)   
     os.remove(mutation_file_oncodrive)
     return sig_elements_output_file
+
+
+def get_sig_muts(elements_input_file, mutations_input_file, sig_muts_file, motif_breaking_score_index, tf_binding_index, dnase_index ):
+    
+    
+    if os.path.exists(sig_muts_file):
+        return sig_muts_file
+    
+    breaking_score_threshold = 0.3
+    
+    elements_input_file_tmp=elements_input_file+'_tmp'
+    os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print "chr"$0}}' {}>{}""".format(elements_input_file,elements_input_file_tmp ))
+
+    sig_muts_file_tmp=sig_muts_file+"_tmp"
+
+         
+    BedTool(active_driver_output_file_sig_tmp).intersect(BedTool(mutations_input_file), wb=True).saveas(sig_muts_file_tmp)
+    os.system("""awk 'BEGIN{{FS=OFS="\t"}}{{print $22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53}}' {} | sort -k1,1 -k2,2n -V | uniq  >{}""".format(sig_muts_file_tmp,sig_muts_file))
+    
+    with open(sig_muts_file_tmp, 'r') as annoted_output_ifile, open(sig_muts_file, 'w') as annoted_input_ofile_onlysig:
+            l = annoted_output_ifile.readline()
+            while l:
+                sl = l.strip().split('\t')
+                if (len(sl) >= 3 and (float(l[motif_breaking_score_index])>=breaking_score_threshold)):
+                        if sl[tf_binding_index]!="nan":
+                            if float(sl[tf_binding_index]) > 0:
+                                annoted_input_ofile_onlysig.write(l)
+                                l = annoted_output_ifile.readline()
+                                continue
+                                
+                            
+                        if (float(sl[dnase_index])>0.0):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs_index])>0.0
+                            annoted_input_ofile_onlysig.write(l)
+                l = annoted_output_ifile.readline()
+    
+    os.remove(elements_input_file_tmp)
+    os.remove(sig_muts_file_tmp)        
+    return sig_muts_file
