@@ -539,7 +539,7 @@ def aggregate_results(regions_input_file):
             '''Report CancerType:ChromatinType:number_of_times'''
                     
             
-            if(cols_dict['#Samples']>2 and cols_dict['FDR']<0.05):
+            if(cols_dict['#Samples']>1 and cols_dict['FDR']<0.05):
                 #instead of writing the dict put them in a list to keep the columns order 
                 cols_to_write = [cols_dict['chr'], cols_dict['start'], cols_dict['end'], cols_dict['Position'], 
                                  ','.join(cols_dict['Cohorts']), cols_dict['#Cohorts'], cols_dict['Score'], cols_dict['FDR'], 
@@ -803,7 +803,7 @@ def combine_sig_TFs(sig_tfs_files, tf_label='TFs', output_dir='.'):
 
 def get_gene_enrichments(elements_input_file, elements_output_file, header_lines_to_skip=6, skip_exon_elements=True):
     elements_input = pd.read_table(elements_input_file, sep='\t', skiprows=header_lines_to_skip, header=0)
-    elements_input_filtered = elements_input[(elements_input['#Samples(RegMuts)']>2)]
+    elements_input_filtered = elements_input[(elements_input['#Samples(RegMuts)']>1)]
     genes_dict = {}
     for i,element in elements_input_filtered.iterrows():
         if skip_exon_elements:
