@@ -990,10 +990,11 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
                 dnase_index=24
                 #filtrarion on the regulatory mutation in elements
                 with open(cohort_mut_grouped_file_tmp2, 'r') as elements_input_ifile, open(cohort_mut_grouped_file, 'w') as elements_input_ofile:
-                    l = elements_input_ifile.readline().strip().split('\t')
-                    while l and len(l)>10:
+                    l = annoted_output_ifile.readline()
+                    while l:
+                        l2 = l.strip().split('\t')
                         n_reg_muts=0
-                        sl = l[12].split(',')
+                        sl = l2[12].split(',')
                         print(sl)
                         for ssl in sl:
                             line = ssl.split('#')
