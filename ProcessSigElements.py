@@ -1009,7 +1009,7 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
                                     n_reg_muts=+1
                         if(n_reg_muts>0):           
                             elements_input_ofile.write(l)
-                        l = elements_input_ifile.readline()
+                        l = eannoted_output_ifile.readline()
                 
                 #copyfile(cohort_mut_grouped_file, cohort_mut_grouped_file_local)
             #else: 
