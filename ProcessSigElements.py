@@ -984,7 +984,10 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
                             motif_cols = '"#"'.join(["$"+str(x) for x in range(13,45)])))#motif cols are starting from col12 and end in col44
                 os.system(awk_stmt)
                 
-                
+                motif_breaking_score_index=10
+                breaking_score_threshold = 0.3
+                tf_binding_index=30
+                dnase_index=24
                 #filtrarion on the regulatory mutation in elements
                 with open(cohort_mut_grouped_file_tmp2, 'r') as elements_input_ifile, open(cohort_mut_grouped_file, 'w') as elements_input_ofile:
                     l = elements_input_ifile.readline().strip().split('\t')
