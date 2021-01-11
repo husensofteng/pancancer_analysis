@@ -993,9 +993,11 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
                     l = elements_input_ifile.readline().strip().split('\t')
                     while l and len(l)>10:
                         n_reg_muts=0
-                        sl = l[12].split('#')
+                        sl = l[12].split(',')
+                        print(sl)
                         for ssl in sl:
-                            line = ssl.split('$')
+                            line = ssl.split('#')
+                            print(line)
                             if((float(line[motif_breaking_score_index])>=breaking_score_threshold)):
                                 if line[tf_binding_index]!="nan":
                                     if float(line[tf_binding_index]) > 0:
