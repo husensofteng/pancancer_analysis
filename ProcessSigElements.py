@@ -538,26 +538,28 @@ def aggregate_results(regions_input_file):
             
             '''Report CancerType:ChromatinType:number_of_times'''
                     
-            #instead of writing the dict put them in a list to keep the columns order 
-            cols_to_write = [cols_dict['chr'], cols_dict['start'], cols_dict['end'], cols_dict['Position'], 
-                             ','.join(cols_dict['Cohorts']), cols_dict['#Cohorts'], cols_dict['Score'], cols_dict['FDR'], 
-                             cols_dict['#RegMuts'], cols_dict['#Samples(RegMuts)'], 
-                             ','.join([x+":"+str(cols_dict['Cancer-Types:#RegMuts'][x]) for x in cols_dict['Cancer-Types:#RegMuts']]), 
-                             ','.join([x+":"+str(cols_dict['Cancer-Types:#Samples(RegMuts)'][x]) for x in cols_dict['Cancer-Types:#Samples(RegMuts)']]),
-                             cols_dict['#Muts'], cols_dict['#Samples'], ','.join(cols_dict['Cancer-Types:#Muts']), ','.join(cols_dict['Cancer-Types:#Samples']),
-                             #'Nearby-Genes(Downstream/Upstream:Distance;COSMIC;KEGG;PCAWG)'
-                             ','.join(cols_dict['StatsMuts']),','.join(cols_dict['StatsSamples']),
-                             ','.join(cols_dict['RegMuts']), ','.join(cols_dict['Muts']), ','.join(cols_dict['Mutated-Moitfs']), ','.join(cols_dict['Max-RegMotif']),
-                             ','.join(cols_dict['SamplesMuts'])#, cols_dict['ElementPval'],
-                             #cols_dict['ELementFDR']
-                             ]
-            aggregated_lines.append(cols_to_write)
             
-            summaries_dict['#Elements'] +=1 
-            summaries_dict['#RegMuts'] += cols_dict['#RegMuts']
-            summaries_dict['#Samples(RegMuts)'] += cols_dict['#Samples(RegMuts)']
-            summaries_dict['#Muts'] += cols_dict['#Muts']
-            summaries_dict['#Samples'] += cols_dict['#Samples']
+            if(cols_dict['#Samples']>2 and cols_dict['FDR']<0.05):
+                #instead of writing the dict put them in a list to keep the columns order 
+                cols_to_write = [cols_dict['chr'], cols_dict['start'], cols_dict['end'], cols_dict['Position'], 
+                                 ','.join(cols_dict['Cohorts']), cols_dict['#Cohorts'], cols_dict['Score'], cols_dict['FDR'], 
+                                 cols_dict['#RegMuts'], cols_dict['#Samples(RegMuts)'], 
+                                 ','.join([x+":"+str(cols_dict['Cancer-Types:#RegMuts'][x]) for x in cols_dict['Cancer-Types:#RegMuts']]), 
+                                 ','.join([x+":"+str(cols_dict['Cancer-Types:#Samples(RegMuts)'][x]) for x in cols_dict['Cancer-Types:#Samples(RegMuts)']]),
+                                 cols_dict['#Muts'], cols_dict['#Samples'], ','.join(cols_dict['Cancer-Types:#Muts']), ','.join(cols_dict['Cancer-Types:#Samples']),
+                                 #'Nearby-Genes(Downstream/Upstream:Distance;COSMIC;KEGG;PCAWG)'
+                                 ','.join(cols_dict['StatsMuts']),','.join(cols_dict['StatsSamples']),
+                                 ','.join(cols_dict['RegMuts']), ','.join(cols_dict['Muts']), ','.join(cols_dict['Mutated-Moitfs']), ','.join(cols_dict['Max-RegMotif']),
+                                 ','.join(cols_dict['SamplesMuts'])#, cols_dict['ElementPval'],
+                                 #cols_dict['ELementFDR']
+                                 ]
+                aggregated_lines.append(cols_to_write)
+                
+                summaries_dict['#Elements'] +=1 
+                summaries_dict['#RegMuts'] += cols_dict['#RegMuts']
+                summaries_dict['#Samples(RegMuts)'] += cols_dict['#Samples(RegMuts)']
+                summaries_dict['#Muts'] += cols_dict['#Muts']
+                summaries_dict['#Samples'] += cols_dict['#Samples']
             
     return aggregated_lines, summaries_dict
 
@@ -579,8 +581,7 @@ def generate_genesets_genes_dict(cosmic_genes_file, kegg_pathways_file, pcawg_dr
         for l in lines:
             sl = l.split('\t')
             if sl[0]=="path:hsa05200":
-                genesets_genes_dict['KCP'] = sl[3::]
-    
+                genesets_genes_dict['KCP'] = sl[3::]   
     with open(pcawg_drivers_file, 'r') as pcawg_drivers_ifile:
         lines = pcawg_drivers_ifile.readlines()
         for l in lines:
@@ -972,16 +973,38 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
                             groupBy -g 1-5 -c 8,8,8,6,7,9,10 -o count,count_distinct,collapse,collapse,collapse,distinct,collapse > {cohort_mut_grouped_file_with_annotated_muts}""".format(
                             cohort_file_all_merged=cohort_file_all_merged, observed_mutations_all=muts_overlapping_cohort_file_all_annotated, cohort_mut_grouped_file_with_annotated_muts=cohort_mut_grouped_file_with_annotated_muts))
                 os.system(awk_stmt)#awk '$7>1'
-    
+                cohort_mut_grouped_file_tmp2 = cohort_mut_grouped_file_tmp + '2'
                 #get all mutated motifs in the extended element
                 #combined_mut_grouped_file_with_annotated_muts_with_motifs = combined_mut_grouped_file + "_withannotatedmuts_motifs"
                 awk_stmt = ("""intersectBed -wo -loj -a {cohort_mut_grouped_file_with_annotated_muts} -b {annotated_motifs} | 
                             awk 'BEGIN{{FS=OFS="\t"}}{{print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,{motif_cols}}}' | 
                             groupBy -g 1-12 -c 13 -o collapse > {cohort_mut_grouped_file_with_annotated_muts_with_motifs}""".format(
                             cohort_mut_grouped_file_with_annotated_muts=cohort_mut_grouped_file_with_annotated_muts, annotated_motifs=annotated_motifs, 
-                            cohort_mut_grouped_file_with_annotated_muts_with_motifs=cohort_mut_grouped_file,
+                            cohort_mut_grouped_file_with_annotated_muts_with_motifs=cohort_mut_grouped_file_tmp2,
                             motif_cols = '"#"'.join(["$"+str(x) for x in range(13,45)])))#motif cols are starting from col12 and end in col44
                 os.system(awk_stmt)
+                
+                
+                #filtrarion on the regulatory mutation in elements
+                with open(cohort_mut_grouped_file_tmp2, 'r') as elements_input_ifile, open(cohort_mut_grouped_file, 'w') as elements_input_ofile:
+                    l = elements_input_ifile.readline().strip().split('\t')
+                    while l and len(l)>10:
+                        n_reg_muts=0
+                        sl = l[12].split('#')
+                        for ssl in sl:
+                            line = ssl.split('$')
+                            if((float(line[motif_breaking_score_index])>=breaking_score_threshold)):
+                                if line[tf_binding_index]!="nan":
+                                    if float(line[tf_binding_index]) > 0:
+                                        n_reg_muts=+1
+                                        
+                                    
+                                if (float(line[dnase_index])>0.0):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs_index])>0.0
+                                    n_reg_muts=+1
+                        if(n_reg_muts>0):           
+                            elements_input_ofile.write(l)
+                        l = elements_input_ifile.readline()
+                
                 #copyfile(cohort_mut_grouped_file, cohort_mut_grouped_file_local)
             #else: 
                 #copyfile(cohort_mut_grouped_file_local, cohort_mut_grouped_file)
