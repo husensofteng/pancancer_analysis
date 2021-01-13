@@ -738,7 +738,7 @@ if __name__ == '__main__':
     print('stats done')
     #make a scatter plot for genes that are mutated in at least 10 samples with expr data (pval and avg FC (WT)
     df = get_sig_expr_events(gene_counts_info_stats, gene_counts_info_stats_file)
-    plot_scatter_geneexpr(df, output_dir)
+    plot_scatter_geneexpr(df, args.output_dir)
     
     #box_plot_per_gene_cancertype(gene_counts_info_stats, genes_cancertypes=['VHL:Kidney-RCC', 'BCL2:Lymph-BNHL', 'MYC:Lymph-BNHL', 'RP11-731F5.1:Lymph-BNHL'])#, 'TERT':['Skin-Melanoma', 'Bladder-TCC','CNS-Oligo','Thy-AdenoCA']})
     #box_plot_per_gene_cancertype(gene_counts_info_stats, genes_cancertypes=['VHL:Kidney-RCC'], out_ext='vhlexpr', fig_width=4, fig_hieght=2)
