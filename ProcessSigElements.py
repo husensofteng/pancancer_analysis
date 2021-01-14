@@ -539,7 +539,7 @@ def aggregate_results(regions_input_file):
             '''Report CancerType:ChromatinType:number_of_times'''
                     
             
-            if(cols_dict['#Samples']>1 and cols_dict['FDR']<0.05):
+            if(cols_dict['#Samples']>=3 and cols_dict['FDR']<0.05):
                 #instead of writing the dict put them in a list to keep the columns order 
                 cols_to_write = [cols_dict['chr'], cols_dict['start'], cols_dict['end'], cols_dict['Position'], 
                                  ','.join(cols_dict['Cohorts']), cols_dict['#Cohorts'], cols_dict['Score'], cols_dict['FDR'], 
