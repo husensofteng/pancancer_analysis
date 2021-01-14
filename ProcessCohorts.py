@@ -525,8 +525,8 @@ def process_cohorts(cohort_names_input, mutations_cohorts_dir,
         #sig_elements_output_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + output_extension + "_groupedbymut"+"withmotifinfo"+"_mergedmuts{distance_to_merge}bp".format(distance_to_merge=distance_to_merge)+"_statspvaluesonlysig{merged_mut_sig_threshold}".format(
         #    merged_mut_sig_threshold=merged_mut_sig_threshold)
         sig_elements_active_output_file=sig_elements_output_file+'_ActiveDriver_sig'
-        sig_tfs_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + '_sigTFs_{}'.format(sig_thresh) 
-        sig_tfpos_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + '_sigTFpos_{}'.format(sig_thresh)
+        sig_tfs_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + '_sigTFs_onlySim_{}'.format(sig_thresh) 
+        sig_tfpos_file = created_cohorts[cohort][0] + "_rand{}setsTFsigQval{}".format(len(mutation_input_files)-1, sig_thresh) + '_sigTFpos_onlySim_{}'.format(sig_thresh)
         if os.path.exists(sig_elements_output_file) and os.path.exists(sig_tfs_file) and os.path.exists(sig_tfpos_file) and os.path.exists(sig_elements_active_output_file):
             generated_sig_merged_element_files.append(sig_elements_output_file)
             generated_sig_merged_elements_active_files.append(sig_elements_active_output_file)
