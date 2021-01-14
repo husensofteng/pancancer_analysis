@@ -639,7 +639,7 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
     '''filter the mutations by motif-breaking score and gene-expression as given in filter_cond
         the mutations in the input file are already checked for signicance (or TF binding>0)'''
     
-    os.system("""awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond}{{print ${motif_name_index},${f_score_index}+${mut_break_score_index}}}}}' {observed_mut_motifs} | sort -k1 | groupBy -g 1 -c 2 -o min > {observed_mut_motifs_temp}""".format(
+    os.system("""awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond}{{print ${motif_name_index},${f_score_index}+${mut_break_score_index}}}}}' {observed_mut_motifs} | sort -k1 | groupBy -g 1 -c 2 -o min,mean,stdev > {observed_mut_motifs_temp}""".format(
                         filter_cond=filter_cond, observed_mut_motifs=observed_mut_motifs, 
                         motif_name_index=motif_name_index+1, f_score_index=f_score_index+1, 
                         mut_break_score_index=motif_breaking_score_index+1, 
@@ -649,7 +649,12 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
     with open(observed_mut_motifs_temp, 'r') as i_observed_mut_motifs_temp:
         lines = i_observed_mut_motifs_temp.readlines()
         for l in lines:
-            tf_min_scores_in_sig_obs_motifs[l.strip().split('\t')[0]] = float(l.strip().split('\t')[1])
+            #min
+            sl = l.strip().split('\t')[1]
+            #Min
+            #tf_min_scores_in_sig_obs_motifs[l.strip().split('\t')[0]] = float(sl.split(',')[0])
+            #mean -sd
+            tf_min_scores_in_sig_obs_motifs[l.strip().split('\t')[0]] = float((sl.split(',')[1])-(sl.split(',')[2]))
     print('tf_min_scores_in_sig_obs_motifs: ', tf_min_scores_in_sig_obs_motifs) 
     gene_expression_index = 31
     tf_binding_index = 30
@@ -657,38 +662,39 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
     breaking_score_threshold = 0.3
     tf_counts_in_sim_sets = {}
     tfpos_counts_in_sim_sets = {}
-    sim_file=sig_muts_per_tf_mutation_input_files[0]
+    
     tf_counts_in_this_sim_set = {}
     tfpos_counts_in_this_sim_set = {}
-    with open(sim_file) as i_sim_file:
-        l = i_sim_file.readline().strip().split('\t')
-        while l and len(l)>gene_expression_index:
-            if ((l[gene_expression_index]=='nan' or float(l[gene_expression_index])>0) and 
-                float(l[motif_breaking_score_index])>=breaking_score_threshold):
-                try:
-                    tf_counts_in_this_sim_set[l[motif_name_index]] +=1
-                except KeyError:
-                    tf_counts_in_this_sim_set[l[motif_name_index]] = 1
-                
-                try:
-                    tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
-                except KeyError:
-                    tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
-            l = i_sim_file.readline().strip().split('\t')
-    for tf in tf_counts_in_this_sim_set.keys():
-            try:
-                tf_counts_in_sim_sets[tf].append(tf_counts_in_this_sim_set[tf])
-            except KeyError:
-                tf_counts_in_sim_sets[tf] = [tf_counts_in_this_sim_set[tf]]
-        
-    for tf in tfpos_counts_in_this_sim_set.keys():
-        try:
-            tfpos_counts_in_sim_sets[tf].append(tfpos_counts_in_this_sim_set[tf])
-        except KeyError:
-            tfpos_counts_in_sim_sets[tf] = [tfpos_counts_in_this_sim_set[tf]]
+#    sim_file=sig_muts_per_tf_mutation_input_files[0]
+#     with open(sim_file) as i_sim_file:
+#         l = i_sim_file.readline().strip().split('\t')
+#         while l and len(l)>gene_expression_index:
+#             if ((l[gene_expression_index]=='nan' or float(l[gene_expression_index])>0) and 
+#                 float(l[motif_breaking_score_index])>=breaking_score_threshold):
+#                 try:
+#                     tf_counts_in_this_sim_set[l[motif_name_index]] +=1
+#                 except KeyError:
+#                     tf_counts_in_this_sim_set[l[motif_name_index]] = 1
+#                 
+#                 try:
+#                     tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
+#                 except KeyError:
+#                     tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
+#             l = i_sim_file.readline().strip().split('\t')
+#     for tf in tf_counts_in_this_sim_set.keys():
+#             try:
+#                 tf_counts_in_sim_sets[tf].append(tf_counts_in_this_sim_set[tf])
+#             except KeyError:
+#                 tf_counts_in_sim_sets[tf] = [tf_counts_in_this_sim_set[tf]]
+#         
+#     for tf in tfpos_counts_in_this_sim_set.keys():
+#         try:
+#             tfpos_counts_in_sim_sets[tf].append(tfpos_counts_in_this_sim_set[tf])
+#         except KeyError:
+#             tfpos_counts_in_sim_sets[tf] = [tfpos_counts_in_this_sim_set[tf]]
 
 
-    for sim_file in sig_muts_per_tf_mutation_input_files[1:]: #count for all files incl. observed
+    for sim_file in sig_muts_per_tf_mutation_input_files:#[1:]: #count for all files incl. observed
         tf_counts_in_this_sim_set = {}
         tfpos_counts_in_this_sim_set = {}
         with open(sim_file) as i_sim_file:
