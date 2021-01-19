@@ -653,8 +653,8 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
             
             #Min
             #tf_min_scores_in_sig_obs_motifs[l.strip().split('\t')[0]] = float(l.strip().split('\t')[1])
-            #mean -sd
-            tf_min_scores_in_sig_obs_motifs[l.strip().split('\t')[0]] = float(float(l.strip().split('\t')[2])-float(l.strip().split('\t')[3]))
+            #mean
+            tf_min_scores_in_sig_obs_motifs[l.strip().split('\t')[0]] = float(float(l.strip().split('\t')[2]))#-float(l.strip().split('\t')[3]))
     print('tf_min_scores_in_sig_obs_motifs: ', tf_min_scores_in_sig_obs_motifs) 
     gene_expression_index = 31
     tf_binding_index = 30
@@ -716,7 +716,7 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
                         min_obs_score_this_motif = None
                     
                     if min_obs_score_this_motif:
-                        if ( ((float(l[f_score_index])+float(l[motif_breaking_score_index])) >= min_obs_score_this_motif 
+                        if ( ((float(l[f_score_index])) >= min_obs_score_this_motif 
                               and (float(l[dnase_index])>0.0)) or# or float(l[fantom_index])>0.0 or float(l[num_other_tfs_index])>0.0 
                              (float(l[tf_binding_index])>0 and l[tf_binding_index]!="nan")):
                             try:
