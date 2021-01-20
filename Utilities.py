@@ -639,7 +639,7 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
     '''filter the mutations by motif-breaking score and gene-expression as given in filter_cond
         the mutations in the input file are already checked for signicance (or TF binding>0)'''
     
-    os.system("""awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond}{{print ${motif_name_index},${f_score_index}+${mut_break_score_index}}}}}' {observed_mut_motifs} | sort -k1 | groupBy -g 1 -c 2 -o min,mean,stdev > {observed_mut_motifs_temp}""".format(
+    os.system("""awk 'BEGIN{{FS=OFS="{fsep}"}}{{{filter_cond}{{print ${motif_name_index},${f_score_index}+${mut_break_score_index}}}}}' {observed_mut_motifs} | sort -k1 | groupBy -g 1 -c 2 -o min,mean,stdev,median > {observed_mut_motifs_temp}""".format(
                         filter_cond=filter_cond, observed_mut_motifs=observed_mut_motifs, 
                         motif_name_index=motif_name_index+1, f_score_index=f_score_index+1, 
                         mut_break_score_index=motif_breaking_score_index+1, 
@@ -716,18 +716,18 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
                         min_obs_score_this_motif = None
                     
                     if min_obs_score_this_motif:
-                        if ( ((float(l[f_score_index])) >= min_obs_score_this_motif 
-                              and (float(l[dnase_index])>0.0)) or# or float(l[fantom_index])>0.0 or float(l[num_other_tfs_index])>0.0 
+                        if ((float(l[f_score_index])) >= min_obs_score_this_motif) :
+                              if((float(l[dnase_index])>0.0) or# or float(l[fantom_index])>0.0 or float(l[num_other_tfs_index])>0.0 
                              (float(l[tf_binding_index])>0 and l[tf_binding_index]!="nan")):
-                            try:
-                                tf_counts_in_this_sim_set[l[motif_name_index]] +=1
-                            except KeyError:
-                                tf_counts_in_this_sim_set[l[motif_name_index]] = 1
-                            
-                            try:
-                                tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
-                            except KeyError:
-                                tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
+                                try:
+                                    tf_counts_in_this_sim_set[l[motif_name_index]] +=1
+                                except KeyError:
+                                    tf_counts_in_this_sim_set[l[motif_name_index]] = 1
+                                
+                                try:
+                                    tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
+                                except KeyError:
+                                    tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
                     
                 l = i_sim_file.readline().strip().split('\t')
         for tf in tf_counts_in_this_sim_set.keys():
