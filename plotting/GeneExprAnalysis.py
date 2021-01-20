@@ -28,7 +28,7 @@ def get_sample_data(meata_data_input):#, search_by='icgc_donor_id', col_to_get='
 
 def read_elements(elements_input):
     elements = pd.read_table(elements_input, sep='\t', skiprows=6, header=0)
-    elements = elements[(elements['#Samples(RegMuts)']>1)]
+    elements = elements[(elements['#Samples(RegMuts)']>=1)]
     return elements
 
 def read_genes_elements(genes_mutated_input):
@@ -581,7 +581,7 @@ def plot_gene_expr(dfs, output_dir):
     print('done')
     
 def get_sig_expr_events(gene_stats, gene_stats_file):
-    pval_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log2)', 'P-val (-log10)', 'DiffCheck']]
+    pval_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log10)', 'P-val (-log10)', 'DiffCheck']]
     min_mutated_values = 10
     min_notmutated_values = 5
     min_expr_to_consider = 0.1
