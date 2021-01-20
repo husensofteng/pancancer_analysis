@@ -654,7 +654,7 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
             #Min
             #tf_min_scores_in_sig_obs_motifs[l.strip().split('\t')[0]] = float(l.strip().split('\t')[1])
             #mean
-            tf_min_scores_in_sig_obs_motifs[l.strip().split('\t')[0]] = float(float(l.strip().split('\t')[2]))#-float(l.strip().split('\t')[3]))
+            tf_min_scores_in_sig_obs_motifs[l.strip().split('\t')[0]] = float(float(l.strip().split('\t')[2])-float(l.strip().split('\t')[3]))
     print('tf_min_scores_in_sig_obs_motifs: ', tf_min_scores_in_sig_obs_motifs) 
     gene_expression_index = 31
     tf_binding_index = 30
@@ -665,36 +665,36 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
     
     tf_counts_in_this_sim_set = {}
     tfpos_counts_in_this_sim_set = {}
-    sim_file=sig_muts_per_tf_mutation_input_files[0]
-    with open(sim_file) as i_sim_file:
-         l = i_sim_file.readline().strip().split('\t')
-         while l and len(l)>gene_expression_index:
-             if ((l[gene_expression_index]=='nan' or float(l[gene_expression_index])>0) and 
-                 float(l[motif_breaking_score_index])>=breaking_score_threshold):
-                 try:
-                     tf_counts_in_this_sim_set[l[motif_name_index]] +=1
-                 except KeyError:
-                     tf_counts_in_this_sim_set[l[motif_name_index]] = 1
-                 
-                 try:
-                     tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
-                 except KeyError:
-                     tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
-             l = i_sim_file.readline().strip().split('\t')
-    for tf in tf_counts_in_this_sim_set.keys():
-             try:
-                 tf_counts_in_sim_sets[tf].append(tf_counts_in_this_sim_set[tf])
-             except KeyError:
-                 tf_counts_in_sim_sets[tf] = [tf_counts_in_this_sim_set[tf]]
-         
-    for tf in tfpos_counts_in_this_sim_set.keys():
-         try:
-             tfpos_counts_in_sim_sets[tf].append(tfpos_counts_in_this_sim_set[tf])
-         except KeyError:
-             tfpos_counts_in_sim_sets[tf] = [tfpos_counts_in_this_sim_set[tf]]
+#     sim_file=sig_muts_per_tf_mutation_input_files[0]
+#     with open(sim_file) as i_sim_file:
+#          l = i_sim_file.readline().strip().split('\t')
+#          while l and len(l)>gene_expression_index:
+#              if ((l[gene_expression_index]=='nan' or float(l[gene_expression_index])>0) and 
+#                  float(l[motif_breaking_score_index])>=breaking_score_threshold):
+#                  try:
+#                      tf_counts_in_this_sim_set[l[motif_name_index]] +=1
+#                  except KeyError:
+#                      tf_counts_in_this_sim_set[l[motif_name_index]] = 1
+#                  
+#                  try:
+#                      tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] +=1
+#                  except KeyError:
+#                      tfpos_counts_in_this_sim_set[l[motif_name_index]+"#"+l[mut_motif_pos_index]] = 1
+#              l = i_sim_file.readline().strip().split('\t')
+#     for tf in tf_counts_in_this_sim_set.keys():
+#              try:
+#                  tf_counts_in_sim_sets[tf].append(tf_counts_in_this_sim_set[tf])
+#              except KeyError:
+#                  tf_counts_in_sim_sets[tf] = [tf_counts_in_this_sim_set[tf]]
+#          
+#     for tf in tfpos_counts_in_this_sim_set.keys():
+#          try:
+#              tfpos_counts_in_sim_sets[tf].append(tfpos_counts_in_this_sim_set[tf])
+#          except KeyError:
+#              tfpos_counts_in_sim_sets[tf] = [tfpos_counts_in_this_sim_set[tf]]
 
 
-    for sim_file in sig_muts_per_tf_mutation_input_files[1:]: #count for all files incl. observed
+    for sim_file in sig_muts_per_tf_mutation_input_files:#[1:]: #count for all files incl. observed
         tf_counts_in_this_sim_set = {}
         tfpos_counts_in_this_sim_set = {}
         with open(sim_file) as i_sim_file:
