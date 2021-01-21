@@ -587,8 +587,10 @@ def plot_gene_expr(dfs, output_dir):
     print('done')
     
 def get_sig_expr_events(gene_stats, gene_stats_file):
-    pval_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log10)', 'P-val (-log10)', 'DiffCheck']]
-    min_mutated_values = 10
+    pval_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log10)', 'P-val', 'DiffCheck']]
+    #pval_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log10)', 'P-val (-log10)', 'DiffCheck']]
+
+    min_mutated_values = 5
     min_notmutated_values = 5
     min_expr_to_consider = 0.1
     
