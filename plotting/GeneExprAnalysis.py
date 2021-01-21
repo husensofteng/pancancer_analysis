@@ -641,7 +641,7 @@ def plot_scatter_geneexpr(df, output_dir):
     ax.set_ylim(0,df[y_col].max()+1)
     sns.despine(ax=ax)
     gs.tight_layout(fig, pad=2, h_pad=0.0, w_pad=0.0)
-    plt.savefig(output_dir + 'sig_min10samples.pdf')
+    plt.savefig(output_dir + '/sig_min10samples.pdf')
     plt.close()
     print('done')
     
