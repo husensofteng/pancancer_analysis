@@ -652,9 +652,9 @@ def get_tf_pval(cohort, sig_muts_per_tf_mutation_input_files, p_value_on_score, 
             #min
             
             #Min
-            #tf_min_scores_in_sig_obs_motifs[l.strip().split('\t')[0]] = float(l.strip().split('\t')[1])
+            tf_min_scores_in_sig_obs_motifs[l.strip().split('\t')[0]] = float(l.strip().split('\t')[1])
             #mean
-            tf_min_scores_in_sig_obs_motifs[l.strip().split('\t')[0]] = float(float(l.strip().split('\t')[2])-float(l.strip().split('\t')[3]))
+            #tf_min_scores_in_sig_obs_motifs[l.strip().split('\t')[0]] = float(float(l.strip().split('\t')[2])-float(l.strip().split('\t')[3]))
     print('tf_min_scores_in_sig_obs_motifs: ', tf_min_scores_in_sig_obs_motifs) 
     gene_expression_index = 31
     tf_binding_index = 30
