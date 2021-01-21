@@ -28,7 +28,7 @@ def get_sample_data(meata_data_input):#, search_by='icgc_donor_id', col_to_get='
 
 def read_elements(elements_input):
     elements = pd.read_table(elements_input, sep='\t', skiprows=6, header=0)
-    elements = elements[(elements['#Samples(RegMuts)']>=1)]
+    elements = elements[(elements['#Samples(Muts)']>=1)]
     return elements
 
 def read_genes_elements(genes_mutated_input):
@@ -230,7 +230,7 @@ def compute_pval_by_permutation(stat_val, sample1_values, sample2_values, num_pe
     scores_higher_than_observed = [i for i in permutated_t_values if i >= stat_val]
     pval= len(scores_higher_than_observed)/(len(permutated_t_values))
     if pval==0.0:
-        pval=1/103
+        pval=1/100000
     return pval
 
 def process_gene_counts_per_gene(gene_df, gene_id):
@@ -590,7 +590,7 @@ def get_sig_expr_events(gene_stats, gene_stats_file):
     pval_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log10)', 'P-val', 'DiffCheck']]
     #pval_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log10)', 'P-val (-log10)', 'DiffCheck']]
 
-    min_mutated_values = 5
+    min_mutated_values = 10
     min_notmutated_values = 5
     min_expr_to_consider = 0.1
     
@@ -629,8 +629,8 @@ def plot_scatter_geneexpr(df, output_dir):
     
     df[x_col] = np.where(df[x_col]<=1e-2, 1e-2, df[x_col])
     df[x_col] = df[x_col].apply(lambda x: math.log(x,10))
-    df[y_col] = np.where(df[y_col]==0, 1e-100, df[y_col])
-    df[y_col] = df[y_col].apply(lambda x: math.log(x,10)*-1) 
+   # df[y_col] = np.where(df[y_col]==0, 1e-100, df[y_col])
+   # df[y_col] = df[y_col].apply(lambda x: math.log(x,10)*-1) 
     print(df['num_mutated_values'])
     df['col'] = np.where(df['DiffCheck']=='Diff', 'green', 'grey')
     ax.scatter(x=x_col, y=y_col, data=df, color=df['col'])
