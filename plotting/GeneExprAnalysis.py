@@ -226,7 +226,11 @@ def compute_pval_by_permutation(stat_val, sample1_values, sample2_values, num_pe
         permuted_values = np.random.permutation(combined_values)
         perm_t, perm_p = stats.ttest_ind(permuted_values[0:len(sample1_values)], permuted_values[len(sample1_values):], equal_var = False)
         permutated_t_values.append(perm_t)
-    pval = get_pval(stat_val, np.mean(permutated_t_values), sd=np.std(permutated_t_values))
+    #pval = get_pval(stat_val, np.mean(permutated_t_values), sd=np.std(permutated_t_values))
+    scores_higher_than_observed = [i for i in permutated_t_values if i >= stat_val]
+    pval= len(scores_higher_than_observed)/(len(permutated_t_values))
+    if pval==0.0:
+        pval=1/103
     return pval
 
 def process_gene_counts_per_gene(gene_df, gene_id):
@@ -339,7 +343,9 @@ def process_results(gene_stats, gene_stats_file):
     min_matching_samples = 0
     min_mutated_values = 3
     min_percentage_matching_samples = 0.75
-    pval_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log10)', 'P-val (-log10)', 'DiffCheck']]
+    pval_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log10)', 'P-val', 'DiffCheck']]
+    #pval_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log10)', 'P-val (-log10)', 'DiffCheck']]
+
     fc_matching_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log10)', 'Avg FC - Matching Normal (log10)', 'DiffCheck']]
     fc_pop_df = [['GeneID', 'Gene_symbol', 'Cancer_type', 'num_mutated_values', 'num_matchin_tumor_values', 'Avg FC - Not Mutated (log10)', 'Avg FC - Normal (log10)', 'DiffCheck']]
     
@@ -427,7 +433,7 @@ def plot_gene_expression(dfs,output_dir):
             ax = fig.add_subplot(gs[i,0])
         axes.append(ax)
         x_col = 'Avg FC - Not Mutated (log10)'
-        y_col = 'P-val (-log10)'
+        y_col = 'P-val'# (-log10)'
         if 'Avg FC - Matching Normal (log10)' in df.columns:
             y_col = 'Avg FC - Matching Normal (log10)'
         elif 'Avg FC - Normal (log10)' in df.columns:
@@ -439,9 +445,9 @@ def plot_gene_expression(dfs,output_dir):
             log_value = 10
         
         df[x_col] = np.where(df[x_col]==0, 1e-300, df[x_col])
-        df[y_col] = np.where(df[y_col]==0, 1e-300, df[y_col])
+        #df[y_col] = np.where(df[y_col]==0, 1e-300, df[y_col])
         df[x_col] = df[x_col].apply(lambda x: math.log(x,10))
-        df[y_col] = df[y_col].apply(lambda x: math.log(x,log_value)*-1) 
+        #df[y_col] = df[y_col].apply(lambda x: math.log(x,log_value)*-1) 
         
         min_x = int(df[x_col].min())
         if min_x < x_accept*-1:
@@ -524,7 +530,7 @@ def plot_gene_expr(dfs, output_dir):
         ax = fig.add_subplot(gs[i,0])
         axes.append(ax)
         x_col = 'Avg FC - Not Mutated (log10)'
-        y_col = 'P-val (-log10)'
+        y_col = 'P-val'# (-log10)'
         if 'Avg FC - Matching Normal (log10)' in df.columns:
             y_col = 'Avg FC - Matching Normal (log10)'
         elif 'Avg FC - Normal (log10)' in df.columns:
@@ -616,7 +622,7 @@ def plot_scatter_geneexpr(df, output_dir):
     gs = gridspec.GridSpec(1, 1, wspace=0.0, hspace=0.0)#create 4 rows and three columns with the given ratio for each
     ax = fig.add_subplot(gs[0,0])
     x_col = 'Avg FC - Not Mutated (log10)'
-    y_col = 'P-val (-log10)'
+    y_col = 'P-val'# (-log10)'
     df.to_csv(output_dir + '/{y_label}_expr_df.tsv'.format(y_label=y_col), sep='\t')
     
     df[x_col] = np.where(df[x_col]<=1e-2, 1e-2, df[x_col])
