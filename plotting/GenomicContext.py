@@ -288,7 +288,7 @@ if __name__ == '__main__':
 
     plt.clf()
     fig = plt.figure(figsize=(8, 6), linewidth=1.0)#design a figure with the given size
-    genes_cancertypes = ['BCL2:Lymph-BNHL', 'BCL7A:Lymph-BNHL', 'CD83:Lymph-BNHL', 'CSF2RA:Kidney-RCC']
+    genes_cancertypes = ['TERT:Thy-AdenoCA','CDH18:Lung-SCC', 'RP11-731F5.2:Lymph-BNHL']
     num_cols = len(genes_cancertypes)
     gs = gridspec.GridSpec(4, 8, height_ratios=[4,2,2,4], wspace=0.0, hspace=0.0)#create 4 rows and three columns with the given ratio for each
     sns.set_style('white', {'axes.linewidth': 1})
@@ -319,7 +319,7 @@ if __name__ == '__main__':
     gene_expr_intput=args.gene_expr_intput
     #plot_genomic_context(ax1, ax2, ax3, x_shift=x_shift, gene_name='VHL', cell_names=['HEK293'], elements_infile=elements_infile, gene_infile=gene_infile, chip_seq_infile=chip_seq_infile)
     show_y_label = False
-    plot_genomic_context(ax1, ax2, ax3, x_shift=x_shift, gene_name='BCL2', cell_names=['GM12878'], elements_infile=elements_infile, gene_infile=gene_infile, chip_seq_infile=chip_seq_infile)
+    plot_genomic_context(ax1, ax2, ax3, x_shift=x_shift, gene_name='CDH18', cell_names=['A549'], elements_infile=elements_infile, gene_infile=gene_infile, chip_seq_infile=chip_seq_infile)
     
     #plot_gene_expr( genes_mutated_input, meta_data,gene_expr_intput, fig, gs, row_num=3, genes_cancertypes=genes_cancertypes)
     fig4 = args.output_dir+'/Fig4'

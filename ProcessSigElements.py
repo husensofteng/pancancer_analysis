@@ -1514,7 +1514,7 @@ if __name__ == '__main__':
     else:
         merged_elements_files=generated_merged_element_files
     
-    ATELM_generated_merged_element_files = [x for x in  merged_elements_files if args.cohort_sig_test in x]
+    ATELM_generated_merged_element_files = [x for x in  merged_elements_files if x.split('/')[8].startwith(args.cohort_sig_test)]
         
     print(merged_elements_files)
     
