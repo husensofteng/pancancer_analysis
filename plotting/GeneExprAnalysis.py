@@ -34,7 +34,7 @@ def read_elements(elements_input):
 def read_genes_elements(genes_mutated_input):
     genes = pd.read_table(genes_mutated_input, sep='\t', header=None, names='Gene_symbol,GeneID,#RegMuts,#RegMutsSamples,#Muts,#MutsSamples,#Elements,Elements,RegSamples,Samples'.split(','))
     #genes = genes[(genes['#MutsSamples']>30)]# & (genes['#Elements']==1)]
-    genes = genes[(genes['#MutsSamples']>=3)]# & (genes['#Elements']==1)]
+    genes = genes[(genes['#MutsSamples']>=1)]# & (genes['#Elements']==1)]
     return genes
     
 def read_gene_expr(gene_exp_input, mutated_genes = []):
