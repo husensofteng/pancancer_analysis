@@ -272,7 +272,7 @@ def process_gene_counts_per_gene(gene_df, gene_id):
         permuted_pval_notmut = None
         permuted_pval_normal = None
         permuted_pval_normal_notmut_combined = None
-        if len(mutated_values)>=10:
+        if len(mutated_values)>=3:
             t_val_notmut, p_val_notmut = stats.ttest_ind(mutated_values, notmutated_values, equal_var = False)
             permuted_pval_notmut = compute_pval_by_permutation(t_val_notmut, mutated_values, notmutated_values)
             
@@ -676,6 +676,10 @@ def box_plot_per_gene_cancertype(fig, gs, row_num, gene_counts_info_stats, genes
         gene_df = pd.DataFrame(gene_values, columns=['Expr (FPKM-UQ)', 'Mutation Status','Gene', 'Cancer Type'])
         print(gene_df)
         tick_spacing = 5
+        if gene_df['Expr (FPKM-UQ)'].max() < 100:
+            tick_spacing =10
+        if gene_df['Expr (FPKM-UQ)'].max() < 3:
+            tick_spacing =0.5
         if gene_df['Expr (FPKM-UQ)'].max() > 100:
             tick_spacing =50
         if gene_df['Expr (FPKM-UQ)'].max() > 300:

@@ -917,7 +917,7 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
     except IndexError:
         print("error: ", generated_sig_merged_element_files)
         sys.exit()
-
+    
     aggregated_output_file = output_dir+'/{cohorts}_combined{ext}_merged_maxdist{max_dist}kb_within{window}kb.tsv'.format(cohorts=cohorts,ext=ext, n=n, up="Up", dw="Dw", max_dist=max_dist/1000, window=window/1000)
     if os.path.exists(aggregated_output_file):
         return aggregated_output_file
@@ -1514,7 +1514,7 @@ if __name__ == '__main__':
     else:
         merged_elements_files=generated_merged_element_files
     
-    ATELM_generated_merged_element_files = [x for x in  merged_elements_files if x.split('/')[8].startwith(args.cohort_sig_test)]
+    ATELM_generated_merged_element_files = [x for x in  merged_elements_files if not x.split('/')[8].startwith(tuple(args.cohort_sig_test))]
         
     print(merged_elements_files)
     
@@ -1551,6 +1551,12 @@ if __name__ == '__main__':
                     args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'All')
+    
+    if(len(args.cohort_sig_test)>1):
+        cohorts_to_test ='_'.join(str(x) for x in args.cohort_sig_test)
+    else:
+        cohorts_to_test=args.cohort_sig_test
+        
     aggregated_output_file_ATELM = getSigElements(
                  ATELM_generated_merged_element_files,  #args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
                  args.n, args.max_dist, args.window, 
@@ -1560,7 +1566,7 @@ if __name__ == '__main__':
                  args.genes_input_file, 
                  args.gencode_input_file, args.cell_names_to_use, args.tissue_cell_mappings_file,
                  args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
-                 args.tmp_dir, args.mutations_cohorts_outdir, cohorts = args.cohort_sig_test)
+                 args.tmp_dir, args.mutations_cohorts_outdir, cohorts = cohorts_to_test)
     
     
     
