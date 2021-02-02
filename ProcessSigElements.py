@@ -970,7 +970,7 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
                                             cohort_mut_grouped_ofile_tmp_reg_muts.write(mut.split('MatchingMotifs')[0].replace('#',"\t")+'\n')
                                             n_reg_muts_total+=1
                                     if(n_reg_muts_total>0): 
-                                        regions_input_ofile.write('\t'.join(l[0:3]) + '\t' + cohort_name + '\t' + '~'.join([x.replace(',', '|') for x in l]) +  '\t'+str(n_reg_muts_total) +'\n')
+                                        regions_input_ofile.write('\t'.join(l[0:3]) + '\t' + cohort_name + '\t' + '~'.join([x.replace(',', '|') for x in l]) +'\n')
                                     l = cohort_sigregions_ifile.readline().strip().split('\t')  
         
                 cohort_file_all_merged = cohort_mut_grouped_file+'_temp_merged'
@@ -1574,10 +1574,10 @@ if __name__ == '__main__':
                     args.cosmic_genes_file, args.kegg_pathways_file, args.pcawg_drivers_file,
                     args.tmp_dir, args.mutations_cohorts_outdir, cohorts = 'All')
     
-    if(len(args.cohort_sig_test)>1):
-        cohorts_to_test ='_'.join(str(x) for x in args.cohort_sig_test)
-    else:
-        cohorts_to_test=args.cohort_sig_test
+    #if(len(args.cohort_sig_test)>1):
+     #   cohorts_to_test ='_'.join(str(x) for x in args.cohort_sig_test)
+    ##else:
+    cohorts_to_test=args.cohort_sig_test
         
     aggregated_output_file_ATELM = getSigElements(
                  ATELM_generated_merged_element_files,  #args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
