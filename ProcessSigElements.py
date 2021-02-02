@@ -966,7 +966,7 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
                                         if n_reg_muts>0:
                                             n_reg_muts_total=+1
                                     if(n_reg_muts>0):               
-                                        regions_input_ofile.write('\t'.join(l[0:3]) + '\t' + cohort_name + '\t' + '~'.join([x.replace(',', '|') for x in l]) +  '\t'+n_reg_muts_total +'\n')
+                                        regions_input_ofile.write('\t'.join(l[0:3]) + '\t' + cohort_name + '\t' + '~'.join([x.replace(',', '|') for x in l]) +  '\t'+str(n_reg_muts_total) +'\n')
                                         l = cohort_sigregions_ifile.readline().strip().split('\t')  
         
                 cohort_file_all_merged = cohort_mut_grouped_file+'_temp_merged'
