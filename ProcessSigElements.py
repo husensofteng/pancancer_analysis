@@ -921,7 +921,11 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
     aggregated_output_file = output_dir+'/{cohorts}_combined{ext}_merged_maxdist{max_dist}kb_within{window}kb.tsv'.format(cohorts=cohorts,ext=ext, n=n, up="Up", dw="Dw", max_dist=max_dist/1000, window=window/1000)
     if os.path.exists(aggregated_output_file):
         return aggregated_output_file
-    
+    for cohort_sigregions_file in generated_sig_merged_element_files:
+        with open(cohort_sigregions_file, 'r') as cohort_sigregions_ifile:
+                                l = cohort_sigregions_ifile.readline().strip().split('\t')
+                                while l and len(l)>10:
+                                    l[16].strsplit(',')  
     
     #regions_input_file = output_dir+'/combined_onlysig_merged_intersectedmuts_grouped_recurrent.col12'
     #per cohort
@@ -946,11 +950,29 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
                 with open(cohort_mut_grouped_file_tmp, 'w') as regions_input_ofile:
     
                             with open(cohort_sigregions_file, 'r') as cohort_sigregions_ifile:
+                                mutations_in_cohorts = []
                                 l = cohort_sigregions_ifile.readline().strip().split('\t')
                                 while l and len(l)>10:
-                                    regions_input_ofile.write('\t'.join(l[0:3]) + '\t' + cohort_name + '\t' + '~'.join([x.replace(',', '|') for x in l]) + '\n')
-                                    l = cohort_sigregions_ifile.readline().strip().split('\t')  
-    
+                                    mutations_in_cohorts.extend(l[14].split(','))
+                                    n_reg_muts =0
+                                    n_reg_muts_total=0
+                                    for mut in mutations_in_cohorts:
+                                        motifs_info_tmp = (mut.split('MatchingMotifs')[1].split('MaxMotif')[0].split('MotifInfo'))
+                                        for motif_info_tmp in  motifs_info_tmp:
+                                            motif_info = motif_info_tmp.split('#') 
+                                            if float(motif_info[3])>=0.3 :
+                                                if motif_info[22]!="nan":
+                                                     if float(motif_info[22]) > 0:
+                                                        n_reg_muts=+1
+                                        
+                                                if (float(motif_info[16])>0.0):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs_index])>0.0
+                                                    n_reg_muts=+1
+                                        if n_reg_muts>0:
+                                            n_reg_muts_total=+1
+                                    if(n_reg_muts>0):               
+                                        regions_input_ofile.write('\t'.join(l[0:3]) + '\t' + cohort_name + '\t' + '~'.join([x.replace(',', '|') for x in l]) +  '\t'+n_reg_muts_total +'\n')
+                                        l = cohort_sigregions_ifile.readline().strip().split('\t')  
+        
                 cohort_file_all_merged = cohort_mut_grouped_file+'_temp_merged'
                 awk_stmt = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if(($3-$2)<{nbp_to_extend}){{s={nbp_to_extend}-($3-$2); $2=$2-int(s/2); $3=$3+int(s/2);}}; print $0}}' {cohort_mut_grouped_file_tmp} | sort -k1,1n -k2,2n -k3,3n | mergeBed -i stdin -c 4,4,5 -o count_distinct,collapse,collapse | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print "chr"$0}}' > {cohort_file_all_merged} 
                                     """).format(cohort_mut_grouped_file_tmp=cohort_mut_grouped_file_tmp, nbp_to_extend = nbp_to_extend, cohort_file_all_merged=cohort_file_all_merged)
@@ -1514,7 +1536,7 @@ if __name__ == '__main__':
     else:
         merged_elements_files=generated_merged_element_files
     
-    ATELM_generated_merged_element_files = [x for x in  merged_elements_files if not x.split('/')[8].startwith(tuple(args.cohort_sig_test))]
+    ATELM_generated_merged_element_files = [x for x in  merged_elements_files if x.split('/')[8].startswith(args.cohort_sig_test)]
         
     print(merged_elements_files)
     
