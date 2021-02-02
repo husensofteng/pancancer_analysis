@@ -939,35 +939,39 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
             if not os.path.exists(cohort_mut_grouped_file):
                 #elements extended by 200bp
                 cohort_mut_grouped_file_tmp = cohort_mut_grouped_file+'_temp'
+                cohort_mut_grouped_file_tmp_reg_muts = cohort_mut_grouped_file_tmp+'_reg_muts'
     
                 cohort_sigregions_file_extend_elements = output_dir + '/'+ cohort_name +'_extend_elements'
                 #tmp file
                 cohort_sigregions_file_extend_elements_tmp =  cohort_sigregions_file_extend_elements + '_tmp'      
-                with open(cohort_mut_grouped_file_tmp, 'w') as regions_input_ofile:
+                with open(cohort_mut_grouped_file_tmp, 'w') as regions_input_ofile, open(cohort_mut_grouped_file_tmp_reg_muts, 'w') as cohort_mut_grouped_ofile_tmp_reg_muts:
     
                             with open(cohort_sigregions_file, 'r') as cohort_sigregions_ifile:
                                 mutations_in_cohorts = []
                                 l = cohort_sigregions_ifile.readline().strip().split('\t')
                                 while l and len(l)>10:
+                                    mutations_in_cohorts = []
                                     mutations_in_cohorts.extend(l[14].split(','))
                                     n_reg_muts =0
                                     n_reg_muts_total=0
                                     for mut in mutations_in_cohorts:
                                         motifs_info_tmp = (mut.split('MatchingMotifs')[1].split('MaxMotif')[0].split('MotifInfo'))
                                         for motif_info_tmp in  motifs_info_tmp:
+                                            n_reg_muts =0
                                             motif_info = motif_info_tmp.split('#') 
                                             if float(motif_info[3])>=0.3 :
                                                 if motif_info[22]!="nan":
-                                                     if float(motif_info[22]) > 0:
-                                                        n_reg_muts=+1
-                                        
-                                                if (float(motif_info[16])>0.0):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs_index])>0.0
-                                                    n_reg_muts=+1
+                                                    if float(motif_info[22]) > 0:
+                                                        n_reg_muts+=1
+                                                        continue
+                                                if (float(motif_info[16])>0.0):
+                                                    n_reg_muts+=1
                                         if n_reg_muts>0:
-                                            n_reg_muts_total=+1
-                                    if(n_reg_muts>0):               
+                                            cohort_mut_grouped_ofile_tmp_reg_muts.write(mut.split('MatchingMotifs')[0].replace('#',"\t")+'\n')
+                                            n_reg_muts_total+=1
+                                    if(n_reg_muts_total>0): 
                                         regions_input_ofile.write('\t'.join(l[0:3]) + '\t' + cohort_name + '\t' + '~'.join([x.replace(',', '|') for x in l]) +  '\t'+str(n_reg_muts_total) +'\n')
-                                        l = cohort_sigregions_ifile.readline().strip().split('\t')  
+                                    l = cohort_sigregions_ifile.readline().strip().split('\t')  
         
                 cohort_file_all_merged = cohort_mut_grouped_file+'_temp_merged'
                 awk_stmt = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if(($3-$2)<{nbp_to_extend}){{s={nbp_to_extend}-($3-$2); $2=$2-int(s/2); $3=$3+int(s/2);}}; print $0}}' {cohort_mut_grouped_file_tmp} | sort -k1,1n -k2,2n -k3,3n | mergeBed -i stdin -c 4,4,5 -o count_distinct,collapse,collapse | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print "chr"$0}}' > {cohort_file_all_merged} 
@@ -1009,23 +1013,23 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
                 #filtrarion on the regulatory mutation in elements
                 with open(cohort_mut_grouped_file_tmp2, 'r') as elements_input_ifile, open(cohort_mut_grouped_file, 'w') as elements_input_ofile:
                     l = elements_input_ifile.readline()
-                    while l:
-                        l2 = l.strip().split('\t')
-                        n_reg_muts=0
-                        sl = l2[12].split(',')
-                        for ssl in sl:
-                            line = ssl.split('#')
-                            if((float(line[motif_breaking_score_index])>=breaking_score_threshold)):
-                                if line[tf_binding_index]!="nan":
-                                    if float(line[tf_binding_index]) > 0:
-                                        n_reg_muts=+1
-                                        
-                                    
-                                if (float(line[dnase_index])>0.0):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs_index])>0.0
-                                    n_reg_muts=+1
-                        if(n_reg_muts>0):           
-                            elements_input_ofile.write(l)
-                        l = elements_input_ifile.readline()
+#                     while l:
+#                         l2 = l.strip().split('\t')
+#                         n_reg_muts=0
+#                         sl = l2[12].split(',')
+#                         for ssl in sl:
+#                             line = ssl.split('#')
+#                             if((float(line[motif_breaking_score_index])>=breaking_score_threshold)):
+#                                 if line[tf_binding_index]!="nan":
+#                                     if float(line[tf_binding_index]) > 0:
+#                                         n_reg_muts=+1
+#                                         
+#                                     
+#                                 if (float(line[dnase_index])>0.0):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs_index])>0.0
+#                                     n_reg_muts=+1
+#                         if(n_reg_muts>0):           
+                    elements_input_ofile.write(l)
+                    l = elements_input_ifile.readline()
                 
                 #copyfile(cohort_mut_grouped_file, cohort_mut_grouped_file_local)
             #else: 
