@@ -1013,7 +1013,7 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
                 #filtrarion on the regulatory mutation in elements
                 with open(cohort_mut_grouped_file_tmp2, 'r') as elements_input_ifile, open(cohort_mut_grouped_file, 'w') as elements_input_ofile:
                     l = elements_input_ifile.readline()
-#                     while l:
+                    while l:
 #                         l2 = l.strip().split('\t')
 #                         n_reg_muts=0
 #                         sl = l2[12].split(',')
@@ -1028,7 +1028,7 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
 #                                 if (float(line[dnase_index])>0.0):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs_index])>0.0
 #                                     n_reg_muts=+1
 #                         if(n_reg_muts>0):           
-                    elements_input_ofile.write(l)
+                        elements_input_ofile.write(l)
                     l = elements_input_ifile.readline()
                 
                 #copyfile(cohort_mut_grouped_file, cohort_mut_grouped_file_local)
