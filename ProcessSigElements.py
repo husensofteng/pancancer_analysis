@@ -1489,6 +1489,9 @@ def parse_args():
     parser.add_argument('--pcawg_drivers_file', help='')
     parser.add_argument('--tmp_dir', default='$SNIC_TMP', help='')
     parser.add_argument('--n_cores_fscore', type=int, default=10, help='number of cores (cpus) to use in parallel to obtain fscore')
+    parser.add_argument('--Skin_lymp_exl', action='store_const', const=True)
+
+    
 
     
     return parser.parse_args(sys.argv[1:])
@@ -1536,8 +1539,12 @@ if __name__ == '__main__':
     else:
         merged_elements_files=generated_merged_element_files
     
-    ATELM_generated_merged_element_files = [x for x in  merged_elements_files if x.split('/')[8].startswith(args.cohort_sig_test)]
-        
+    if args.Skin_lymp_exl:
+        ATELM_generated_merged_element_files = [x for x in  merged_elements_files if not x.split('/')[8].startswith(('Lymph','Skin-M', 'Hematopoietic'))]
+        cohorts_to_test='Lymph_Skin_Hematopoietic'
+    else:
+        ATELM_generated_merged_element_files = [x for x in  merged_elements_files if x.split('/')[8].startswith(args.cohort_sig_test)]
+        cohorts_to_test=args.cohort_sig_test
     print(merged_elements_files)
     
     
@@ -1577,7 +1584,7 @@ if __name__ == '__main__':
     #if(len(args.cohort_sig_test)>1):
      #   cohorts_to_test ='_'.join(str(x) for x in args.cohort_sig_test)
     ##else:
-    cohorts_to_test=args.cohort_sig_test
+    
         
     aggregated_output_file_ATELM = getSigElements(
                  ATELM_generated_merged_element_files,  #args.active_driver_script_dir, args.active_driver_min_mut, args.num_cores_activedriver,
