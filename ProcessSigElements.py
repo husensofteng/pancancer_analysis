@@ -921,11 +921,7 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
     aggregated_output_file = output_dir+'/{cohorts}_combined{ext}_merged_maxdist{max_dist}kb_within{window}kb.tsv'.format(cohorts=cohorts,ext=ext, n=n, up="Up", dw="Dw", max_dist=max_dist/1000, window=window/1000)
     if os.path.exists(aggregated_output_file):
         return aggregated_output_file
-    for cohort_sigregions_file in generated_sig_merged_element_files:
-        with open(cohort_sigregions_file, 'r') as cohort_sigregions_ifile:
-                                l = cohort_sigregions_ifile.readline().strip().split('\t')
-                                while l and len(l)>10:
-                                    l[16].strsplit(',')  
+ 
     
     #regions_input_file = output_dir+'/combined_onlysig_merged_intersectedmuts_grouped_recurrent.col12'
     #per cohort
