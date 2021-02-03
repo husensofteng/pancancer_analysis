@@ -539,7 +539,7 @@ def aggregate_results(regions_input_file):
             '''Report CancerType:ChromatinType:number_of_times'''
                     
             
-            if(cols_dict['#Samples']>=1 and cols_dict['FDR']<0.05):
+            if(cols_dict['#Samples']>=3 and cols_dict['FDR']<0.05):
                 #instead of writing the dict put them in a list to keep the columns order 
                 cols_to_write = [cols_dict['chr'], cols_dict['start'], cols_dict['end'], cols_dict['Position'], 
                                  ','.join(cols_dict['Cohorts']), cols_dict['#Cohorts'], cols_dict['Score'], cols_dict['FDR'], 
@@ -1559,8 +1559,8 @@ if __name__ == '__main__':
         merged_elements_files=generated_merged_element_files
     
     if args.Skin_lymp_exl:
-        ATELM_generated_merged_element_files = [x for x in  merged_elements_files if x.split('/')[8].startswith(('Lymph', 'Hematopoietic'))]
-        cohorts_to_test='Lymph_Hematopoietic'
+        ATELM_generated_merged_element_files = [x for x in  merged_elements_files if not x.split('/')[8].startswith(('Lymph','Skin', 'Hematopoietic'))]
+        cohorts_to_test='Lymph_Skin_Hematopoietic'
     else:
         ATELM_generated_merged_element_files = [x for x in  merged_elements_files if x.split('/')[8].startswith(args.cohort_sig_test)]
         cohorts_to_test=args.cohort_sig_test
