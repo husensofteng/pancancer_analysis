@@ -539,7 +539,7 @@ def aggregate_results(regions_input_file):
             '''Report CancerType:ChromatinType:number_of_times'''
                     
             
-            if(cols_dict['#Samples']>=1 and cols_dict['FDR']<0.05):
+            if(cols_dict['#Samples']>=3 and cols_dict['FDR']<0.05):
                 #instead of writing the dict put them in a list to keep the columns order 
                 cols_to_write = [cols_dict['chr'], cols_dict['start'], cols_dict['end'], cols_dict['Position'], 
                                  ','.join(cols_dict['Cohorts']), cols_dict['#Cohorts'], cols_dict['Score'], cols_dict['FDR'], 
@@ -939,39 +939,17 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
             if not os.path.exists(cohort_mut_grouped_file):
                 #elements extended by 200bp
                 cohort_mut_grouped_file_tmp = cohort_mut_grouped_file+'_temp'
-                cohort_mut_grouped_file_tmp_reg_muts = cohort_mut_grouped_file_tmp+'_reg_muts'
     
                 cohort_sigregions_file_extend_elements = output_dir + '/'+ cohort_name +'_extend_elements'
                 #tmp file
                 cohort_sigregions_file_extend_elements_tmp =  cohort_sigregions_file_extend_elements + '_tmp'      
-                with open(cohort_mut_grouped_file_tmp, 'w') as regions_input_ofile, open(cohort_mut_grouped_file_tmp_reg_muts, 'w') as cohort_mut_grouped_ofile_tmp_reg_muts:
+                with open(cohort_mut_grouped_file_tmp, 'w') as regions_input_ofile:
     
                             with open(cohort_sigregions_file, 'r') as cohort_sigregions_ifile:
-                                mutations_in_cohorts = []
                                 l = cohort_sigregions_ifile.readline().strip().split('\t')
                                 while l and len(l)>10:
-                                    mutations_in_cohorts = []
-                                    mutations_in_cohorts.extend(l[14].split(','))
-                                    n_reg_muts =0
-                                    n_reg_muts_total=0
-                                    for mut in mutations_in_cohorts:
-                                        motifs_info_tmp = (mut.split('MatchingMotifs')[1].split('MaxMotif')[0].split('MotifInfo'))
-                                        for motif_info_tmp in  motifs_info_tmp:
-                                            n_reg_muts =0
-                                            motif_info = motif_info_tmp.split('#') 
-                                            if float(motif_info[3])>=0.3 :
-                                                if motif_info[22]!="nan":
-                                                    if float(motif_info[22]) > 0:
-                                                        n_reg_muts+=1
-                                                        continue
-                                                if (float(motif_info[16])>0.0):
-                                                    n_reg_muts+=1
-                                        if n_reg_muts>0:
-                                            cohort_mut_grouped_ofile_tmp_reg_muts.write(mut.split('MatchingMotifs')[0].replace('#',"\t")+'\n')
-                                            n_reg_muts_total+=1
-                                    if(n_reg_muts_total>0): 
-                                        regions_input_ofile.write('\t'.join(l[0:3]) + '\t' + cohort_name + '\t' + '~'.join([x.replace(',', '|') for x in l]) +'\n')
-                                    l = cohort_sigregions_ifile.readline().strip().split('\t')  
+                                    regions_input_ofile.write('\t'.join(l[0:3]) + '\t' + cohort_name + '\t' + '~'.join([x.replace(',', '|') for x in l]) + '\n')
+                                    l = cohort_sigregions_ifile.readline().strip().split('\t') 
         
                 cohort_file_all_merged = cohort_mut_grouped_file+'_temp_merged'
                 awk_stmt = ("""awk 'BEGIN{{FS=OFS="\t"}}{{if(($3-$2)<{nbp_to_extend}){{s={nbp_to_extend}-($3-$2); $2=$2-int(s/2); $3=$3+int(s/2);}}; print $0}}' {cohort_mut_grouped_file_tmp} | sort -k1,1n -k2,2n -k3,3n | mergeBed -i stdin -c 4,4,5 -o count_distinct,collapse,collapse | awk 'BEGIN{{FS=OFS="\t"}}{{gsub("23","X", $1); gsub("24","Y", $1); print "chr"$0}}' > {cohort_file_all_merged} 
@@ -1060,7 +1038,48 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
 #              #   print(awk_stmt_sig)
 #                 copyfile(active_driver_output_file_sig, active_driver_output_file_local_sig)
             
-            with open(cohort_mut_grouped_file) as infile:
+            cohort_mut_grouped_file_1regM=cohort_mut_grouped_file+'1regM'
+            cohort_mut_grouped_file_tmp_reg_muts=cohort_mut_grouped_file_1regM+'_reg_muts'
+            if not os.path.exists(cohort_mut_grouped_file_1regM):
+                with open(cohort_mut_grouped_file_1regM, 'w') as regions_input_ofile, open(cohort_mut_grouped_file_tmp_reg_muts, 'w') as cohort_mut_grouped_ofile_tmp_reg_muts:
+                            with open(cohort_sigregions_file, 'r') as cohort_sigregions_ifile:
+                                mutations_in_cohorts = []
+                                line = cohort_sigregions_ifile.readline()
+                                l=line.strip().split('\t')
+                                while l and len(l)>9:
+                                    mutations_in_cohorts = []
+                                    mutations_in_cohorts.extend(l[10].split('~')[14].split('|'))
+                                    n_reg_muts =0
+                                    n_reg_muts_total=0
+                                   
+                                    for mut in mutations_in_cohorts:
+                                        motifs_info_tmp = (mut.split('MatchingMotifs')[1].split('MaxMotif')[0].split('MotifInfo'))
+                                        n_reg_muts =0
+                
+                                        for motif_info_tmp in  motifs_info_tmp:
+                
+                                                motif_info = motif_info_tmp.split('#') 
+                                                if float(motif_info[3])>=0.3 :
+                                                  
+                                                    if motif_info[22]!="nan":
+                                                         if float(motif_info[22]) > 0:
+                                                            n_reg_muts+=1
+                  
+                                                            continue
+                                                    if (float(motif_info[16])>0.0):# or float(sl[fantom_index])>0.0 or float(sl[num_other_tfs_index])>0.0
+                                                        n_reg_muts+=1
+                                        if n_reg_muts>0:
+                                           cohort_mut_grouped_ofile_tmp_reg_muts.write(mut.split('MatchingMotifs')[0].replace('#',"\t")+'\n')
+                                           n_reg_muts_total+=1
+                                            
+                                    if(n_reg_muts_total>0):               
+                                           regions_input_ofile.write(line)
+                                
+                                    line=cohort_sigregions_ifile.readline()
+                                    l = line.strip().split('\t')  
+            
+            
+            with open(cohort_mut_grouped_file_1regM) as infile:
                 for line in infile:
                     aggregated_output_file_ofile.write(line)
             
