@@ -1042,7 +1042,7 @@ def getSigElements(generated_sig_merged_element_files, #active_driver_script_dir
             cohort_mut_grouped_file_tmp_reg_muts=cohort_mut_grouped_file_1regM+'_reg_muts'
             if not os.path.exists(cohort_mut_grouped_file_1regM):
                 with open(cohort_mut_grouped_file_1regM, 'w') as regions_input_ofile, open(cohort_mut_grouped_file_tmp_reg_muts, 'w') as cohort_mut_grouped_ofile_tmp_reg_muts:
-                            with open(cohort_sigregions_file, 'r') as cohort_sigregions_ifile:
+                            with open(cohort_mut_grouped_file, 'r') as cohort_sigregions_ifile:
                                 mutations_in_cohorts = []
                                 line = cohort_sigregions_ifile.readline()
                                 l=line.strip().split('\t')
